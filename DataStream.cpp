@@ -154,7 +154,7 @@ float DataStream::getSimpleMADatum(void)
 	float* currentSimpleMAData = simpleMAData[currentRange-1];
 	float datum = 0;
 	int idx = 0;
-	for(;idx<simpleMALag[currentRange-1];idx++) datum += (currentSimpleMAData[idx] *  (1 / simpleMALag[currentRange-1]));
+	for(;idx<simpleMALag[currentRange-1];idx++) datum += (currentSimpleMAData[idx] *  (float)(1 / simpleMALag[currentRange-1]));
 	return datum;
 }
 float DataStream::getReadoutDatum(void)

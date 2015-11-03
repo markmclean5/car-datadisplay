@@ -7,8 +7,8 @@
 #include "fontinfo.h"		// OpenVG
 #include "shapes.h"			//
 #include <cmath>			// Math (float remainder operation)
+#include "TouchableObject.h"
 #include "Gauge.h"			// Gauge 
-
 #include <stdio.h>
 
 using namespace std;		// ??
@@ -228,8 +228,13 @@ void Gauge::drawTickSet(float startAng, float stopAng, float angInt, float angRa
 
 Gauge::Gauge(int x, int y, int rad, int ranges)		// Constructor
 {
-	if(numRanges==0) numRanges=1;
+	// Configuring base class (TouchableObject)
+	setCircular();
+	setCircleCenter(x, y);
+	setCircleRadius(rad);
+
 	numRanges = ranges;
+	if(numRanges==0) numRanges=1;
 	centerX = x;
 	centerY = y;
 	radius = rad;

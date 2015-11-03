@@ -1,7 +1,9 @@
 #ifndef GAUGE_H
 #define GAUGE_H
 
-class Gauge{
+#include "TouchableObject.h"
+
+class Gauge: public TouchableObject{
 private:
 	// Gauge itself
 	int centerX;

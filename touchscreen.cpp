@@ -3,6 +3,7 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
 
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -14,90 +15,71 @@ using namespace std;
 #include "touchscreen.h"
 #include "project.h"
 
-
-// mouseinit starts the mouse event thread
-int mouseinit(int w, int h) {
+/* touchinit starts the touch event thread */
+int touchinit(int w, int h)
+{
 	pthread_t inputThread;
 	return pthread_create(&inputThread, NULL, &eventThread, NULL);
 }
 
-
-
-// evenThread reads from the mouse input file
-void *eventThread(void *arg) {
-	// Open mouse driver
-	if ((mouse.fd = open("/dev/input/event0", O_RDONLY)) < 0) {
-		fprintf(stderr, "Error opening Mouse!\n");
+/* evenThread reads from the touch input file */
+void *eventThread(void *arg)
+{
+	// Open touch driver file descriptor
+	if ((touch.fd = open("/dev/input/event0", O_RDONLY)) < 0) { 
+		fprintf(stderr, "Error opening touch!\n");
 		quitState = 1;
 		return &quitState;
 	}
 
-	bool touchStarted = false;
-	bool touchXRead = false;
-	bool touchYRead = false;
+	int mt_tracking_id = 0;
+	bool btn_touch = false;
+	int abs_x = 0;
+	int abs_y = 0;
 
 	while (1) {
-		read(mouse.fd, &mouse.ev, sizeof(struct input_event));
-		printf("Event read: [%4.0f,%4.0f]\n",mouse.x,mouse.y);
-
-		if(touchStarted){
-			if (mouse.ev.type == EV_ABS)
-			{
-				if (mouse.ev.code == ABS_X)
-				{
-					mouse.x = (VGfloat) mouse.ev.value;
-					if(touchStarted) touchXRead = true;
-				}
-				if (mouse.ev.code == ABS_Y)
-				{
-					mouse.y = (VGfloat) mouse.ev.value;
-					if(touchStarted) touchYRead = true; 
-				}
-			}
-		}
-		
-		if(touchStarted && touchXRead && touchYRead)
+		read(touch.fd, &touch.ev, sizeof(struct input_event)); // read file descriptor
+		if(touch.ev.type == EV_SYN)
 		{
-			printf("Processed Touch position: [%4.0f,%4.0f]\n\n",mouse.x,mouse.y);
-		}
-
-		if(mouse.ev.type == EV_KEY)
-		{
-			if(mouse.ev.code == BTN_TOUCH)
+			//std::cout << "EV_SYN TYPE" << std::endl;
+			if(touch.ev.code == SYN_REPORT)
 			{
-				printf("Time Stamp:%ld - ", mouse.ev.time.tv_usec);
-				if(mouse.ev.value == 1) 
-				{
-					printf("Touch Started: \n");
-					touchStarted = true;
-				}
-				if(mouse.ev.value == 0)
-				{
-					printf("Touch Completed: \n");
-					touchStarted = false;
-					touchXRead = false;
-					touchYRead = false;
-				}
+				//std::cout << "SYN CODE SYN_REPORT" << std::endl;
+				touch.mt_tracking_id = mt_tracking_id;
+				touch.btn_touch = btn_touch;
+				touch.abs_x = abs_x;
+				touch.abs_y = abs_y;
 			}
 		}
-
-
-/*		if (mouse.ev.type == EV_KEY) {
-			//printf("Time Stamp:%d - type %d, code %d, value %d\n",
-			//      mouse.ev.time.tv_usec,mouse.ev.type,mouse.ev.code,mouse.ev.value);
-			if (mouse.ev.code == BTN_LEFT) {
-				mouse.left = 1;
-				//   printf("Left button\n");
-				left_count++;
-				// printf("User Quit\n");
-				// quitState = 1;
-				// return &quitState;  //Left mouse to quit
+		else if(touch.ev.type == EV_ABS)
+		{
+			//std::cout << "EV_ABS TYPE" << std::endl;
+			if(touch.ev.code == ABS_MT_TRACKING_ID)
+			{
+				//std::cout << "ABS CODE MT TRACKING ID: " << touch.ev.value << std::endl;
+				mt_tracking_id = touch.ev.value;
 			}
-			if (mouse.ev.code == BTN_RIGHT) {
-				mouse.right = 1;
-				//  printf("Right button\n");
+			else if(touch.ev.code == ABS_X)
+			{
+				//std::cout << "ABS CODE ABS X: " << touch.ev.value <<std::endl;
+				abs_x = touch.ev.value;
 			}
+			else if(touch.ev.code == ABS_Y)
+			{
+				//std::cout << "ABS CODE ABS Y: " << touch.ev.value << std::endl;
+				abs_y = touch.ev.value;
+			}
+				
 		}
-*/
+		else if(touch.ev.type == EV_KEY)
+		{
+			//std::cout << "EV_KEY TYPE" << std::endl;
+			if(touch.ev.code == BTN_TOUCH)
+			{
+				//std::cout << "KEY CODE ABS BTN_TOUCH: " << touch.ev.value << std::endl;
+				btn_touch = touch.ev.value;
+			}
+
+		}
 	}
 }

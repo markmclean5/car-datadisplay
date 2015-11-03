@@ -27,13 +27,16 @@ using namespace std;
 #include <bcm2835.h> 
 
 #include "touchscreen.h"
+#include "project.h"
+#include "Readout.h"
 
-//#include "project.h"
 
 // Label and readout fonts, loop time
 Fontinfo avengeance;
 Fontinfo digits;
 uint64_t loopTime;
+touch_t touch;
+int quitState = 0;
 
 // Prototypes
 void setupGraphics(int*,int*);
@@ -47,7 +50,7 @@ int main()
 	if (!bcm2835_init())
         	return 1;
 
-	if (mouseinit(width, height) != 0) {
+	if (touchinit(width, height) != 0) {
 		fprintf(stderr, "Unable to initialize the mouse\n");
 		exit(1);
 	}
@@ -80,15 +83,15 @@ int main()
 
 	BoostDataStream.setRangeScaling(1., 1);
 	BoostDataStream.setRangeLimits(0.,30.,1);
-	BoostDataStream.setWeightedMALag(3,1);
+	BoostDataStream.setWeightedMALag(10,1);
 	BoostDataStream.setSimpleMALag(3,1);
 
 	BoostDataStream.setRangeScaling(-2.036, 2);
 	BoostDataStream.setRangeLimits(0,-14.734,2);	// Define range with respect to serial stream input units 
-	BoostDataStream.setWeightedMALag(3,2);
+	BoostDataStream.setWeightedMALag(10,2);
 	BoostDataStream.setSimpleMALag(3,2);
 
-	float coeffs[] = {0.25, 0.25, 0.5};
+	float coeffs[] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 	BoostDataStream.setWeightedMACoeffs(coeffs,1);
 	BoostDataStream.setWeightedMACoeffs(coeffs,2);
 
@@ -144,10 +147,16 @@ int main()
 	BoostGauge.setLabelDecPlaces(0, 2); 
 	BoostGauge.setLabelFont(avengeance, 2);
 
+	BoostGauge.touchEnable();
+
 	BoostGauge.draw();
+
+	Readout readout1(width-100, height/2, 100, 50, 2); 
+	readout1.draw();
 
 	End();						   // End the picture
 	
+	int last_touch_id = 0;
 	while(1)
 	{
 		loopTime = bcm2835_st_read();
@@ -158,6 +167,28 @@ int main()
 		//cout << "DataStream output data: " << BoostDataStream.getWeightedMADatum() << endl;
 		//cout << "DataStream output units: " << BoostDataStream.getEngUnits() << endl;
 		//cout << "DataStream update rate: " << BoostDataStream.getRawUpdateRate() << " Hz" << endl;
+
+		readout1.update(50.01);
+		BoostGauge.updateTouch(touch);
+		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
+
+		/*
+		if(touch.btn_touch == 1 && touch.mt_tracking_id != last_touch_id)
+		{
+			last_touch_id = touch.mt_tracking_id;
+			cout << "New Touch: Main Loop - Touch X: " << touch.abs_x << " Touch Y: " << touch.abs_y << endl;
+		}
+		else if (touch.btn_touch == 1 && touch.mt_tracking_id == last_touch_id)
+		{
+			cout << "Touch Held: Main Loop - Touch X: " << touch.abs_x << " Touch Y: " << touch.abs_y << endl;
+		}
+		else if (touch.btn_touch == 0 && last_touch_id != 0)
+		{
+			cout << "Touch Released" << endl;
+			last_touch_id = 0;
+		}
+		*/
+			
 		End();
 	}
 }
