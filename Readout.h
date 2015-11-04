@@ -22,6 +22,7 @@ private:
 	int numLines;
 	char labelAlign;
 	char valueAlign;
+	int decPlaces;
 
 	// Size & location related properties
 	int readoutWidth, readoutHeight;		// Size of entire readout, including border stroke
@@ -30,14 +31,14 @@ private:
 	int bottomLeftX, bottomLeftY;			// Location of rectangle bottom left corner
 
 public:
-	Readout(int, int, int, int, int);	// Readout constructor: center X, center Y, width, height
+	Readout(int, int, int, int, int);		// Readout constructor: center X, center Y, width, height
 	void setBackgroundColor(float*);
-	void setBorder(float*, int);	// Set border color, border width
-	void setDecPlaces(int);			// Set number of digits after decimal
-	void setRefreshRate(int);		// Set desired refresh frequency (Hz) 
-	void alignValue(char);			// 'L', 'R', 'C' for left, right, center value alignment
-	void alignLabel(char);			// 'L', 'R', 'C' for left, right, center label alignment
-	void setLabel(string);			// Set readout label
-	void draw(void);				// Draw readout
-	void update(float);				// Draw readout with new data
+	void setBorder(float*, int);			// Set border color, border width
+	void setDecPlaces(int);					// Set number of digits after decimal
+	void setRefreshRate(int);				// Set desired refresh frequency (Hz) 
+	void alignValue(char);					// 'L', 'R', 'C' for left, right, center value alignment
+	void alignLabel(char);					// 'L', 'R', 'C' for left, right, center label alignment
+	void setLabel(string);					// Set readout label
+	void draw(void);						// Draw readout
+	void update(float);						// Draw readout with new data
 };

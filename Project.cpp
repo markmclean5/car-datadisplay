@@ -107,6 +107,7 @@ int main()
 	float majorTickColor[] = {0,1,0,1};
 	float minorTickColor[] = {1,1,1,1};
 	float black[] = {0,0,0,1};
+	float green[] = {0,1,0,1};
 
 	// Create Boost gauge!!
 	Gauge BoostGauge(width/2,height/2,height/2, 2);
@@ -151,7 +152,12 @@ int main()
 
 	BoostGauge.draw();
 
-	Readout readout1(width-100, height/2, 100, 50, 2); 
+	Readout readout1(width-100, height/2, 100, 50, 2);
+	readout1.setDecPlaces(2);
+	readout1.setRefreshRate(5);
+	string labelString = "Hz update";
+	readout1.setLabel(labelString);
+	readout1.setBorder(green, 2); 
 	readout1.draw();
 
 	End();						   // End the picture
@@ -168,7 +174,7 @@ int main()
 		//cout << "DataStream output units: " << BoostDataStream.getEngUnits() << endl;
 		//cout << "DataStream update rate: " << BoostDataStream.getRawUpdateRate() << " Hz" << endl;
 
-		readout1.update(50.01);
+		readout1.update(BoostDataStream.getRawUpdateRate());
 		BoostGauge.updateTouch(touch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 
