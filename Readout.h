@@ -24,9 +24,14 @@ private:
 	int fontSize;
 	string label;
 	char* formatSpecifier;
-	int numLines;
-	char labelAlign;
-	char valueAlign;
+
+	// new properties for button configuration
+	bool labelEnabled;
+	bool valueEnabled;
+	char labelVertAlign;
+	char valueVertAlign;
+	char labelHorizAlign;
+	char valueHorizAlign;
 	int decPlaces;
 
 	// Size & location related properties
