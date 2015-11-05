@@ -1,5 +1,5 @@
 /********************************/
-/*		Readout Class			*/
+/*		Button Class			*/
 /********************************/
 #include <iostream>
 #include "VG/openvg.h"		//
@@ -7,14 +7,14 @@
 #include "fontinfo.h"		// OpenVG
 #include "shapes.h"			//
 #include <cmath>			// Math (float remainder operation)
-#include "Readout.h"
+#include "Button.h"
 #include <stdio.h>
 #include <bcm2835.h>
 
 using namespace std;		// ??
 
 /* Readout Constructor */
-Readout::Readout(int cx, int cy, int w, int h, int lines)
+Button::Button(int cx, int cy, int w, int h, int lines)
 {
 	lastUpdateTime = 0;
 	centerX = cx;
@@ -26,7 +26,8 @@ Readout::Readout(int cx, int cy, int w, int h, int lines)
 	valueColor = new float[4]{0,1,0,1};
 	labelColor = new float[4]{0,1,0,1};
 	backgroundColor = new float[4]{0,0,0,1};
-	borderColor = new float[4]{0,1,0,1};;
+	borderColor = new float[4]{0,1,0,1};
+	formatSpecifier = new char[10];
 	// Default graphics options if setters are not called
 	borderWidth = 4;
 	label = "--";
@@ -36,20 +37,15 @@ Readout::Readout(int cx, int cy, int w, int h, int lines)
 	bottomLeftX = centerX - (rectWidth+borderWidth) / 2;
 	bottomLeftY = centerY - (rectHeight+borderWidth) / 2;
 
-	formatSpecifier = new char[10];
-	int i=0;
-	for(;i<10;i++)
-	{
-		formatSpecifier[i] = 0;
-	}
+
 	fontSize = 0.9 * (rectHeight - borderWidth) / 2;
 
 	labelAlign = 'C';
 	valueAlign = 'C';
 
 }
-/* Readout draw */
-void Readout::draw(void)
+/* Button draw */
+void Button::draw(void)
 {
 	setfill(backgroundColor);
 	StrokeWidth(borderWidth);
@@ -67,13 +63,13 @@ void Readout::draw(void)
 		TextMid(centerX, centerY - fontSize, (char*)label.c_str(), SansTypeface, labelFontSize);
 }
 
-void Readout::setDecPlaces(int dec)						// Set number of digits before & after decimal
+void Button::setDecPlaces(int dec)						// Set number of digits before & after decimal
 {
 	decPlaces = dec;
 }
 
-/* Readout update */
-void Readout::update(float value)
+/* Button update */
+void Button::update(float value)
 {
 	uint64_t currentTime = bcm2835_st_read();
 	if(desiredRefreshRate == 0)	desiredRefreshRate = 5;
@@ -103,15 +99,15 @@ void Readout::update(float value)
 
 }
 
-/* Readout setters */
-void Readout::setBackgroundColor(float color[4])
+/* Button setters */
+void Button::setBackgroundColor(float color[4])
 {
 	backgroundColor[0] = color[0];
 	backgroundColor[1] = color[1];
 	backgroundColor[2] = color[2];
 	backgroundColor[3] = color[3];
 }
-void Readout::setBorder(float color[4], int width)		// Set border color, border width
+void Button::setBorder(float color[4], int width)		// Set border color, border width
 {
 	borderWidth = width;
 	borderColor[0] = color[0];
@@ -120,19 +116,19 @@ void Readout::setBorder(float color[4], int width)		// Set border color, border 
 	borderColor[3] = color[3];
 }
 
-void Readout::setRefreshRate(int rate)		// Set desired refresh frequency (Hz)
+void Button::setRefreshRate(int rate)		// Set desired refresh frequency (Hz)
 {
 	desiredRefreshRate = rate;
 }
-void Readout::alignValue(char align)					// 'L', 'R', 'C' for left, right, center value alignment
+void Button::alignValue(char align)					// 'L', 'R', 'C' for left, right, center value alignment
 {
 	valueAlign = align;
 }
-void Readout::alignLabel(char align)					// 'L', 'R', 'C' for left, right, center label alignment
+void Button::alignLabel(char align)					// 'L', 'R', 'C' for left, right, center label alignment
 {
 	labelAlign = align;
 }
-void Readout::setLabel(string lbl)						// Set readout label
+void Button::setLabel(string lbl)						// Set readout label
 {
 	label.assign(lbl);
 }
