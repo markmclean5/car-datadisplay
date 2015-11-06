@@ -25,6 +25,21 @@ private:
 	float* backgroundColor;
 	float* borderColor;
 	int borderWidth;
+<<<<<<< HEAD:Button.h
+=======
+	int fontSize;
+	string label;
+	char* formatSpecifier;
+
+	// new properties for button configuration
+	bool labelEnabled;
+	bool valueEnabled;
+	char labelVertAlign;
+	char valueVertAlign;
+	char labelHorizAlign;
+	char valueHorizAlign;
+	int decPlaces;
+>>>>>>> origin/master:Readout.h
 
 	// Text properties
 	float* textColor;
