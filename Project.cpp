@@ -28,7 +28,7 @@ using namespace std;
 
 #include "touchscreen.h"
 #include "project.h"
-#include "Readout.h"
+#include "Button.h"
 
 
 // Label and readout fonts, loop time
@@ -152,13 +152,14 @@ int main()
 
 	BoostGauge.draw();
 
-	Readout readout1(width-100, height/2, 100, 50, 2);
-	readout1.setDecPlaces(2);
-	readout1.setRefreshRate(5);
-	string labelString = "Hz update";
-	readout1.setLabel(labelString);
-	readout1.setBorder(green, 2); 
-	readout1.draw();
+	Button button1(width-100, height/2, 100, 50);
+	button1.setBorder(green, 2); 
+	//readout1.setDecPlaces(2);
+	//readout1.setRefreshRate(5);
+	button1.enableText('B');
+	string textString = "Test!!!";
+	button1.setText(textString);
+	button1.draw();
 
 	End();						   // End the picture
 	
@@ -174,7 +175,7 @@ int main()
 		//cout << "DataStream output units: " << BoostDataStream.getEngUnits() << endl;
 		//cout << "DataStream update rate: " << BoostDataStream.getRawUpdateRate() << " Hz" << endl;
 
-		readout1.update(BoostDataStream.getRawUpdateRate());
+		button1.update();
 		BoostGauge.updateTouch(touch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 
