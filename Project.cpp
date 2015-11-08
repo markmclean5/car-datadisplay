@@ -108,6 +108,7 @@ int main()
 	float minorTickColor[] = {1,1,1,1};
 	float black[] = {0,0,0,1};
 	float green[] = {0,1,0,1};
+	float red[] = {1,0,0,1};
 
 	// Create Boost gauge!!
 	Gauge BoostGauge(width/2,height/2,height/2, 2);
@@ -156,8 +157,14 @@ int main()
 	button1.setBorder(green, 2); 
 	//readout1.setDecPlaces(2);
 	//readout1.setRefreshRate(5);
-	button1.enableText('B');
-	string textString = "Test!!!";
+	button1.enableText('T');
+
+	button1.setValueRefreshRate(5); 
+	button1.enableValue('B');
+	button1.setValueDecPlaces(2);
+	button1.setTextColor(green);
+	button1.setValueColor(red);
+	string textString = "Hz";
 	button1.setText(textString);
 	button1.draw();
 
@@ -175,6 +182,7 @@ int main()
 		//cout << "DataStream output units: " << BoostDataStream.getEngUnits() << endl;
 		//cout << "DataStream update rate: " << BoostDataStream.getRawUpdateRate() << " Hz" << endl;
 
+		button1.setValue(BoostDataStream.getRawUpdateRate());
 		button1.update();
 		BoostGauge.updateTouch(touch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;

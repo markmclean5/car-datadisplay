@@ -25,7 +25,6 @@ Button::Button(int cx, int cy, int w, int h)
 	textColor = new float[4]{0,1,0,1};
 	backgroundColor = new float[4]{0,0,0,1};
 	borderColor = new float[4]{0,1,0,1};
-	valueFormatSpecifier = new char[10];
 	lastText = "";
 	containsText = false;
 	containsValue = false;
@@ -48,14 +47,16 @@ void Button::update(void)
 	if(desiredRefreshRate == 0)	desiredRefreshRate = 5;
 	uint64_t nextTime = lastUpdateTime + (1000000/desiredRefreshRate);
 
-	if(containsText && !containsValue)
+	if(containsText)
 	{
 		if(text.compare(lastText)!=0)
 		{
 			lastText.assign(text);
 			setfill(textColor);
+			StrokeWidth(0);
 			textFontSize = (rectHeight-borderWidth)/2;
 			int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+
 			while(textWidth > 0.9*rectWidth)
 			{
 				textFontSize--;
@@ -63,19 +64,67 @@ void Button::update(void)
 			}
 			if(textVertAlign == 'T')
 			{
+				setfill(backgroundColor);
+				Rect(centerX-(0.9*rectWidth/2), bottomLeftY+rectHeight-textFontSize-1, 0.9*rectWidth, textFontSize-1);
+				setfill(textColor);
 				TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize-2);
 			}
 			if(textVertAlign == 'C')
 			{
+				setfill(backgroundColor);
+				Rect(centerX-(0.9*rectWidth/2), centerY-textFontSize/2-1, 0.9*rectWidth, textFontSize);
+				setfill(textColor);
 				TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize-2);
 			}
 			if(textVertAlign == 'B')
-			{
+			{	
+				setfill(backgroundColor);
+				Rect(centerX-(0.9*rectWidth/2), bottomLeftY+borderWidth-1, 0.9*rectWidth, textFontSize);
+				setfill(textColor);
 				TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
 			}
 		}
-		
 	}
+	if(containsValue && currentTime>=nextTime)
+	{
+			setfill(valueColor);
+			StrokeWidth(0);
+			valueFontSize = (rectHeight-borderWidth)/2;
+			char valueText[10];
+			sprintf(valueText, (char*)formatSpecifierString.c_str(), value);
+			string  valueString(valueText);
+			cout << "Value String: " << valueString << endl;
+			int valueWidth = TextWidth((char*)valueString.c_str(), SansTypeface, valueFontSize);
+
+			while(valueWidth > 0.9*rectWidth)
+			{
+				valueFontSize--;
+				valueWidth = TextWidth((char*)valueString.c_str(), SansTypeface, valueFontSize);
+			}
+			if(valueVertAlign == 'T')
+			{
+				setfill(backgroundColor);
+				Rect(centerX-(0.9*rectWidth/2), bottomLeftY+rectHeight-valueFontSize-1, 0.9*rectWidth, valueFontSize-1);
+				setfill(valueColor);
+				TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			}
+			if(valueVertAlign == 'C')
+			{
+				setfill(backgroundColor);
+				Rect(centerX-(0.9*rectWidth/2), centerY-valueFontSize/2-1, 0.9*rectWidth, valueFontSize);
+				setfill(valueColor);
+				TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			}
+			if(valueVertAlign == 'B')
+			{	
+				setfill(backgroundColor);
+				Rect(centerX-(0.9*rectWidth/2), bottomLeftY+borderWidth-1, 0.9*rectWidth, valueFontSize);
+				setfill(valueColor);
+				TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			}
+			lastUpdateTime = currentTime;
+		}
+
 
 	/*
 	if(currentTime>=nextTime){
@@ -90,7 +139,7 @@ void Button::update(void)
 			setfill(labelColor);
 			TextMid(centerX, centerY+1, valueText, SansTypeface, fontSize-1);
 		}
-		lastUpdateTime = currentTime;
+
 	}
 	*/
 }
@@ -101,10 +150,9 @@ void Button::setValueDecPlaces(int dec)						// Set number of digits before & af
 	valueDecPlaces = dec;
 	char decPlacesText[10];
 	sprintf(decPlacesText, "%d", valueDecPlaces);
-	string formatSpecifierString = "%.";
+	formatSpecifierString = "%.";
 	formatSpecifierString.append(decPlacesText);
 	formatSpecifierString.append("f");
-	valueFormatSpecifier = (char*)formatSpecifierString.c_str();
 }
 void Button::setBackgroundColor(float color[4])
 {
@@ -143,12 +191,12 @@ void Button::setValueRefreshRate(int rate)		// Set desired refresh frequency (Hz
 {
 	desiredRefreshRate = rate;
 }
-void Button::enableValue(char v)					// 'L', 'R', 'C' for left, right, center value alignment
+void Button::enableValue(char v)
 {
 	valueVertAlign = v;
 	containsValue = true;
 }
-void Button::enableText(char v)					// 'L', 'R', 'C' for left, right, center value alignment
+void Button::enableText(char v)
 {
 	textVertAlign = v;
 	containsText = true;
