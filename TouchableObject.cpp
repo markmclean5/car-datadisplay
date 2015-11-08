@@ -8,7 +8,7 @@ using namespace std;
 #include "TouchableObject.h"
 
 /* Update Function */
-void::TouchableObject::updateTouch(touch_t touchStruct)
+void TouchableObject::updateTouch(touch_t touchStruct)
 {
 	if(touchEnabled)
 	{
@@ -16,11 +16,10 @@ void::TouchableObject::updateTouch(touch_t touchStruct)
 		{
 			if(isRectangular)		// Figure out if touch falls within rectangle bounds
 			{
-				int xMin = rblX;
-				int xMax = rblX + rW;
-				int yMax = rblY;
-				int yMin = rblY - rH;
-
+				int xMin = rX - rW/2;
+				int xMax = rX + rW/2;
+				int yMin = rY - rH/2;
+				int yMax = rY + rH/2;
 				if(touchStruct.abs_x >= xMin && touchStruct.abs_x <= xMax)
 				{
 					if(touchStruct.abs_y >= yMin && touchStruct.abs_y <= yMax)
@@ -43,13 +42,30 @@ void::TouchableObject::updateTouch(touch_t touchStruct)
 	}
 }
 
+void TouchableObject::move(int changeX, int changeY, int transTime)
+{
+//	if(isRectangular)
+//	{
+		desiredPosX = rX + changeX;
+		desiredPosY = rY + changeY;
+//	}
+}
+
+int TouchableObject::getDesiredPosX(void)
+{
+	return desiredPosX;
+}
+
+int TouchableObject::getDesiredPosY(void)
+{
+	return desiredPosY;
+}
+
 
 bool TouchableObject::isTouched(void)
 {
 	return touched;
 }
-
-
 
 /* Constructor */
 TouchableObject::TouchableObject(void)
@@ -60,8 +76,8 @@ TouchableObject::TouchableObject(void)
 	cRad = 0;
 	rW = 0;
 	rH = 0;
-	rblX = 0;
-	rblY = 0;
+	rX = 0;
+	rY = 0;
 	touchEnabled = false;
 	visible = false;
 	lpVisible = false;
@@ -89,6 +105,8 @@ void TouchableObject::setCircleCenter(int x, int y)
 {
 	cX = x;
 	cY = y;
+	desiredPosX = cX;
+	desiredPosY = cY;
 }
 
 void TouchableObject::setCircleRadius(int rad)
@@ -108,10 +126,12 @@ void TouchableObject::setRectWidthHeight(int w, int h)
 	rH = h;
 }
 
-void TouchableObject::setRectBottomLeft(int x, int y)
+void TouchableObject::setRectCenter(int x, int y)
 {
-	rblX = x;
-	rblY = y;
+	rX = x;
+	rY = y;
+	desiredPosX = cX;
+	desiredPosY = cY;
 }
 
 /* Touch control */

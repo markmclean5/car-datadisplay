@@ -24,8 +24,8 @@ private:
 	/* Rectangular properties */
 	int rW;				// Rectangle width
 	int rH;				// Rectangle height
-	int rblX;			// Rectangle bottom-left corner x coordinate
-	int rblY;			// Rectangle bottom-left corner y coordinate
+	int rX;				// Rectangle center x coordinate
+	int rY;				// Rectangle center y coordinate
 
 	/* Touch processing & visibility */
 	bool touchEnabled;
@@ -35,10 +35,17 @@ private:
 	bool touched;
 
 
+	/* Moving a touchable object */
+	int desiredPosX;
+	int desiredPosY;
+
 protected:
 	/* Methods called by derived classes */
-	bool getVisibility(void);				// Called by derived classes to determine visibility
-	bool getLPVisibility(void);				// Called by derived classes to determine previous visiblity
+	bool getVisibility(void);			// Called by derived classes to determine visibility
+	bool getLPVisibility(void);			// Called by derived classes to determine previous visiblity
+
+	int getDesiredPosX(void);			// Called by derived classes to determine whether or not to move in the x direction
+	int getDesiredPosY(void); 			// Called by derived classes to determine whether or not to move in the y direction
 
 	void setCircular(void);				// Called by derived class to set touch area as circular
 	void setCircleCenter(int, int);		// Called by derived class to set circular touch area center
@@ -46,10 +53,10 @@ protected:
 
 	void setRectangular(void);			// Called by derived class to set touch area as rectangular
 	void setRectWidthHeight(int, int);	// Called by derived class to set rectangular touch area size
-	void setRectBottomLeft(int, int);	// Called by derived class to set rectangular touch area bottom left cornet
+	void setRectCenter(int, int);		// Called by derived class to set rectangular touch area bottom left cornet
 
 	/* Constructor */
-	TouchableObject(void);				// Sets up ClickableObject, sets properties to safe state
+	TouchableObject(void);				// Sets up TouchableObject, sets properties to safe state
 
 public:
 	/* Control methods */
@@ -58,11 +65,16 @@ public:
 	void setVisible(void);				// Sets display object visible
 	void setInvisible(void);			// Sets display object invisible
 
+	void move(int, int, int);		// Moves object (delta X, delta Y, transition time in ms)  
+
 	/* Update method */
 	void updateTouch(touch_t);
 
 	/* All that for this.. */
 	bool isTouched(void);
+	bool isHeld(void);
+	bool isReleased(void);
+	int getTouchDuration(void);
 };
 
 #endif
