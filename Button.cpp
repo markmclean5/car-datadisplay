@@ -28,6 +28,10 @@ Button::Button(int cx, int cy, int w, int h)
 	lastText = "";
 	containsText = false;
 	containsValue = false;
+
+	setRectangular();
+	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
+	setRectCenter(centerX, centerY);	// Called by derived class to set rectangular touch area bottom left corner
 }
 /* Button draw */
 void Button::draw(void)
@@ -38,14 +42,33 @@ void Button::draw(void)
 	Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
 }
 
-
-
 /* Button update */
 void Button::update(void)
 {
 	uint64_t currentTime = bcm2835_st_read();
 	if(desiredRefreshRate == 0)	desiredRefreshRate = 5;
 	uint64_t nextTime = lastUpdateTime + (1000000/desiredRefreshRate);
+
+
+
+	// Handle movement
+
+	if(centerX != getDesiredPosX() || centerY != getDesiredPosY())
+	{
+		StrokeWidth(borderWidth+1);
+		Stroke(0,0,0,1);
+		Fill(0,0,0,1);
+		Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
+
+		centerX = getDesiredPosX();
+		centerY = getDesiredPosY();
+
+		bottomLeftX = centerX - (rectWidth+borderWidth) / 2;
+		bottomLeftY = centerY - (rectHeight+borderWidth) / 2;
+		setRectCenter(centerX, centerY);	// Called by derived class to set rectangular touch area bottom left corner
+		draw();
+		lastText = "";
+	}
 
 	if(containsText)
 	{
@@ -93,7 +116,6 @@ void Button::update(void)
 			char valueText[10];
 			sprintf(valueText, (char*)formatSpecifierString.c_str(), value);
 			string  valueString(valueText);
-			cout << "Value String: " << valueString << endl;
 			int valueWidth = TextWidth((char*)valueString.c_str(), SansTypeface, valueFontSize);
 
 			while(valueWidth > 0.9*rectWidth)

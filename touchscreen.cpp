@@ -67,7 +67,7 @@ void *eventThread(void *arg)
 			else if(touch.ev.code == ABS_Y)
 			{
 				//std::cout << "ABS CODE ABS Y: " << touch.ev.value << std::endl;
-				abs_y = touch.ev.value;
+				abs_y = 480 - touch.ev.value;
 			}
 				
 		}

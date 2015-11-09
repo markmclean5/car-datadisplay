@@ -155,18 +155,28 @@ int main()
 
 	Button button1(width-100, height/2, 100, 50);
 	button1.setBorder(green, 2); 
-	//readout1.setDecPlaces(2);
-	//readout1.setRefreshRate(5);
 	button1.enableText('T');
-
-	button1.setValueRefreshRate(5); 
-	button1.enableValue('B');
-	button1.setValueDecPlaces(2);
 	button1.setTextColor(green);
-	button1.setValueColor(red);
 	string textString = "Hz";
 	button1.setText(textString);
+
+	button1.enableValue('B');
+	button1.setValueRefreshRate(5); 
+	button1.setValueDecPlaces(2);
+	button1.setValueColor(red);
+
+	button1.touchEnable();
 	button1.draw();
+
+
+	Button exitButton(width-40, 40, 50, 50);
+	exitButton.setBorder(red, 2);
+	exitButton.enableText('C');
+	exitButton.setTextColor(red);
+	string exitButtonText = "X";
+	exitButton.setText(exitButtonText);
+	exitButton.touchEnable();
+	exitButton.draw();
 
 	End();						   // End the picture
 	
@@ -182,12 +192,32 @@ int main()
 		//cout << "DataStream output units: " << BoostDataStream.getEngUnits() << endl;
 		//cout << "DataStream update rate: " << BoostDataStream.getRawUpdateRate() << " Hz" << endl;
 
-		button1.setValue(BoostDataStream.getRawUpdateRate());
-		button1.update();
+		
 		BoostGauge.updateTouch(touch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 
-		/*
+
+
+		button1.setValue(BoostDataStream.getRawUpdateRate());
+		button1.update();
+		button1.updateTouch(touch);
+		if (button1.isTouched())
+		{
+			cout << "Button 1 was touched!!!" << endl;
+			exitButton.moveOnRight();
+		}
+
+		//exitButton.move(0,1,1);
+
+		exitButton.update();
+		exitButton.updatePosition();
+		exitButton.updateTouch(touch);
+		if (exitButton.isTouched())
+		{
+			cout << "Exit Button was touched!!!" << endl;
+			exitButton.moveOffRight();
+		}
+		
 		if(touch.btn_touch == 1 && touch.mt_tracking_id != last_touch_id)
 		{
 			last_touch_id = touch.mt_tracking_id;
@@ -202,7 +232,7 @@ int main()
 			cout << "Touch Released" << endl;
 			last_touch_id = 0;
 		}
-		*/
+		
 			
 		End();
 	}
