@@ -51,6 +51,7 @@ void TouchableObject::move(int changeX, int changeY, int transTime)
 //	}
 }
 
+<<<<<<< HEAD
 void TouchableObject::moveOffRight(void)
 {
 	if(!moveOffRt)
@@ -67,6 +68,16 @@ void TouchableObject::moveOffRight(void)
 			prevcY = cY;
 		}
 	}
+=======
+int TouchableObject::getDesiredPosX(void)
+{
+	return desiredPosX;
+}
+
+int TouchableObject::getDesiredPosY(void)
+{
+	return desiredPosY;
+>>>>>>> origin/master
 }
 
 void TouchableObject::moveOnRight(void)
@@ -74,6 +85,7 @@ void TouchableObject::moveOnRight(void)
 	if(!moveOnRt) moveOnRt = true;
 }
 
+<<<<<<< HEAD
 void TouchableObject::updatePosition(void)
 {
 	if(moveOffRt)
@@ -140,6 +152,8 @@ int TouchableObject::getDesiredPosY(void)
 }
 
 
+=======
+>>>>>>> origin/master
 bool TouchableObject::isTouched(void)
 {
 	return touched;
@@ -211,8 +225,13 @@ void TouchableObject::setRectCenter(int x, int y)
 {
 	rX = x;
 	rY = y;
+<<<<<<< HEAD
 	desiredPosX = rX;
 	desiredPosY = rY;
+=======
+	desiredPosX = cX;
+	desiredPosY = cY;
+>>>>>>> origin/master
 }
 
 /* Touch control */

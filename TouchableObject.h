@@ -35,6 +35,7 @@ private:
 	bool touched;
 
 
+<<<<<<< HEAD
 	// Animation stuff
 	bool moveOffRt;
 	bool moveOnRt;
@@ -45,6 +46,8 @@ private:
 
 
 
+=======
+>>>>>>> origin/master
 	/* Moving a touchable object */
 	int desiredPosX;
 	int desiredPosY;
@@ -75,12 +78,16 @@ public:
 	void setVisible(void);				// Sets display object visible
 	void setInvisible(void);			// Sets display object invisible
 
+<<<<<<< HEAD
 	void move(int, int, int);		// Moves object (delta X, delta Y, transition time in ms)
 	
 	// Animation
 	void moveOffRight(void);
 	void moveOnRight(void);
 	void updatePosition(void);  
+=======
+	void move(int, int, int);		// Moves object (delta X, delta Y, transition time in ms)  
+>>>>>>> origin/master
 
 	/* Update method */
 	void updateTouch(touch_t);
