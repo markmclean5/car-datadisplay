@@ -1,12 +1,13 @@
 /********************************/
 /*	DataStream Class			*/
 /********************************/
+#include <sys/types.h>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cmath>			// Math (float remainder operation)
 #include <math.h>
-#include "DataStream.h"	
+#include "DataStream.h"
 #include <bcm2835.h>
 #include <algorithm>    // std::find
 #include <string>

@@ -1,19 +1,18 @@
 using namespace std;
-
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 
 
-#include "VG/openvg.h"		//
-#include "VG/vgu.h"			//
-#include "fontinfo.h"		// OpenVG
-#include "shapes.h"			//
-#include <stdlib.h>			//
+#include "VG/openvg.h"	//
+#include "VG/vgu.h"	//
+#include "fontinfo.h"	// Openvg
+#include "shapes.h"	//
+#include <stdlib.h>	//
 
-#include "serial.h"			// Serial functions
-#include "Gauge.h"			// Gauge class
-#include "DataStream.h"		// DataStream class
+#include "serial.h"	// Serial functions
+#include "Gauge.h"	// Gauge class
+#include "DataStream.h"	// DataStream class
 
 
 #include <linux/input.h>
@@ -24,12 +23,11 @@ using namespace std;
 // *** Label Fonts
 #include "avengeance.inc"
 #include "digits.inc"
-#include <bcm2835.h> 
+#include <bcm2835.h>
 
 #include "touchscreen.h"
 #include "project.h"
 #include "Button.h"
-
 
 // Label and readout fonts, loop time
 Fontinfo avengeance;

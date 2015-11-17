@@ -68,10 +68,6 @@ void Button::update(void)
 		setRectCenter(centerX, centerY);	// Called by derived class to set rectangular touch area bottom left corner
 		draw();
 		lastText = "";
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 	}
 
 	if(containsText)
