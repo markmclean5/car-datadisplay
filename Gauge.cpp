@@ -11,16 +11,30 @@
 #include "Gauge.h"			// Gauge 
 #include <stdio.h>
 
-using namespace std;		// ??
+using namespace std;
+
+VGImage BackgroundBuffer;
+VGImage GaugeBuffer;
 
 // Gauge Draw Method
 void Gauge::draw(void)
 {
+	// Gauge sizing
 	float borderWidth = 0.03 * radius;
 	gaugeRadius = radius - borderWidth/2;
 	dynamicContentRadius = 0.85 * gaugeRadius;
 
-	int range = 0;						//
+	StrokeWidth(0);
+	Fill(0,0,0,.7);
+	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge fill circle
+
+
+	// Save background image in buffer
+	BackgroundBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
+	vgGetPixels(BackgroundBuffer, 0, 0, centerX - radius, centerY - radius, 2*radius, 2*radius);
+
+	// Draw Ticks
+	int range = 0;
 	for(;range<numRanges;range++)
 	{
 		float valRange = stopVal[range] - startVal[range];
@@ -39,12 +53,26 @@ void Gauge::draw(void)
 									 minorTickColorAlpha[range]};
 		drawTickSet(startAng[range], stopAng[range], angMajorInt, angRatio, majorTickColor, true);		// Draw major ticks
 		drawTickSet(startAng[range], stopAng[range], angMinorInt, angRatio, minorTickColor, false);		// Draw minor ticks
+	}
 
+	// Draw labels
+	range = 0;
+	for(;range<numRanges;range++)
+	{
+		float labelColor[] =	{labelColorRed[range],
+								 labelColorGreen[range],
+								 labelColorBlue[range],
+								 labelColorAlpha[range]};
+		drawLabelSet(labelStartVal[range], labelStopVal[range], labelIncrement[range], labelDecPlaces[range], labelStartAng[range], labelStopAng[range], labelColor, labelFont[range]);
 	}
 	StrokeWidth(borderWidth);
 	Fill(0,0,0,0);
 	setstroke(borderColor);
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge border (on top of ticks)
+
+	// Save gauge image in buffer
+	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
+	vgGetPixels(GaugeBuffer, 0, 0, centerX - radius, centerY - radius, 2*radius, 2*radius);
 }
 
 void Gauge::update(float value, std::string units)
@@ -69,21 +97,8 @@ void Gauge::update(float value, std::string units)
 
 	if(unitsFound)
 	{
-		float needleAngle = -value * (stopAng[dataRange]-startAng[dataRange])/abs(stopVal[dataRange]-startVal[dataRange]);
-		//Draw black circle to clear previous needle
-		setfill(backgroundColor);
-		StrokeWidth(0);
-		Circle(centerX,centerY, dynamicContentRadius * 2);	
-
-		int range = 0;
-		for(;range<numRanges;range++)
-		{
-			float labelColor[] =	{labelColorRed[range],
-									 labelColorGreen[range],
-									 labelColorBlue[range],
-									 labelColorAlpha[range]};
-			drawLabelSet(labelStartVal[range], labelStopVal[range], labelIncrement[range], labelDecPlaces[range], labelStartAng[range], labelStopAng[range], labelColor, labelFont[range]);
-		}
+		vgSetPixels(centerX - radius, centerY - radius, GaugeBuffer, 0, 0, 2*radius, 2*radius);
+		float needleAngle = -value * (stopAng[dataRange]-startAng[dataRange])/abs(stopVal[dataRange]-startVal[dataRange]);	
 		drawNeedle(needleAngle);
 	}	
 }
@@ -238,6 +253,7 @@ Gauge::Gauge(int x, int y, int rad, int ranges)		// Constructor
 	centerX = x;
 	centerY = y;
 	radius = rad;
+
 
 	startVal = new float[numRanges];
 	stopVal = new float[numRanges];

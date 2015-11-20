@@ -72,6 +72,9 @@ int main()
 		digits_characterMap, 
 		digits_glyphCount);
 
+	// Draw background
+	Image(0, 0, 800, 480, "wallpaper.jpg");
+
 	// create datastream object!!
 	DataStream BoostDataStream(2);
 	BoostDataStream.setDebugMode(false);
