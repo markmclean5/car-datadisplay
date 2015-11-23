@@ -28,7 +28,7 @@ typedef struct {
 	int abs_y;					// populated from EV_ABS, ABS_Y
 } touch_t;
 
-extern touch_t touch;			// global mouse state
+extern touch_t threadTouch;			// global mouse state
 extern int quitState;			// get rid of this eventually?
 
 /* mouseinit starts the mouse event thread */

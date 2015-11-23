@@ -28,6 +28,7 @@ Button::Button(int cx, int cy, int w, int h)
 	lastText = "";
 	containsText = false;
 	containsValue = false;
+	firstDrawn = false;
 
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
@@ -36,6 +37,12 @@ Button::Button(int cx, int cy, int w, int h)
 /* Button draw */
 void Button::draw(void)
 {
+	if(!firstDrawn)	// The first time a button is drawn background will be saved for movement and visibility
+	{
+		BackgroundBuffer = vgCreateImage(VG_sABGR_8888, readoutWidth, readoutHeight, VG_IMAGE_QUALITY_BETTER);
+		vgGetPixels(BackgroundBuffer, 0, 0, centerX-readoutWidth/2 , centerY-readoutHeight/2, readoutWidth, readoutHeight);
+		firstDrawn = true;
+	}
 	setfill(backgroundColor);
 	StrokeWidth(borderWidth);
 	setstroke(borderColor);
@@ -48,24 +55,24 @@ void Button::update(void)
 	uint64_t currentTime = bcm2835_st_read();
 	if(desiredRefreshRate == 0)	desiredRefreshRate = 5;
 	uint64_t nextTime = lastUpdateTime + (1000000/desiredRefreshRate);
-
-
-
-	// Handle movement
-
+	// Handle movement: current position is not desired position
 	if(centerX != getDesiredPosX() || centerY != getDesiredPosY())
 	{
-		StrokeWidth(borderWidth+1);
-		Stroke(0,0,0,1);
-		Fill(0,0,0,1);
-		Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
-
 		centerX = getDesiredPosX();
 		centerY = getDesiredPosY();
-
-		bottomLeftX = centerX - (rectWidth+borderWidth) / 2;
-		bottomLeftY = centerY - (rectHeight+borderWidth) / 2;
-		setRectCenter(centerX, centerY);	// Called by derived class to set rectangular touch area bottom left corner
+		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
+		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+		
+		// Re-draw background buffer and movement buffer images
+		vgSetPixels(moveStartRX - readoutWidth/2, moveStartRY - readoutHeight/2, BackgroundBuffer, 0, 0, readoutWidth, readoutHeight);
+		int movementBufferWidth = abs(finalPosX-moveStartRX)+readoutWidth;
+		int movementBufferHeight = abs(finalPosY-moveStartRY)+readoutHeight;
+		int sx, sy;		// Screen pixels to be placed in 0,0 (start) of buffer
+		if(finalPosX-moveStartRX >= 0) sx = moveStartRX-readoutWidth/2;	// Moving right
+		else sx = finalPosX+readoutWidth/2;								// Moving left
+		if(finalPosY-moveStartRY >= 0) sy = moveStartRY-readoutHeight/2;	// Moving up
+		else sy = finalPosY+readoutHeight/2;								// Moving left
+		vgSetPixels(sx, sy, MovementBuffer, 0, 0, movementBufferWidth, movementBufferHeight);
 		draw();
 		lastText = "";
 	}
@@ -146,24 +153,6 @@ void Button::update(void)
 			}
 			lastUpdateTime = currentTime;
 		}
-
-
-	/*
-	if(currentTime>=nextTime){
-		if (numLines == 2)
-		{
-			StrokeWidth(0);
-			setfill(backgroundColor);
-			Rect(centerX-(rectWidth+borderWidth)/2, centerY, rectWidth-2*borderWidth, fontSize);
-			char valueText[10];
-
-			sprintf(valueText, formatSpecifier, value);
-			setfill(labelColor);
-			TextMid(centerX, centerY+1, valueText, SansTypeface, fontSize-1);
-		}
-
-	}
-	*/
 }
 
 /* Button setters */
@@ -206,8 +195,8 @@ void Button::setBorder(float color[4], int width)		// Set border color, border w
 	borderColor[3] = color[3];
 	rectHeight = readoutHeight-borderWidth;
 	rectWidth = readoutWidth - borderWidth;
-	bottomLeftX = centerX - (rectWidth+borderWidth) / 2;
-	bottomLeftY = centerY - (rectHeight+borderWidth) / 2;
+	bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
+	bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
 }
 void Button::setValueRefreshRate(int rate)		// Set desired refresh frequency (Hz)
 {

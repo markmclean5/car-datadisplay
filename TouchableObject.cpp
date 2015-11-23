@@ -6,6 +6,74 @@ using namespace std;
 #include <iostream>
 #include <cmath>
 #include "TouchableObject.h"
+#include <bcm2835.h>
+
+void TouchableObject::move(int finalX, int finalY, int dur, string type)
+{
+	cout << "Move called" << endl;
+	if(finalX != finalPosX || finalY != finalPosY)
+	{
+		if(isRectangular)
+		{
+			moveStartRX = rX;
+			moveStartRY = rY;	
+		}
+		else
+		{
+			moveStartCX = cX;
+			moveStartCY = cY;		
+		}
+		cout << "Move: Setting new final position" << endl;
+		finalPosX = finalX;
+		finalPosY = finalY;
+
+
+		int movementBufferWidth = abs(finalPosX-moveStartRX)+rW;
+		int movementBufferHeight = abs(finalPosY-moveStartRY)+rH;
+		MovementBuffer = vgCreateImage(VG_sABGR_8888, movementBufferWidth, movementBufferHeight, VG_IMAGE_QUALITY_BETTER);
+
+		int sx, sy;		// Screen pixels to be placed in 0,0 (start) of buffer
+		if(finalPosX-moveStartRX >= 0) sx = moveStartRX-rW/2;	// Moving right
+		else sx = finalPosX+rW/2;								// Moving left
+		if(finalPosY-moveStartRY >= 0) sy = moveStartRY-rH/2;	// Moving up
+		else sy = finalPosY+rH/2;								// Moving left
+		vgGetPixels(MovementBuffer, 0, 0, sx, sy, movementBufferWidth, movementBufferHeight);
+
+
+		moveStartTime = bcm2835_st_read();
+		moveDuration = dur;
+		motionType.assign(type);
+	}
+	else cout << "Move called - already in progress" << endl;
+}
+
+void TouchableObject::updateVisuals(void)
+{
+	if(isRectangular)
+	{
+		if(rX != finalPosX || rY != finalPosY)
+		{
+			cout << "Inside updateVisuals: position change, move is necessary" << endl;
+			int totalPixDisp = sqrt(pow(finalPosX-moveStartRX, 2) + pow(finalPosY-moveStartRY, 2));
+			float omega = (M_PI/2)/moveDuration;
+			uint64_t currentTime = bcm2835_st_read();
+			if(currentTime > (moveStartTime + moveDuration*1000))
+			{
+				cout << "Overshot time!!" << endl;
+				//currentTime = moveStartTime + moveDuration*1000;
+				rX = finalPosX;
+				rY = finalPosY;
+			}
+			else
+			{
+				int currentPixDisp = totalPixDisp*sin((omega/1000)*(currentTime - moveStartTime));
+				double moveAngle = atan2(finalPosY - moveStartRY, finalPosX - moveStartRX);
+				rX = moveStartRX + currentPixDisp * cos(moveAngle);
+				rY = moveStartRY + currentPixDisp * sin(moveAngle);
+			}
+		}
+	}
+}
 
 /* Update Function */
 void TouchableObject::updateTouch(touch_t touchStruct)
@@ -22,10 +90,7 @@ void TouchableObject::updateTouch(touch_t touchStruct)
 				int yMax = rY + rH/2;
 				if(touchStruct.abs_x >= xMin && touchStruct.abs_x <= xMax)
 				{
-					if(touchStruct.abs_y >= yMin && touchStruct.abs_y <= yMax)
-					{
-						touched = true;
-					}
+					if(touchStruct.abs_y >= yMin && touchStruct.abs_y <= yMax) touched = true;
 					else touched = false;
 				}
 			}
@@ -42,103 +107,22 @@ void TouchableObject::updateTouch(touch_t touchStruct)
 	}
 }
 
-void TouchableObject::move(int changeX, int changeY, int transTime)
-{
-//	if(isRectangular)
-//	{
-		desiredPosX = rX + changeX;
-		desiredPosY = rY + changeY;
-//	}
-}
-
-void TouchableObject::moveOffRight(void)
-{
-	if(!moveOffRt)
-	{
-		moveOffRt = true;
-		if(isRectangular)
-		{
-			prevrX = rX;
-			prevrY = rY;
-		}
-		else
-		{
-			prevcX = cX;
-			prevcY = cY;
-		}
-	}
-}
-
-void TouchableObject::moveOnRight(void)
-{
-	if(!moveOnRt) moveOnRt = true;
-}
-
-void TouchableObject::updatePosition(void)
-{
-	if(moveOffRt)
-	{
-		if(isRectangular)
-		{
-			if (rX > 800 + rW)
-			{
-				moveOffRt = false;
-			}
-			else
-			{
-				desiredPosX = rX + 1;
-			}
-		}
-		else
-		{
-			if (cX > 800 + cRad)
-			{
-				moveOffRt = false;
-			}
-			else
-			{
-				desiredPosX = cX + 1;
-			}
-		}
-	}
-	if(moveOnRt)
-	{
-		if(isRectangular)
-		{
-			if (rX == prevrX)
-			{
-				moveOnRt = false;
-			}
-			else
-			{
-				desiredPosX = rX - 1;
-			}
-		}
-		else
-		{
-			if (cX == prevcX)
-			{
-				moveOnRt = false;
-			}
-			else
-			{
-				desiredPosX = cX + -1;
-			}
-		}
-	}
-}
-
-
 int TouchableObject::getDesiredPosX(void)
 {
-	return desiredPosX;
+	if(isRectangular) return rX;
+	else return cX;
 }
 
 int TouchableObject::getDesiredPosY(void)
 {
-	return desiredPosY;
+	if(isRectangular) return rY;
+	else return cY;
 }
 
+float TouchableObject::getDesiredAlpha(void)
+{
+	return alpha;
+}
 
 bool TouchableObject::isTouched(void)
 {
@@ -156,13 +140,17 @@ TouchableObject::TouchableObject(void)
 	rH = 0;
 	rX = 0;
 	rY = 0;
+
 	touchEnabled = false;
 	visible = false;
 	lpVisible = false;
 	touched = false;
 
-	moveOffRt = false;
-	moveOnRt = false;
+	finalPosX = -1;
+	finalPosY = -1;
+
+	movingOffRight = false;
+	movingOnRight = false;
 }
 
 /* Visibility getters */
@@ -186,8 +174,6 @@ void TouchableObject::setCircleCenter(int x, int y)
 {
 	cX = x;
 	cY = y;
-	desiredPosX = cX;
-	desiredPosY = cY;
 }
 
 void TouchableObject::setCircleRadius(int rad)
@@ -211,8 +197,8 @@ void TouchableObject::setRectCenter(int x, int y)
 {
 	rX = x;
 	rY = y;
-	desiredPosX = rX;
-	desiredPosY = rY;
+	finalPosX = rX; 
+	finalPosY = rY;
 }
 
 /* Touch control */
@@ -232,6 +218,7 @@ void TouchableObject::setVisible(void)
 {
 	lpVisible = visible;
 	visible = true;
+	alpha = 1.0;
 }
 
 void TouchableObject::setInvisible(void)
@@ -239,5 +226,3 @@ void TouchableObject::setInvisible(void)
 	lpVisible = visible;
 	visible = false;
 }
-
-

@@ -26,6 +26,8 @@ private:
 	float* borderColor;
 	int borderWidth;
 
+	bool firstDrawn;
+
 	// Text properties
 	float* textColor;
 	int textFontSize;
