@@ -16,6 +16,7 @@ private:
 	int rectWidth, rectHeight;				// Size of rectangle to be drawn
 	int centerX, centerY;					// Location of readout center
 	int bottomLeftX, bottomLeftY;			// Location of rectangle bottom left corner
+	int cornerRadius;
 
 	// Timing related properties
 	int desiredRefreshRate;
@@ -23,21 +24,22 @@ private:
 
 	// Graphics related properties
 	float* backgroundColor;
+	float backgroundColorAlpha;
 	float* borderColor;
+	float borderColorAlpha;
 	int borderWidth;
-
-	bool firstDrawn;
 
 	// Text properties
 	float* textColor;
+	float textColorAlpha;
 	int textFontSize;
 	char textVertAlign;
 	string text;
-	string lastText;
 	bool containsText;
 
 	// Value properties
 	float* valueColor;
+	float valueColorAlpha;
 	int valueFontSize;	
 	char valueVertAlign;
 	string formatSpecifierString;
@@ -45,11 +47,24 @@ private:
 	float value;
 	bool containsValue;
 
+
+	// Selection Properties
+	bool selectEnabled;
+	bool selected;
+	float* selectedBackgroundColor;
+	float* selectedTextColor;
+
+	// Pressed Color Properties
+	bool pressedColorEnabled;
+	float* pressedBackgroundColor;
+	float* presssedTextColor;
+
 public:
 	Button(int, int, int, int);				// Button constructor: center X, center Y, width, height
 	
 	void setBackgroundColor(float*);		// Set background color
 	void setBorder(float*, int);			// Set border color, border width
+	void setCornerRadius(int);				// Set corner radius if rounded 
 
 	void draw(void);
 	void update(void);

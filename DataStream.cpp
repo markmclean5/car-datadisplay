@@ -28,6 +28,7 @@ DataStream::DataStream(int ranges)
 	weightedMACoeffs = new float*[numRanges];
 	weightedMAData = new float*[numRanges];
 	simpleMAData = new float*[numRanges];
+	dataCounts = new int[numRanges];
 
 	currentRange = 1;
 	lastRange = 1;
@@ -237,7 +238,6 @@ void DataStream::update (char* serialData, uint64_t updateTime)
 						}
 						range++;
 					}
-
 					if(rangeFound==true)
 					{
 						scaledValue = scaledValue * rangeScaling[currentRange-1];	// Apply scaling of current range
@@ -252,6 +252,8 @@ void DataStream::update (char* serialData, uint64_t updateTime)
 							for(;idx<simpleMALag[currentRange-1];idx++) currentSimpleMAData[idx] = scaledValue;
 							idx = 0;
 							for(;idx<weightedMALag[currentRange-1];idx++) currentWeightedMAData[idx] = scaledValue;
+							idx = 0;
+							for(;idx<numRanges;idx++) dataCounts[idx] = 0;
 						}
 						// Shift all simple MA data values down one, put current value in last position
 						idx = 1;							
@@ -262,7 +264,14 @@ void DataStream::update (char* serialData, uint64_t updateTime)
 						idx = 1;
 						for(;idx<weightedMALag[currentRange-1];idx++)	
 							currentWeightedMAData[idx-1] = currentWeightedMAData[idx];	// Shift data, overwrite oldest
-						currentWeightedMAData[weightedMALag[currentRange-1]-1] = scaledValue;	// Add latest value to array	
+						currentWeightedMAData[weightedMALag[currentRange-1]-1] = scaledValue;	// Add latest value to array
+						int maxCounts = 0;
+						if(weightedMALag[currentRange-1] > simpleMALag[currentRange-1])
+							maxCounts = weightedMALag[currentRange-1];
+						else
+							maxCounts = simpleMALag[currentRange-1];
+						if(dataCounts[currentRange-1] < maxCounts)
+							dataCounts[currentRange-1]++;
 					}
 					else cout << "Error: Data not inside any range. " << endl;
 

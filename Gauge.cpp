@@ -13,7 +13,6 @@
 
 using namespace std;
 
-VGImage BackgroundBuffer;
 VGImage GaugeBuffer;
 
 // Gauge Draw Method
@@ -22,16 +21,11 @@ void Gauge::draw(void)
 	// Gauge sizing
 	float borderWidth = 0.03 * radius;
 	gaugeRadius = radius - borderWidth/2;
-	dynamicContentRadius = 0.85 * gaugeRadius;
+	dynamicContentRadius = 0.85 * gaugeRadius;	// MARK FOR REMOVAL
 
 	StrokeWidth(0);
-	Fill(0,0,0,.7);
+	setfill(backgroundColor);
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge fill circle
-
-
-	// Save background image in buffer
-	BackgroundBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
-	vgGetPixels(BackgroundBuffer, 0, 0, centerX - radius, centerY - radius, 2*radius, 2*radius);
 
 	// Draw Ticks
 	int range = 0;

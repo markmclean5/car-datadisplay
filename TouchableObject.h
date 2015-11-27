@@ -40,11 +40,23 @@ private:
 	bool touchEnabled;	// Enables touch processing
 	bool touched;		// Current touch state
 
+	/* Press processing properties */
+	bool pressDebounceEnabled;
+	uint64_t pressStartTime;
+	uint64_t debounceFinishTime;
+	int debounceDuration;
+	bool pressed;
+	bool pressRead;
+	bool inDebounce;
+
 	/* Visibility properties */
 	bool visible;		// Current visibility state
 	bool lpVisible;		// Previous visibility state
 
 	/* Movement Properties */
+	bool moving;
+
+
 	bool movingOffRight;	// In process of moving object off of the screen to the right
 	bool movingOnRight;		// In process of moving object onto the screen from the right
 	bool movingOffLeft;		// In process of moving object off of the screen to the left
@@ -57,9 +69,20 @@ private:
 	uint64_t moveStartTime;		// Time at the start of a move
 	int moveDuration;			// Duration of move (milliseconds)
 
+
 	float initialAlpha;			// Initial alpha
 	float finalAlpha;			// Final alpha p
 	string motionType;			// Type of movement (linear)
+
+
+	int fadePercentage;
+	int finalFadePercentage;
+	int initialFadePercentage;
+	int fadeDuration;
+	uint64_t fadeStartTime;
+	string fadeType;
+
+	void pressProcessing(void);	// Press processing
 
 protected:
 	/* Image buffers for visibility, accessed directly by derived class*/
@@ -68,12 +91,10 @@ protected:
 	VGImage MovementBuffer;		// Image buffer containing background behind movement path to prevent wiping behind moving object
 	
 	/* Stored position properties, used in current positon calculation in move and by derived class for buffer re-draw */
-	int moveStartCX;			// Saved previous circle center x coordinate
-	int moveStartCY;			// Saved previous circle center y coordinate
-	int moveStartRX;			// Saved previous rectangle center x coordinate
-	int moveStartRY;			// Saved previous rectangle center y coordinate
-	int finalPosX;				// Final desired X coordinate of move
-	int finalPosY;				// Final desired X coordinate of move
+	int moveStartX;			// Saved previous center x coordinate
+	int moveStartY;			// Saved previous center y coordinate
+	int finalPosX;				// Final desired center x coordinate of move
+	int finalPosY;				// Final desired center y coordinate of move
 
 	/* Constructor */
 	TouchableObject(void);				// Sets up TouchableObject, sets properties to safe state
@@ -83,7 +104,7 @@ protected:
 	bool getLPVisibility(void);			// Called by derived classes to determine previous visiblity state
 	int getDesiredPosX(void);			// Called by derived classes to determine X position for TouchableObject
 	int getDesiredPosY(void); 			// Called by derived classes to determine Y position for TouchableObject
-	float getDesiredAlpha(void);		// Called by derived classes to determine alpha
+	int getDesiredFadePercentage(void);	// Called by derived classes to determine fade percentage to apply to alpha values
 	void setCircular(void);				// Called by derived class to set touch area as circular
 	void setCircleCenter(int, int);		// Called by derived class to set circular touch area center
 	void setCircleRadius(int);			// Called by derived class to set circular touch area radius
@@ -100,9 +121,10 @@ public:
 
 	/* Movement methods */
 	void updateVisuals(void);			// Called to update object visuals (handles moves and fades)
+	bool isMoving(void);				// Called to determine if an object is in motion
 
 	void move(int, int, int, string);	// Moves object (new X, new Y, duration (milliseconds), motion type string)
-	void fade(float, int, string);		// Fades object (final alpha, duration (milliseconds), fade type string)
+	void fade(int, int, string);		// Fades object (final desired fade percentage, duration (milliseconds), fade type string)
 	void moveOffRight(void);			// Moves object off of the screen to the right
 	void moveOnRight(void);				// Moves object back onto the screen to its previous position from the right
 	void moveOffLeft(void);				// Moves object off of the screen to the left
@@ -118,6 +140,10 @@ public:
 	bool isHeld(void);					// Returns if the object is being touched and held  **** Need to define threshold ****
 	bool isReleased(void);				// Returns if the object was released following a touch
 	int getTouchDuration(void);			// Returns current touch duration (during and after touch)
+
+	void setPressDebounce(int);
+	bool isPressed(void);
+
 };
 
 #endif

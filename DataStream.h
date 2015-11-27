@@ -46,6 +46,7 @@ private:	// Class Private properties
 	float* rangeStop;			// max value of every range
 	float* rangeScaling;		// scaling value of every range
 	std::string* EngUnits;		// engineering units of every range
+	int* dataCounts;			// Number of data counts in each data range between range switch
 
 	// Timing related properties
 	float readoutFreq;
