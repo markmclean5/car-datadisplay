@@ -6,6 +6,8 @@
 class Gauge: public TouchableObject{
 private:
 	// Gauge itself
+	VGImage GaugeBuffer;
+
 	int centerX;
 	int centerY;
 	int radius;
@@ -50,7 +52,8 @@ private:
 public:
 	
 	// Gauge itself
-	Gauge(int, int, int, int);						// Gauge constructor		(centerX, centerY, radius, # ranges)
+	Gauge(int, int, int);							// Gauge constructor		(centerX, centerY, radius)
+	void setNumRanges(int);
 	void setEngUnits(std::string, int);				// Set engineering units string	(Eng Units string, range#)
 
  	// Draw function setters (tick marks & border)
@@ -76,6 +79,8 @@ public:
 	void setLabelDecPlaces(int, int);			// Set label # of dec places 	(# of decimal places, range #)
 	void setLabelFont(Fontinfo, int);			// Set label font				(font)
 
+
+
 	void setReadoutColor(float*);				// Set readout color 			(rgba)
 	void setReadoutDigits(int);					// Set readout # digits 		(# digits)
 	void setReadoutDecPlaces(int);				// Set readout # dec places 	(# of decimal places)
@@ -83,14 +88,11 @@ public:
 	void setReadoutRadius(float);				// Set readout radius 			(readout center radius)
 	void setReadoutFont(Fontinfo);				// Set label font 				(font)
 
+
+	void configure(string);						// Auto configure using configGauges file
 	// Update function
 	// (Call after setting all of the above!)
 	void update(float, std::string);			// Update gauge with value		(value, engineering units string)
-
-	// Other gauge draw functions
-	void moveResize(float, float, float);		// Move and or resize gauge 	(centerX, centerY, radius)
-	void setVisible(bool);						// Set gauge visibility			(visibility)
-	void fade(float);							// Fade gauge (set all alphas)	(fade alpha)
 
 private:
 	// Internally accessed methods (called within draw / update functions)
@@ -115,6 +117,8 @@ private:
 	void drawNeedle(float);
 
 	float degToRad(float);						// Degrees to radians			(degrees)
+	void processConfigLine(string, int);
+
 };
 
 

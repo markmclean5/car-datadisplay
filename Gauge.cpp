@@ -10,10 +10,180 @@
 #include "TouchableObject.h"
 #include "Gauge.h"			// Gauge 
 #include <stdio.h>
+#include <fstream>
+#include <algorithm>
 
+using namespace std;
+// Prototype for processConfigLine method
+void Gauge::configure(string gaugeType) {
+	ifstream configFile;
+	configFile.open("configGauges");
+	if(!configFile){
+		cout << "Unable to open config file" << endl;
+		exit(1);
+	}
+	string currentLine;
+	string searchString = "name";
+	bool typeFound = false;
+	size_t pos;
+	int currentRange = 0;
+	while(configFile.good()) {
+    	getline(configFile, currentLine);
+    	if(!typeFound) {
+    		pos=currentLine.find(searchString);
+    		if(pos!=string::npos) {	// string::npos is returned if string is not found
+    			pos=currentLine.find(gaugeType);
+    			if(pos!=string::npos){
+    				cout << "Gauge Type " << gaugeType << " found in this name line:" << endl;
+    				cout << currentLine << endl;
+    				typeFound = true;
+    			}
+    			else{
+    				cout << "Gauge Type " << gaugeType << " not found this the name line:" <<endl;
+    				cout << currentLine << endl;
+    				cout << "Continuing search.." << endl;
+    			}
+			}
+		}
+		else {
+			if(!currentLine.empty()){
+				currentLine.erase(remove(currentLine.begin(), currentLine.end(), ' '), currentLine.end());
+				//cout << "Without spaces: " << currentLine << endl;
+				currentLine.erase(remove(currentLine.begin(), currentLine.end(), '	'), currentLine.end());
+				//cout << "Without tabs and spaces: " << currentLine << endl;
+			}
+
+
+			if(!currentLine.empty()) {
+				pos = currentLine.find(":END:");
+				if (pos!=string::npos)
+					break;
+				pos = currentLine.find("RANGE=");
+				string rangeString;
+				if(pos!=string::npos){
+					size_t rangeEnd = currentLine.find(";");
+					if(rangeEnd!=string::npos){
+						rangeString.insert(0,currentLine, 6, rangeEnd-6);
+						cout << "Range String" << rangeString << endl;
+						currentRange = stoi(rangeString);
+						cout << "Range Set to " << currentRange << endl;
+					}
+				}
+				else processConfigLine(currentLine, currentRange);
+			} 
+		}
+	}
+}
+
+void Gauge::processConfigLine(string inputLine, int range) {
+
+
+		size_t firstEquals = inputLine.find("=");
+		size_t firstSemicolon = inputLine.find(";");
+		size_t attributeEndChar = firstEquals - 1;
+		string configAttribute;
+		configAttribute.insert(0, inputLine, 0, attributeEndChar+1);
+		cout << "Config attribute: " << configAttribute << "*" << endl;
+		string attributeContents;
+		attributeContents.insert(0, inputLine, firstEquals+1, firstSemicolon - (firstEquals+1));
+		cout << "	Contents: " << attributeContents << "*" << endl;
+		
+		// String handling
+		if(attributeContents[0] == '"') {
+			cout << "This is a string" << endl;
+			string contents;
+			contents.insert(0, attributeContents, 1, attributeContents.length()-2);
+			cout << "String contents: " << contents << endl;
+			
+			
+			if(configAttribute.compare("engUnits")==0){
+				setEngUnits(contents, range);
+				cout << "Set engineering units for range " << range << endl;
+			}
+			
+		}
+		// Array handling
+		else if (attributeContents[0] == '{') {
+			int* commaLocations;
+			string* valueStrings;
+			float* values;
+			int itemCount = 1;
+			
+			size_t searchResult;
+			int searchStart = 0;
+			while(searchResult!=string::npos)
+			{
+				searchResult = attributeContents.find(",", searchStart);
+				if(searchResult!=string::npos) {
+					searchStart = searchResult+1;
+					itemCount++;
+				}
+
+			}
+			cout << "This is an array with "<< itemCount <<" elements"<< endl;
+
+			commaLocations = new int[itemCount-1];
+			valueStrings = new string[itemCount];
+			values = new float[itemCount];
+
+			searchStart = 0;
+			int idx = 0;
+			size_t commaSearchResult;
+			while(commaSearchResult!=string::npos)
+			{
+				commaSearchResult = attributeContents.find(",", searchStart);
+				if(commaSearchResult!=string::npos) {
+					searchStart = commaSearchResult+1;
+					commaLocations[idx] = commaSearchResult;
+					idx++;
+					cout << "Comma Search Loop Cycle End" <<endl;
+				}
+			}
+			idx = 0;
+			int start;
+			int end;
+			for(;idx<itemCount;idx++){
+				if(idx == 0) {
+					start = 1;
+					end = commaLocations[idx];
+					cout << "First valueString start and end set" <<endl;
+				}
+				else if(idx == itemCount-1) {
+					start = commaLocations[idx-1]+1;
+					end = attributeContents.size()-1;
+					cout << "Last valueString start and end set" <<endl;
+				}
+				else {
+					start = commaLocations[idx-1]+1;
+					end =  commaLocations[idx];
+					cout << "Intermediate valueString start and end set" <<endl;
+				}
+				cout << "Length = " << end-start << endl;
+				valueStrings[idx].insert(0, attributeContents, start, end-start);
+				cout << "Value string #" << idx+1 << "= " << valueStrings[idx] << endl;
+				values[idx] = stof(valueStrings[idx]);
+				cout << "Value: " << values[idx] << endl;
+			}
+
+			// Call appropriate setters which take in arrays
+
+
+		}
+
+		else cout << "This is a float" << endl;
+
+
+
+		configAttribute = "";
+		attributeContents = "";
+}
+
+<<<<<<< Updated upstream
 using namespace std;
 
 VGImage GaugeBuffer;
+=======
+>>>>>>> Stashed changes
 
 // Gauge Draw Method
 void Gauge::draw(void)
@@ -22,11 +192,19 @@ void Gauge::draw(void)
 	float borderWidth = 0.03 * radius;
 	gaugeRadius = radius - borderWidth/2;
 	dynamicContentRadius = 0.85 * gaugeRadius;	// MARK FOR REMOVAL
+<<<<<<< Updated upstream
 
 	StrokeWidth(0);
 	setfill(backgroundColor);
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge fill circle
 
+=======
+
+	StrokeWidth(0);
+	setfill(backgroundColor);
+	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge fill circle
+
+>>>>>>> Stashed changes
 	// Draw Ticks
 	int range = 0;
 	for(;range<numRanges;range++)
@@ -65,8 +243,13 @@ void Gauge::draw(void)
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge border (on top of ticks)
 
 	// Save gauge image in buffer
+<<<<<<< Updated upstream
 	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
 	vgGetPixels(GaugeBuffer, 0, 0, centerX - radius, centerY - radius, 2*radius, 2*radius);
+=======
+	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
+	vgGetPixels(GaugeBuffer, centerX-radius, centerY-radius, centerX - radius, centerY - radius, 2*radius, 2*radius);
+>>>>>>> Stashed changes
 }
 
 void Gauge::update(float value, std::string units)
@@ -91,7 +274,14 @@ void Gauge::update(float value, std::string units)
 
 	if(unitsFound)
 	{
+<<<<<<< Updated upstream
 		vgSetPixels(centerX - radius, centerY - radius, GaugeBuffer, 0, 0, 2*radius, 2*radius);
+=======
+		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
+		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
+		Fill(255,255,255,alphaScalar);		// Alpha applied to vgDrawImage due to VG_DRAW_IMAGE_MULTIPLY
+		vgDrawImage(GaugeBuffer);
+>>>>>>> Stashed changes
 		float needleAngle = -value * (stopAng[dataRange]-startAng[dataRange])/abs(stopVal[dataRange]-startVal[dataRange]);	
 		drawNeedle(needleAngle);
 	}	
@@ -99,28 +289,29 @@ void Gauge::update(float value, std::string units)
 
 void Gauge::drawNeedle(float angle)
 {
+	float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
 	// Center Glow
 	StrokeWidth(0);
 	int glowRadius = gaugeRadius*0.1875;
-	VGfloat glowStops[] = {	0.000,	needleColor[0], needleColor[1], needleColor[2], 1,
-							1.000,	0, 0, 0, 1};
+	VGfloat glowStops[] = {	0.000,	needleColor[0],	needleColor[1],	needleColor[2],	alphaScalar,
+							1.000,	0,				0,				0,				alphaScalar};
 	FillRadialGradient(centerX, centerY, centerX, centerY, glowRadius+5, glowStops, 2);
 	Circle(centerX, centerY, glowRadius*2);
 	//Gauge Center
 	float centerRadius = gaugeRadius*0.125;
 	float scaling = gaugeRadius*0.041;
 	StrokeWidth(0);
-	Fill(0,0,0,1);
+	Fill(0,0,0,alphaScalar);
 	Circle(centerX, centerY, centerRadius);
 	int focalX = centerX - 15;
 	int focalY = centerY + 0;
-	VGfloat stops[] = {	0.000,	5,5,5,.05,
-				1.000,	0,0,0,1};
-	FillRadialGradient(centerX, centerY, focalX, focalY, centerRadius*scaling, stops,0);
+	VGfloat stops[] = {	0.000,	5,	5,	5,	(float).05*alphaScalar,
+						1.000,	0,	0,	0,	alphaScalar};
+	FillRadialGradient(centerX, centerY, focalX, focalY, centerRadius*scaling, stops,2);
 	Circle(centerX, centerY, centerRadius*2);
-	Fill(0,0,0,.7);
+	Fill(0,0,0,.7*alphaScalar);
 	Circle(centerX, centerY, centerRadius);
-	Fill(0,0,0,1);
+	Fill(0,0,0,alphaScalar);
 	Circle(centerX, centerY, centerRadius*2*.75);
 	// Gauge Needle
 	centerRadius = gaugeRadius*0.05;
@@ -137,13 +328,13 @@ void Gauge::drawNeedle(float angle)
 	yVertices[3] = centerY + 0.92*needleLength*sin(degToRad(angle)) + (0.5*centerRadius)*sin(degToRad(angle-90));
 	xVertices[4] = centerX - centerRadius*cos(degToRad(angle-90));
 	yVertices[4] = centerY + centerRadius*sin(degToRad(angle-90));
-	VGfloat needleStops[] = {	0.000,	needleColor[0], needleColor[1], needleColor[2], 0.1,
-								0.250,	needleColor[0], needleColor[1], needleColor[2], 0.8,
-								1.000,	needleColor[0], needleColor[1], needleColor[2], 0.8};
+	VGfloat needleStops[] = {	0.000,	needleColor[0], needleColor[1], needleColor[2], (float)0.1*alphaScalar,
+								0.250,	needleColor[0], needleColor[1], needleColor[2], (float)0.8*alphaScalar,
+								1.000,	needleColor[0], needleColor[1], needleColor[2], (float)0.8*alphaScalar};
 	FillRadialGradient(centerX, centerY, centerX, centerY, needleLength, needleStops, 3);
 	Polygon(xVertices, yVertices, 5);
 	// Gauge Needle Cap
-	Stroke(0,0,0,1);
+	Stroke(0,0,0,alphaScalar);
 	StrokeWidth(2*centerRadius);
 	float needleCapLength = centerRadius*3.33;
 	float  needleCapX = centerX - needleCapLength*cos(degToRad(angle+180));
@@ -235,20 +426,26 @@ void Gauge::drawTickSet(float startAng, float stopAng, float angInt, float angRa
 	Translate(-centerX,-centerY);
 }
 
-Gauge::Gauge(int x, int y, int rad, int ranges)		// Constructor
+Gauge::Gauge(int x, int y, int rad)		// Constructor
 {
 	// Configuring base class (TouchableObject)
 	setCircular();
 	setCircleCenter(x, y);
 	setCircleRadius(rad);
 
-	numRanges = ranges;
-	if(numRanges==0) numRanges=1;
 	centerX = x;
 	centerY = y;
 	radius = rad;
+}
 
+<<<<<<< Updated upstream
 
+=======
+void Gauge::setNumRanges(int ranges)
+{
+	numRanges = ranges;
+	if(numRanges==0) numRanges=1;
+>>>>>>> Stashed changes
 	startVal = new float[numRanges];
 	stopVal = new float[numRanges];
 	startAng = new float[numRanges];
