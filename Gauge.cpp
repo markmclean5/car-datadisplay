@@ -178,12 +178,6 @@ void Gauge::processConfigLine(string inputLine, int range) {
 		attributeContents = "";
 }
 
-<<<<<<< Updated upstream
-using namespace std;
-
-VGImage GaugeBuffer;
-=======
->>>>>>> Stashed changes
 
 // Gauge Draw Method
 void Gauge::draw(void)
@@ -192,19 +186,11 @@ void Gauge::draw(void)
 	float borderWidth = 0.03 * radius;
 	gaugeRadius = radius - borderWidth/2;
 	dynamicContentRadius = 0.85 * gaugeRadius;	// MARK FOR REMOVAL
-<<<<<<< Updated upstream
 
 	StrokeWidth(0);
 	setfill(backgroundColor);
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge fill circle
 
-=======
-
-	StrokeWidth(0);
-	setfill(backgroundColor);
-	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge fill circle
-
->>>>>>> Stashed changes
 	// Draw Ticks
 	int range = 0;
 	for(;range<numRanges;range++)
@@ -243,13 +229,8 @@ void Gauge::draw(void)
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge border (on top of ticks)
 
 	// Save gauge image in buffer
-<<<<<<< Updated upstream
-	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
-	vgGetPixels(GaugeBuffer, 0, 0, centerX - radius, centerY - radius, 2*radius, 2*radius);
-=======
 	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
 	vgGetPixels(GaugeBuffer, centerX-radius, centerY-radius, centerX - radius, centerY - radius, 2*radius, 2*radius);
->>>>>>> Stashed changes
 }
 
 void Gauge::update(float value, std::string units)
@@ -274,14 +255,10 @@ void Gauge::update(float value, std::string units)
 
 	if(unitsFound)
 	{
-<<<<<<< Updated upstream
-		vgSetPixels(centerX - radius, centerY - radius, GaugeBuffer, 0, 0, 2*radius, 2*radius);
-=======
 		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
 		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
 		Fill(255,255,255,alphaScalar);		// Alpha applied to vgDrawImage due to VG_DRAW_IMAGE_MULTIPLY
 		vgDrawImage(GaugeBuffer);
->>>>>>> Stashed changes
 		float needleAngle = -value * (stopAng[dataRange]-startAng[dataRange])/abs(stopVal[dataRange]-startVal[dataRange]);	
 		drawNeedle(needleAngle);
 	}	
@@ -438,14 +415,10 @@ Gauge::Gauge(int x, int y, int rad)		// Constructor
 	radius = rad;
 }
 
-<<<<<<< Updated upstream
-
-=======
 void Gauge::setNumRanges(int ranges)
 {
 	numRanges = ranges;
 	if(numRanges==0) numRanges=1;
->>>>>>> Stashed changes
 	startVal = new float[numRanges];
 	stopVal = new float[numRanges];
 	startAng = new float[numRanges];

@@ -41,11 +41,7 @@ int main()
 	setupGraphics(&width, &height);		// Initialize display
 	int uart0_filestream = openSerial();
 	if (!bcm2835_init())
-<<<<<<< Updated upstream
-        	return 1;
-=======
 		return 1;
->>>>>>> Stashed changes
 	if (touchinit(width, height) != 0) {
 		fprintf(stderr, "Unable to initialize the mouse\n");
 		exit(1);
@@ -90,10 +86,6 @@ int main()
 	BoostDataStream.setEngUnits(eu1, 1);
 	string eu2 = "inHg";
 	BoostDataStream.setEngUnits(eu2, 2);
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 	// Color definitions (float r, float g, float b, float alpha)
 	float gaugeColor[] = {0,1,0,1};
 	float majorTickColor[] = {0,1,0,1};
@@ -104,11 +96,7 @@ int main()
 	float blue[] = {0,0,1,1};
 	float white[] = {1,1,1,1};
 	float translucentBlack[] = {0,0,0,0.5};
-<<<<<<< Updated upstream
-
-=======
 	float gray[] = {0.43,0.43,0.43,1};
->>>>>>> Stashed changes
 	// Create Boost gauge!!
 	Gauge BoostGauge(width/2,height/2,width/6);
 	BoostGauge.setNumRanges(2);
@@ -144,11 +132,8 @@ int main()
 	BoostGauge.setLabelDecPlaces(0, 2); 
 	BoostGauge.setLabelFont(avengeance, 2);
 	BoostGauge.touchEnable();
-<<<<<<< Updated upstream
-=======
 
 	BoostGauge.configure("Boost Gauge");
->>>>>>> Stashed changes
 	BoostGauge.draw();
 
 	// Button 1: Refresh rate button
@@ -165,26 +150,6 @@ int main()
 	button1.touchEnable();
 	button1.draw();
 
-<<<<<<< Updated upstream
-	// Exit button
-	Button exitButton(width-40, 40, 50, 50);
-	exitButton.setBorder(red, 2);
-	exitButton.enableText('C');
-	exitButton.setTextColor(red);
-	string hideText = "X";
-	string showText = "-";
-	string transitionText = " ";
-	exitButton.setText(hideText);
-	exitButton.setPressDebounce(500);
-	exitButton.touchEnable();
-	exitButton.draw();
-
-
-
-	int mbWidth = 100;
-	int mbHeight = 50;
-	int mbPadding = 10;
-=======
 
 	// Menu Button style properties
 	int mbWidth = 100;
@@ -205,7 +170,6 @@ int main()
 	menuControlButton.touchEnable();
 	menuControlButton.draw();
 
->>>>>>> Stashed changes
 	// Menu Buttons
 	Button menuButton1(mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight);
 	menuButton1.setCornerRadius(20);
@@ -255,16 +219,6 @@ int main()
 		char serialData[256];
 		readSerial(uart0_filestream, serialData);			// Capture serial data
 		BoostDataStream.update(serialData, loopTime);		// Update datastream with serial data
-<<<<<<< Updated upstream
-
-		// Grab touch data at the begining of each loop and 
-		loopTouch = threadTouch;
-
-		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
-
-
-		BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
-=======
 
 		// Grab touch data at the begining of each loop and 
 		loopTouch = threadTouch;
@@ -273,7 +227,6 @@ int main()
 
 		BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
 		BoostGauge.updateVisuals();
->>>>>>> Stashed changes
 		BoostGauge.updateTouch(loopTouch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 		
@@ -287,15 +240,9 @@ int main()
 			cout << "Button 1 was touched!!!" << endl;
 		}
 
-<<<<<<< Updated upstream
-		exitButton.update();
-		exitButton.updateVisuals();
-		exitButton.updateTouch(loopTouch);
-=======
 		menuControlButton.update();
 		menuControlButton.updateVisuals();
 		menuControlButton.updateTouch(loopTouch);
->>>>>>> Stashed changes
 		
 		menuButton1.update();
 		menuButton1.updateVisuals();
@@ -312,10 +259,7 @@ int main()
 		if (menuButton2.isTouched())
 		{
 			cout << "Menu Button 2 was touched!!!" << endl;
-<<<<<<< Updated upstream
-=======
 			BoostGauge.fade(100, 2000, "AAA");
->>>>>>> Stashed changes
 		}
 
 		menuButton3.update();
@@ -334,21 +278,11 @@ int main()
 			cout << "Menu Button 4 was touched!!!" << endl;
 		}
 
-<<<<<<< Updated upstream
-		if (exitButton.isPressed())
-=======
 		if (menuControlButton.isPressed())
->>>>>>> Stashed changes
 		{
 			cout << "Exit Button was touched!!!" << endl;
 			if(!menuHidden)
 			{
-<<<<<<< Updated upstream
-				menuButton1.move(mbPadding+mbWidth/2,0-mbHeight/2, 1000, "AAA");
-				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, 0-mbHeight/2, 1000, "AAA");
-				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, 0-mbHeight/2, 1000, "AAA");
-				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, 0-mbHeight/2, 1000, "AAA");
-=======
 				menuButton1.move(mbPadding+mbWidth/2,0-mbHeight/2+mbPeek, 600, "AAA");
 				menuButton1.fade(60,600,"AAA");
 				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
@@ -357,22 +291,11 @@ int main()
 				menuButton3.fade(60,600,"AAA");
 				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
 				menuButton4.fade(60,600,"AAA");
->>>>>>> Stashed changes
 				menuHidden = true;
 
 			}
 			else
 			{
-<<<<<<< Updated upstream
-				menuButton1.move(mbPadding+mbWidth/2,mbPadding+mbHeight/2, 1000, "AAA");
-				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 1000, "AAA");
-				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 1000, "AAA");
-				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 1000, "AAA");
-				menuHidden = false;
-			}
-		}
-
-=======
 				menuButton1.move(mbPadding+mbWidth/2,mbPadding+mbHeight/2, 600, "AAA");
 				menuButton1.fade(0,600,"AAA");
 				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
@@ -387,7 +310,6 @@ int main()
 		}
 		if(menuHidden) menuControlButton.setText(showText);
 		else menuControlButton.setText(hideText);
->>>>>>> Stashed changes
 		End();
 	}
 }
