@@ -49,6 +49,7 @@ void Button::draw(void)
 /* Button update */
 void Button::update(void)
 {
+	updateVisuals();
 	// Handle movement: current position is not desired position
 	if(centerX != getDesiredPosX() || centerY != getDesiredPosY())
 	{

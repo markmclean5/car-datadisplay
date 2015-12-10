@@ -1,0 +1,55 @@
+
+
+foo_srv {
+	timeout ?= "2 minutes";
+	log {
+		dir ?= "C:\foo\logs";
+		level ?= "0";
+		};
+	};
+
+BoostGauge {
+	
+	numRanges = "2";
+	borderColor = ["0.0", "1.0", "0.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.5"];
+	needleColor = ["0.0", "1.0", "0.0", "1.0"];
+	range1 {
+		engUnits = "PSI";
+		dataRangeStart	=	"0";
+		dataRangeStop	= "30";
+		angleRangeStart = "0";
+		angleRangeStop = "-180";
+		majorTickInterval = "5";
+		minorTickInterval = "1";
+		labelValueStart = "0";
+		labelValueStop = "30";
+		labelAngleStart = "0";
+		labelAngleStop = "180";
+		labelIncrement = "5";
+		labelDecPlaces = "0";
+		majorTickColor = ["1.0", "0.0", "0.0", "1.0"];
+		minorTickColor = ["0.0", "1.0", "0.0", "1.0"];
+		labelColor = ["0.0", "0.0", "1.0", "1.0"];
+	};
+	range2 {
+		engUnits ="inHg";
+		dataRangeStart = "0";
+		dataRangeStop = "30";
+		angleRangeStart = "0";
+		angleRangeStop = "90";
+		majorTickInterval = "10";
+		minorTickInterval = "2";
+		labelValueStart = "10";
+		labelValueStop = "30";
+		labelAngleStart = "-30";
+		labelAngleStop = "-90";
+		labelIncrement = "10";
+		labelDecPlaces = "0";
+		majorTickColor = ["1.0", "0.0", "0.0", "1.0"];
+		minorTickColor = ["0.0", "1.0", "0.0", "1.0"];
+		labelColor = ["0.0", "0.0", "1.0", "1.0"];
+	};
+
+	
+};

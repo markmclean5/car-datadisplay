@@ -10,10 +10,84 @@
 #include "TouchableObject.h"
 #include "Gauge.h"			// Gauge 
 #include <stdio.h>
+#include <fstream>
+#include <algorithm>
+#include <stdlib.h>
 
+#include <locale.h>
+#include <config4cpp/Configuration.h>
+#include "parsingUtilities.h"
 using namespace std;
+using namespace config4cpp;
 
-VGImage GaugeBuffer;
+void Gauge::configure(string gaugeType) {
+	setlocale(LC_ALL, "");
+	char * scope = "BoostGauge";
+
+	Configuration * cfg = Configuration::create();
+
+	try {
+		cfg->parse("testConfig");
+		string gaugeName = "BoostGauge";
+
+		// Gauge attributes
+		numRanges = parseInt(cfg, gaugeName, "numRanges");
+		EngUnits = new std::string[numRanges];
+		parseColor(cfg, gaugeName, borderColor, "borderColor");
+		parseColor(cfg, gaugeName, backgroundColor, "backgroundColor");
+		parseColor(cfg, gaugeName, needleColor, "needleColor");
+
+		if(numRanges==0) numRanges=1;
+		startVal = new float[numRanges];
+		stopVal = new float[numRanges];
+		startAng = new float[numRanges];
+		stopAng = new float[numRanges];;
+		majorInt = new float[numRanges];
+ 		minorInt = new float[numRanges];
+		majorTickColor = new float*[numRanges];
+		minorTickColor = new float*[numRanges];
+		labelStartVal = new float[numRanges];;
+		labelStopVal = new float[numRanges];
+		labelIncrement = new float[numRanges];
+		labelDecPlaces = new int[numRanges];
+		labelStartAng = new float[numRanges];;
+		labelStopAng = new float[numRanges];
+		labelColor = new float*[numRanges];
+		labelFont = new Fontinfo[numRanges];
+
+		// Per-range attributes
+		string rangeScope = "range";
+		int currentRange = 1;
+		for(;currentRange<=numRanges;currentRange++)
+		{
+			majorTickColor[currentRange-1] = new float[4];
+			minorTickColor[currentRange-1] = new float[4];
+			labelColor[currentRange-1] = new float[4];
+			string currentRangeScope = rangeScope + to_string(currentRange);
+			int prefixSize = currentRangeScope.length();
+			string scope2 = scope;
+			EngUnits[currentRange-1] = parseString(cfg, scope2, currentRangeScope, ".engUnits");
+			majorInt[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".majorTickInterval");
+			minorInt[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".minorTickInterval");
+			startVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".dataRangeStart");
+			stopVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".dataRangeStop");			
+			startAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".angleRangeStart");
+			stopAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".angleRangeStop");
+			labelStartVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelValueStart");
+			labelStopVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelValueStop");
+			labelStartAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelAngleStart");
+			labelStopAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelAngleStop");
+			labelIncrement[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelIncrement");
+			labelDecPlaces[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelDecPlaces");
+			parseColor(cfg, scope2, currentRangeScope, majorTickColor[currentRange-1], ".majorTickColor");
+			parseColor(cfg, scope2, currentRangeScope, minorTickColor[currentRange-1], ".minorTickColor");
+			parseColor(cfg, scope2, currentRangeScope, labelColor[currentRange-1], ".labelColor");
+		}
+	} catch(const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+	}
+	cfg->destroy();
+}
 
 // Gauge Draw Method
 void Gauge::draw(void)
@@ -37,27 +111,18 @@ void Gauge::draw(void)
 		float angMajorInt = majorInt[range] * angPerVal;
 		float angMinorInt = minorInt[range] * angPerVal;
 		float angRatio = angMajorInt / angMinorInt;
-		float majorTickColor[] =	{majorTickColorRed[range],
-									 majorTickColorGreen[range],
-									 majorTickColorBlue[range],
-									 majorTickColorAlpha[range]};
-		float minorTickColor[] =	{minorTickColorRed[range],
-									 minorTickColorGreen[range],
-									 minorTickColorBlue[range],
-									 minorTickColorAlpha[range]};
-		drawTickSet(startAng[range], stopAng[range], angMajorInt, angRatio, majorTickColor, true);		// Draw major ticks
-		drawTickSet(startAng[range], stopAng[range], angMinorInt, angRatio, minorTickColor, false);		// Draw minor ticks
+		float* currentMajorTickColor = majorTickColor[range];
+		float* currentMinorTickColor = minorTickColor[range];
+		drawTickSet(startAng[range], stopAng[range], angMajorInt, angRatio, currentMajorTickColor, true);		// Draw major ticks
+		drawTickSet(startAng[range], stopAng[range], angMinorInt, angRatio, currentMinorTickColor, false);		// Draw minor ticks
 	}
 
 	// Draw labels
 	range = 0;
 	for(;range<numRanges;range++)
 	{
-		float labelColor[] =	{labelColorRed[range],
-								 labelColorGreen[range],
-								 labelColorBlue[range],
-								 labelColorAlpha[range]};
-		drawLabelSet(labelStartVal[range], labelStopVal[range], labelIncrement[range], labelDecPlaces[range], labelStartAng[range], labelStopAng[range], labelColor, labelFont[range]);
+		float* currentLabelColor = labelColor[range];
+		drawLabelSet(labelStartVal[range], labelStopVal[range], labelIncrement[range], labelDecPlaces[range], labelStartAng[range], labelStopAng[range], currentLabelColor, labelFont[range]);
 	}
 	StrokeWidth(borderWidth);
 	Fill(0,0,0,0);
@@ -65,12 +130,13 @@ void Gauge::draw(void)
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge border (on top of ticks)
 
 	// Save gauge image in buffer
-	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
-	vgGetPixels(GaugeBuffer, 0, 0, centerX - radius, centerY - radius, 2*radius, 2*radius);
+	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
+	vgGetPixels(GaugeBuffer, centerX-radius, centerY-radius, centerX - radius, centerY - radius, 2*radius, 2*radius);
 }
 
 void Gauge::update(float value, std::string units)
 {
+	updateVisuals();
 	bool unitsFound = false;
 	int range = 0;
 	int dataRange = 0;
@@ -91,7 +157,10 @@ void Gauge::update(float value, std::string units)
 
 	if(unitsFound)
 	{
-		vgSetPixels(centerX - radius, centerY - radius, GaugeBuffer, 0, 0, 2*radius, 2*radius);
+		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
+		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
+		Fill(255,255,255,alphaScalar);		// Alpha applied to vgDrawImage due to VG_DRAW_IMAGE_MULTIPLY
+		vgDrawImage(GaugeBuffer);
 		float needleAngle = -value * (stopAng[dataRange]-startAng[dataRange])/abs(stopVal[dataRange]-startVal[dataRange]);	
 		drawNeedle(needleAngle);
 	}	
@@ -99,28 +168,29 @@ void Gauge::update(float value, std::string units)
 
 void Gauge::drawNeedle(float angle)
 {
+	float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
 	// Center Glow
 	StrokeWidth(0);
 	int glowRadius = gaugeRadius*0.1875;
-	VGfloat glowStops[] = {	0.000,	needleColor[0], needleColor[1], needleColor[2], 1,
-							1.000,	0, 0, 0, 1};
+	VGfloat glowStops[] = {	0.000,	needleColor[0],	needleColor[1],	needleColor[2],	alphaScalar,
+							1.000,	0,				0,				0,				alphaScalar};
 	FillRadialGradient(centerX, centerY, centerX, centerY, glowRadius+5, glowStops, 2);
 	Circle(centerX, centerY, glowRadius*2);
 	//Gauge Center
 	float centerRadius = gaugeRadius*0.125;
 	float scaling = gaugeRadius*0.041;
 	StrokeWidth(0);
-	Fill(0,0,0,1);
+	Fill(0,0,0,alphaScalar);
 	Circle(centerX, centerY, centerRadius);
 	int focalX = centerX - 15;
 	int focalY = centerY + 0;
-	VGfloat stops[] = {	0.000,	5,5,5,.05,
-				1.000,	0,0,0,1};
-	FillRadialGradient(centerX, centerY, focalX, focalY, centerRadius*scaling, stops,0);
+	VGfloat stops[] = {	0.000,	5,	5,	5,	(float).05*alphaScalar,
+						1.000,	0,	0,	0,	alphaScalar};
+	FillRadialGradient(centerX, centerY, focalX, focalY, centerRadius*scaling, stops,2);
 	Circle(centerX, centerY, centerRadius*2);
-	Fill(0,0,0,.7);
+	Fill(0,0,0,.7*alphaScalar);
 	Circle(centerX, centerY, centerRadius);
-	Fill(0,0,0,1);
+	Fill(0,0,0,alphaScalar);
 	Circle(centerX, centerY, centerRadius*2*.75);
 	// Gauge Needle
 	centerRadius = gaugeRadius*0.05;
@@ -137,13 +207,13 @@ void Gauge::drawNeedle(float angle)
 	yVertices[3] = centerY + 0.92*needleLength*sin(degToRad(angle)) + (0.5*centerRadius)*sin(degToRad(angle-90));
 	xVertices[4] = centerX - centerRadius*cos(degToRad(angle-90));
 	yVertices[4] = centerY + centerRadius*sin(degToRad(angle-90));
-	VGfloat needleStops[] = {	0.000,	needleColor[0], needleColor[1], needleColor[2], 0.1,
-								0.250,	needleColor[0], needleColor[1], needleColor[2], 0.8,
-								1.000,	needleColor[0], needleColor[1], needleColor[2], 0.8};
+	VGfloat needleStops[] = {	0.000,	needleColor[0], needleColor[1], needleColor[2], (float)0.1*alphaScalar,
+								0.250,	needleColor[0], needleColor[1], needleColor[2], (float)0.8*alphaScalar,
+								1.000,	needleColor[0], needleColor[1], needleColor[2], (float)0.8*alphaScalar};
 	FillRadialGradient(centerX, centerY, centerX, centerY, needleLength, needleStops, 3);
 	Polygon(xVertices, yVertices, 5);
 	// Gauge Needle Cap
-	Stroke(0,0,0,1);
+	Stroke(0,0,0,alphaScalar);
 	StrokeWidth(2*centerRadius);
 	float needleCapLength = centerRadius*3.33;
 	float  needleCapX = centerX - needleCapLength*cos(degToRad(angle+180));
@@ -235,47 +305,22 @@ void Gauge::drawTickSet(float startAng, float stopAng, float angInt, float angRa
 	Translate(-centerX,-centerY);
 }
 
-Gauge::Gauge(int x, int y, int rad, int ranges)		// Constructor
+Gauge::Gauge(int x, int y, int rad)		// Constructor
 {
 	// Configuring base class (TouchableObject)
 	setCircular();
 	setCircleCenter(x, y);
 	setCircleRadius(rad);
 
-	numRanges = ranges;
-	if(numRanges==0) numRanges=1;
 	centerX = x;
 	centerY = y;
 	radius = rad;
+}
 
+void Gauge::setNumRanges(int ranges)
+{
+	numRanges = ranges;
 
-	startVal = new float[numRanges];
-	stopVal = new float[numRanges];
-	startAng = new float[numRanges];
-	stopAng = new float[numRanges];;
-	majorInt = new float[numRanges];
- 	minorInt = new float[numRanges];
-	majorTickColorRed = new float[numRanges];
-	majorTickColorGreen = new float[numRanges];
-	majorTickColorBlue = new float[numRanges];
-	majorTickColorAlpha = new float[numRanges];
-	minorTickColorRed = new float[numRanges];
-	minorTickColorGreen = new float[numRanges];
-	minorTickColorBlue = new float[numRanges];
-	minorTickColorAlpha = new float[numRanges];
-
-	labelStartVal = new float[numRanges];;
-	labelStopVal = new float[numRanges];
-	labelIncrement = new float[numRanges];
-	labelDecPlaces = new int[numRanges];
-	labelStartAng = new float[numRanges];;
-	labelStopAng = new float[numRanges];
-	labelColorRed = new float[numRanges];
-	labelColorGreen = new float[numRanges];
-	labelColorBlue = new float[numRanges];
-	labelColorAlpha = new float[numRanges];
-	labelFont = new Fontinfo[numRanges];
-	EngUnits = new std::string[numRanges];
 } 
 
 void Gauge::setEngUnits(string units, int range)
@@ -305,22 +350,6 @@ void Gauge::setNeedleColor(float color[4])
 	needleColor[1] = color[1];
 	needleColor[2] = color[2];
 	needleColor[3] = color[3];
-}
-
-void Gauge::setMajorTickColor(float color[4], int range)
-{
-	majorTickColorRed[range-1]		= color[0];
-	majorTickColorGreen[range-1]	= color[1];
-	majorTickColorBlue[range-1]		= color[2];
-	majorTickColorAlpha[range-1]	= color[3];
-}
-
-void Gauge::setMinorTickColor(float color[4], int range)
-{
-	minorTickColorRed[range-1]		= color[0];
-	minorTickColorGreen[range-1]	= color[1];
-	minorTickColorBlue[range-1]		= color[2];
-	minorTickColorAlpha[range-1]	= color[3];
 }
 void Gauge::setDataRange(float start, float stop, int range)
 {
@@ -364,14 +393,6 @@ void Gauge::setLabelIncrement(float increment, int range)
 void Gauge::setLabelDecPlaces(int places, int range)
 {
 	labelDecPlaces[range-1] = places;
-}
-
-void Gauge::setLabelColor(float color[4], int range)
-{
-	labelColorRed[range-1]			= color[0];
-	labelColorGreen[range-1]		= color[1];
-	labelColorBlue[range-1]			= color[2];
-	labelColorAlpha[range-1]		= color[3];
 }
 
 void Gauge::setLabelFont(Fontinfo font, int range)

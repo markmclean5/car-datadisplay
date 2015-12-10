@@ -20,6 +20,7 @@ using namespace std;
 #include "project.h"
 #include "Button.h"
 
+
 // Label and readout fonts, loop time
 Fontinfo avengeance;
 Fontinfo digits;
@@ -35,13 +36,13 @@ void setupGraphics(int*,int*);
 bool menuHidden = false;
 
 // main()
-int main() 
+int main()
 {
 	int width, height;					// display width & height
 	setupGraphics(&width, &height);		// Initialize display
 	int uart0_filestream = openSerial();
 	if (!bcm2835_init())
-        	return 1;
+		return 1;
 	if (touchinit(width, height) != 0) {
 		fprintf(stderr, "Unable to initialize the mouse\n");
 		exit(1);
@@ -50,7 +51,7 @@ int main()
 	avengeance = loadfont(avengeance_glyphPoints, 
 		avengeance_glyphPointIndices, 
 		avengeance_glyphInstructions,                
-        avengeance_glyphInstructionIndices, 
+		avengeance_glyphInstructionIndices, 
 		avengeance_glyphInstructionCounts, 
 		avengeance_glyphAdvances,
 		avengeance_characterMap, 
@@ -58,7 +59,7 @@ int main()
 	digits = loadfont(digits_glyphPoints, 
 		digits_glyphPointIndices, 
 		digits_glyphInstructions,                
-        digits_glyphInstructionIndices, 
+		digits_glyphInstructionIndices, 
 		digits_glyphInstructionCounts, 
 		digits_glyphAdvances,
 		digits_characterMap, 
@@ -86,7 +87,6 @@ int main()
 	BoostDataStream.setEngUnits(eu1, 1);
 	string eu2 = "inHg";
 	BoostDataStream.setEngUnits(eu2, 2);
-
 	// Color definitions (float r, float g, float b, float alpha)
 	float gaugeColor[] = {0,1,0,1};
 	float majorTickColor[] = {0,1,0,1};
@@ -97,39 +97,11 @@ int main()
 	float blue[] = {0,0,1,1};
 	float white[] = {1,1,1,1};
 	float translucentBlack[] = {0,0,0,0.5};
-
+	float gray[] = {0.43,0.43,0.43,1};
 	// Create Boost gauge!!
-	Gauge BoostGauge(width/2,height/2,height/2, 2);
-	BoostGauge.setBorderColor(gaugeColor);
-	BoostGauge.setBackgroundColor(translucentBlack);
-	BoostGauge.setNeedleColor(gaugeColor);
-	// Configure Boost gauge range 1
-	BoostGauge.setDataRange(0,30,1);
-	BoostGauge.setDataAngleRange(0,-180,1);
-	BoostGauge.setEngUnits(eu1, 1);
-	BoostGauge.setMajorInterval(5,1);
-	BoostGauge.setMinorInterval(1,1);
-	BoostGauge.setMajorTickColor(majorTickColor, 1);
-	BoostGauge.setMinorTickColor(minorTickColor, 1);
-	BoostGauge.setLabelColor(gaugeColor, 1);
-	BoostGauge.setLabelRange(0, 30, 1);
-	BoostGauge.setLabelAngleRange(0, 180, 1);
-	BoostGauge.setLabelIncrement(5, 1);
-	BoostGauge.setLabelDecPlaces(0, 1);
+	Gauge BoostGauge(width/2,height/2,width/6);
+	BoostGauge.configure("Boost Gauge");
 	BoostGauge.setLabelFont(avengeance, 1);
-	// Configure Boost gauge range 2
-	BoostGauge.setDataRange(0,30,2);
-	BoostGauge.setDataAngleRange(0,90,2);
-	BoostGauge.setEngUnits(eu2, 2);
-	BoostGauge.setMajorInterval(10,2);
-	BoostGauge.setMinorInterval(2,2);
-	BoostGauge.setMajorTickColor(majorTickColor, 2);
-	BoostGauge.setMinorTickColor(minorTickColor, 2);
-	BoostGauge.setLabelColor(gaugeColor, 2);
-	BoostGauge.setLabelRange(10, 30, 2);
-	BoostGauge.setLabelAngleRange(-30, -90, 2);
-	BoostGauge.setLabelIncrement(10, 2);
-	BoostGauge.setLabelDecPlaces(0, 2); 
 	BoostGauge.setLabelFont(avengeance, 2);
 	BoostGauge.touchEnable();
 	BoostGauge.draw();
@@ -148,24 +120,26 @@ int main()
 	button1.touchEnable();
 	button1.draw();
 
-	// Exit button
-	Button exitButton(width-40, 40, 50, 50);
-	exitButton.setBorder(red, 2);
-	exitButton.enableText('C');
-	exitButton.setTextColor(red);
-	string hideText = "X";
-	string showText = "-";
-	string transitionText = " ";
-	exitButton.setText(hideText);
-	exitButton.setPressDebounce(500);
-	exitButton.touchEnable();
-	exitButton.draw();
 
-
-
+	// Menu Button style properties
 	int mbWidth = 100;
 	int mbHeight = 50;
 	int mbPadding = 10;
+	int mbPeek = 10;
+	// Menu control button
+	Button menuControlButton(width-mbWidth/2-mbPadding, mbPadding+mbHeight/2, mbWidth, mbHeight);
+	menuControlButton.setCornerRadius(20);
+	menuControlButton.setBorder(gray, 2);
+	menuControlButton.enableText('C');
+	menuControlButton.setTextColor(gray);
+	string hideText = "HIDE";
+	string showText = "MENU";
+	string defaultText = " ";
+	menuControlButton.setText(defaultText);
+	menuControlButton.setPressDebounce(500);
+	menuControlButton.touchEnable();
+	menuControlButton.draw();
+
 	// Menu Buttons
 	Button menuButton1(mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight);
 	menuButton1.setCornerRadius(20);
@@ -221,14 +195,13 @@ int main()
 
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 
-
 		BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
+		//BoostGauge.updateVisuals();
 		BoostGauge.updateTouch(loopTouch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 		
 		button1.setValue(BoostDataStream.getRawUpdateRate());
 		button1.update();
-		button1.updateVisuals();
 
 		button1.updateTouch(loopTouch);
 		if (button1.isTouched())
@@ -236,12 +209,10 @@ int main()
 			cout << "Button 1 was touched!!!" << endl;
 		}
 
-		exitButton.update();
-		exitButton.updateVisuals();
-		exitButton.updateTouch(loopTouch);
+		menuControlButton.update();
+		menuControlButton.updateTouch(loopTouch);
 		
 		menuButton1.update();
-		menuButton1.updateVisuals();
 		menuButton1.updateTouch(loopTouch);
 		if (menuButton1.isTouched())
 		{
@@ -250,15 +221,14 @@ int main()
 		}
 
 		menuButton2.update();
-		menuButton2.updateVisuals();
 		menuButton2.updateTouch(loopTouch);
 		if (menuButton2.isTouched())
 		{
 			cout << "Menu Button 2 was touched!!!" << endl;
+			BoostGauge.fade(100, 2000, "AAA");
 		}
 
 		menuButton3.update();
-		menuButton3.updateVisuals();
 		menuButton3.updateTouch(loopTouch);
 		if (menuButton3.isTouched())
 		{
@@ -266,39 +236,47 @@ int main()
 		}
 
 		menuButton4.update();
-		menuButton4.updateVisuals();
 		menuButton4.updateTouch(loopTouch);
 		if (menuButton4.isTouched())
 		{
 			cout << "Menu Button 4 was touched!!!" << endl;
 		}
 
-		if (exitButton.isPressed())
+		if (menuControlButton.isPressed())
 		{
 			cout << "Exit Button was touched!!!" << endl;
 			if(!menuHidden)
 			{
-				menuButton1.move(mbPadding+mbWidth/2,0-mbHeight/2, 1000, "AAA");
-				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, 0-mbHeight/2, 1000, "AAA");
-				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, 0-mbHeight/2, 1000, "AAA");
-				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, 0-mbHeight/2, 1000, "AAA");
+				menuButton1.move(mbPadding+mbWidth/2,0-mbHeight/2+mbPeek, 600, "AAA");
+				menuButton1.fade(60,600,"AAA");
+				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
+				menuButton2.fade(60,600,"AAA");
+				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
+				menuButton3.fade(60,600,"AAA");
+				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
+				menuButton4.fade(60,600,"AAA");
 				menuHidden = true;
 
 			}
 			else
 			{
-				menuButton1.move(mbPadding+mbWidth/2,mbPadding+mbHeight/2, 1000, "AAA");
-				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 1000, "AAA");
-				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 1000, "AAA");
-				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 1000, "AAA");
+				menuButton1.move(mbPadding+mbWidth/2,mbPadding+mbHeight/2, 600, "AAA");
+				menuButton1.fade(0,600,"AAA");
+				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
+				menuButton2.fade(0,600,"AAA");
+				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
+				menuButton3.fade(0,600,"AAA");
+				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
+				menuButton4.fade(0,600,"AAA");
 				menuHidden = false;
+
 			}
 		}
-
+		if(menuHidden) menuControlButton.setText(showText);
+		else menuControlButton.setText(hideText);
 		End();
 	}
 }
-
 
 // setupGraphics()
 void setupGraphics(int* widthPtr, int* heightPtr)
