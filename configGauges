@@ -1,0 +1,39 @@
+name 				= "applesauce";
+name 				= "Boost Gauge";
+borderColor 		= {0.0, 1.0, 0.0, 1.0};
+backgroundColor 	= {0.0, 0.0, 0.0, 0.4};
+needleColor 		= {1.0, 0.0, 0.0, 1.0};
+touchEnable 		= "true";
+numRanges 			= 2;
+
+RANGE 				= 1;
+dataRange 			= {0, 30};
+dataAngleRange  	= {0, -180};
+engUnits 			= "PSI";
+majorInterval 		= 5;
+minorInterval 		= 1;
+majorTickColor 		= {0.0, 1.0, 0.0, 1.0};
+minorTickColor 		= {1.0, 1.0, 1.0, 1.0};
+labelColor 			= {0.0, 1.0, 0.0, 1.0};
+labelRange 			= {0, 30};
+labelAngleRange  	= {0, 180};
+labelIncrement 		= 5;
+labelDecPlaces 		= 0;
+labelFont 			= "avengeance";
+
+RANGE 				= 2;
+dataRange	 		= {0, 30};
+dataAngleRange 		= {0, 90};
+engUnits 			= "inHg";
+majorInterval 		= 10;
+minorInterval 		= 2;
+majorTickColor 		= {0.0, 1.0, 0.0, 1.0};
+minorTickColor 		= {1.0, 1.0, 1.0, 1.0};
+labelColor 			= {0.0, 1.0, 0.0, 1.0};
+labelRange 			= {10, 30};
+labelAngleRange 	= {-30, -90};
+labelIncrement 		= 10;
+labelDecPlaces 		= 0;
+labelFont 			= "avengeance";
+
+:END:

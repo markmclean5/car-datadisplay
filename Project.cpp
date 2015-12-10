@@ -100,10 +100,46 @@ int main()
 	float gray[] = {0.43,0.43,0.43,1};
 	// Create Boost gauge!!
 	Gauge BoostGauge(width/2,height/2,width/6);
+<<<<<<< HEAD
 	BoostGauge.configure("Boost Gauge");
 	BoostGauge.setLabelFont(avengeance, 1);
+=======
+	BoostGauge.setNumRanges(2);
+	BoostGauge.setBorderColor(gaugeColor);
+	BoostGauge.setBackgroundColor(translucentBlack);
+	BoostGauge.setNeedleColor(gaugeColor);
+	// Configure Boost gauge range 1
+	BoostGauge.setDataRange(0,30,1);
+	BoostGauge.setDataAngleRange(0,-180,1);
+	//BoostGauge.setEngUnits(eu1, 1);
+	BoostGauge.setMajorInterval(5,1);
+	BoostGauge.setMinorInterval(1,1);
+	BoostGauge.setMajorTickColor(majorTickColor, 1);
+	BoostGauge.setMinorTickColor(minorTickColor, 1);
+	BoostGauge.setLabelColor(gaugeColor, 1);
+	BoostGauge.setLabelRange(0, 30, 1);
+	BoostGauge.setLabelAngleRange(0, 180, 1);
+	BoostGauge.setLabelIncrement(5, 1);
+	BoostGauge.setLabelDecPlaces(0, 1);
+	BoostGauge.setLabelFont(avengeance, 1);
+	// Configure Boost gauge range 2
+	BoostGauge.setDataRange(0,30,2);
+	BoostGauge.setDataAngleRange(0,90,2);
+	//BoostGauge.setEngUnits(eu2, 2);
+	BoostGauge.setMajorInterval(10,2);
+	BoostGauge.setMinorInterval(2,2);
+	BoostGauge.setMajorTickColor(majorTickColor, 2);
+	BoostGauge.setMinorTickColor(minorTickColor, 2);
+	BoostGauge.setLabelColor(gaugeColor, 2);
+	BoostGauge.setLabelRange(10, 30, 2);
+	BoostGauge.setLabelAngleRange(-30, -90, 2);
+	BoostGauge.setLabelIncrement(10, 2);
+	BoostGauge.setLabelDecPlaces(0, 2); 
+>>>>>>> origin/master
 	BoostGauge.setLabelFont(avengeance, 2);
 	BoostGauge.touchEnable();
+
+	BoostGauge.configure("Boost Gauge");
 	BoostGauge.draw();
 
 	// Button 1: Refresh rate button
@@ -196,7 +232,11 @@ int main()
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 
 		BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
+<<<<<<< HEAD
 		//BoostGauge.updateVisuals();
+=======
+		BoostGauge.updateVisuals();
+>>>>>>> origin/master
 		BoostGauge.updateTouch(loopTouch);
 		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 		
@@ -210,6 +250,10 @@ int main()
 		}
 
 		menuControlButton.update();
+<<<<<<< HEAD
+=======
+		menuControlButton.updateVisuals();
+>>>>>>> origin/master
 		menuControlButton.updateTouch(loopTouch);
 		
 		menuButton1.update();
