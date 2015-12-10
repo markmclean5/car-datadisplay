@@ -12,16 +12,12 @@
 #include <stdio.h>
 #include <fstream>
 #include <algorithm>
-<<<<<<< HEAD
 #include <stdlib.h>
-=======
->>>>>>> origin/master
 
 #include <locale.h>
 #include <config4cpp/Configuration.h>
 #include "parsingUtilities.h"
 using namespace std;
-<<<<<<< HEAD
 using namespace config4cpp;
 
 void Gauge::configure(string gaugeType) {
@@ -92,172 +88,6 @@ void Gauge::configure(string gaugeType) {
 	}
 	cfg->destroy();
 }
-=======
-// Prototype for processConfigLine method
-void Gauge::configure(string gaugeType) {
-	ifstream configFile;
-	configFile.open("configGauges");
-	if(!configFile){
-		cout << "Unable to open config file" << endl;
-		exit(1);
-	}
-	string currentLine;
-	string searchString = "name";
-	bool typeFound = false;
-	size_t pos;
-	int currentRange = 0;
-	while(configFile.good()) {
-    	getline(configFile, currentLine);
-    	if(!typeFound) {
-    		pos=currentLine.find(searchString);
-    		if(pos!=string::npos) {	// string::npos is returned if string is not found
-    			pos=currentLine.find(gaugeType);
-    			if(pos!=string::npos){
-    				cout << "Gauge Type " << gaugeType << " found in this name line:" << endl;
-    				cout << currentLine << endl;
-    				typeFound = true;
-    			}
-    			else{
-    				cout << "Gauge Type " << gaugeType << " not found this the name line:" <<endl;
-    				cout << currentLine << endl;
-    				cout << "Continuing search.." << endl;
-    			}
-			}
-		}
-		else {
-			if(!currentLine.empty()){
-				currentLine.erase(remove(currentLine.begin(), currentLine.end(), ' '), currentLine.end());
-				//cout << "Without spaces: " << currentLine << endl;
-				currentLine.erase(remove(currentLine.begin(), currentLine.end(), '	'), currentLine.end());
-				//cout << "Without tabs and spaces: " << currentLine << endl;
-			}
-
-
-			if(!currentLine.empty()) {
-				pos = currentLine.find(":END:");
-				if (pos!=string::npos)
-					break;
-				pos = currentLine.find("RANGE=");
-				string rangeString;
-				if(pos!=string::npos){
-					size_t rangeEnd = currentLine.find(";");
-					if(rangeEnd!=string::npos){
-						rangeString.insert(0,currentLine, 6, rangeEnd-6);
-						cout << "Range String" << rangeString << endl;
-						currentRange = stoi(rangeString);
-						cout << "Range Set to " << currentRange << endl;
-					}
-				}
-				else processConfigLine(currentLine, currentRange);
-			} 
-		}
-	}
-}
-
-void Gauge::processConfigLine(string inputLine, int range) {
-
-
-		size_t firstEquals = inputLine.find("=");
-		size_t firstSemicolon = inputLine.find(";");
-		size_t attributeEndChar = firstEquals - 1;
-		string configAttribute;
-		configAttribute.insert(0, inputLine, 0, attributeEndChar+1);
-		cout << "Config attribute: " << configAttribute << "*" << endl;
-		string attributeContents;
-		attributeContents.insert(0, inputLine, firstEquals+1, firstSemicolon - (firstEquals+1));
-		cout << "	Contents: " << attributeContents << "*" << endl;
-		
-		// String handling
-		if(attributeContents[0] == '"') {
-			cout << "This is a string" << endl;
-			string contents;
-			contents.insert(0, attributeContents, 1, attributeContents.length()-2);
-			cout << "String contents: " << contents << endl;
-			
-			
-			if(configAttribute.compare("engUnits")==0){
-				setEngUnits(contents, range);
-				cout << "Set engineering units for range " << range << endl;
-			}
-			
-		}
-		// Array handling
-		else if (attributeContents[0] == '{') {
-			int* commaLocations;
-			string* valueStrings;
-			float* values;
-			int itemCount = 1;
-			
-			size_t searchResult;
-			int searchStart = 0;
-			while(searchResult!=string::npos)
-			{
-				searchResult = attributeContents.find(",", searchStart);
-				if(searchResult!=string::npos) {
-					searchStart = searchResult+1;
-					itemCount++;
-				}
-
-			}
-			cout << "This is an array with "<< itemCount <<" elements"<< endl;
-
-			commaLocations = new int[itemCount-1];
-			valueStrings = new string[itemCount];
-			values = new float[itemCount];
-
-			searchStart = 0;
-			int idx = 0;
-			size_t commaSearchResult;
-			while(commaSearchResult!=string::npos)
-			{
-				commaSearchResult = attributeContents.find(",", searchStart);
-				if(commaSearchResult!=string::npos) {
-					searchStart = commaSearchResult+1;
-					commaLocations[idx] = commaSearchResult;
-					idx++;
-					cout << "Comma Search Loop Cycle End" <<endl;
-				}
-			}
-			idx = 0;
-			int start;
-			int end;
-			for(;idx<itemCount;idx++){
-				if(idx == 0) {
-					start = 1;
-					end = commaLocations[idx];
-					cout << "First valueString start and end set" <<endl;
-				}
-				else if(idx == itemCount-1) {
-					start = commaLocations[idx-1]+1;
-					end = attributeContents.size()-1;
-					cout << "Last valueString start and end set" <<endl;
-				}
-				else {
-					start = commaLocations[idx-1]+1;
-					end =  commaLocations[idx];
-					cout << "Intermediate valueString start and end set" <<endl;
-				}
-				cout << "Length = " << end-start << endl;
-				valueStrings[idx].insert(0, attributeContents, start, end-start);
-				cout << "Value string #" << idx+1 << "= " << valueStrings[idx] << endl;
-				values[idx] = stof(valueStrings[idx]);
-				cout << "Value: " << values[idx] << endl;
-			}
-
-			// Call appropriate setters which take in arrays
-
-
-		}
-
-		else cout << "This is a float" << endl;
-
-
-
-		configAttribute = "";
-		attributeContents = "";
-}
-
->>>>>>> origin/master
 
 // Gauge Draw Method
 void Gauge::draw(void)
@@ -490,38 +320,7 @@ Gauge::Gauge(int x, int y, int rad)		// Constructor
 void Gauge::setNumRanges(int ranges)
 {
 	numRanges = ranges;
-<<<<<<< HEAD
 
-=======
-	if(numRanges==0) numRanges=1;
-	startVal = new float[numRanges];
-	stopVal = new float[numRanges];
-	startAng = new float[numRanges];
-	stopAng = new float[numRanges];;
-	majorInt = new float[numRanges];
- 	minorInt = new float[numRanges];
-	majorTickColorRed = new float[numRanges];
-	majorTickColorGreen = new float[numRanges];
-	majorTickColorBlue = new float[numRanges];
-	majorTickColorAlpha = new float[numRanges];
-	minorTickColorRed = new float[numRanges];
-	minorTickColorGreen = new float[numRanges];
-	minorTickColorBlue = new float[numRanges];
-	minorTickColorAlpha = new float[numRanges];
-
-	labelStartVal = new float[numRanges];;
-	labelStopVal = new float[numRanges];
-	labelIncrement = new float[numRanges];
-	labelDecPlaces = new int[numRanges];
-	labelStartAng = new float[numRanges];;
-	labelStopAng = new float[numRanges];
-	labelColorRed = new float[numRanges];
-	labelColorGreen = new float[numRanges];
-	labelColorBlue = new float[numRanges];
-	labelColorAlpha = new float[numRanges];
-	labelFont = new Fontinfo[numRanges];
-	EngUnits = new std::string[numRanges];
->>>>>>> origin/master
 } 
 
 void Gauge::setEngUnits(string units, int range)
