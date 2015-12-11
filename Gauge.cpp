@@ -14,17 +14,30 @@
 #include <algorithm>
 #include <stdlib.h>
 
+#include "avengeance.inc"	// *** Label Fonts
+
 #include <locale.h>
 #include <config4cpp/Configuration.h>
 #include "parsingUtilities.h"
 using namespace std;
 using namespace config4cpp;
 
+Fontinfo avengeanceG;
+
 void Gauge::configure(string gaugeType) {
 	setlocale(LC_ALL, "");
 	char * scope = "BoostGauge";
 
 	Configuration * cfg = Configuration::create();
+
+	avengeanceG = loadfont(avengeance_glyphPoints, 
+		avengeance_glyphPointIndices, 
+		avengeance_glyphInstructions,                
+		avengeance_glyphInstructionIndices, 
+		avengeance_glyphInstructionCounts, 
+		avengeance_glyphAdvances,
+		avengeance_characterMap, 
+		avengeance_glyphCount);
 
 	try {
 		cfg->parse("testConfig");
@@ -82,6 +95,7 @@ void Gauge::configure(string gaugeType) {
 			parseColor(cfg, scope2, currentRangeScope, majorTickColor[currentRange-1], ".majorTickColor");
 			parseColor(cfg, scope2, currentRangeScope, minorTickColor[currentRange-1], ".minorTickColor");
 			parseColor(cfg, scope2, currentRangeScope, labelColor[currentRange-1], ".labelColor");
+			labelFont[currentRange-1] = avengeanceG;
 		}
 	} catch(const ConfigurationException & ex) {
 		cout << ex.c_str() << endl;
@@ -305,7 +319,7 @@ void Gauge::drawTickSet(float startAng, float stopAng, float angInt, float angRa
 	Translate(-centerX,-centerY);
 }
 
-Gauge::Gauge(int x, int y, int rad)		// Constructor
+Gauge::Gauge(int x, int y, int rad, string name)		// Constructor
 {
 	// Configuring base class (TouchableObject)
 	setCircular();
@@ -315,6 +329,8 @@ Gauge::Gauge(int x, int y, int rad)		// Constructor
 	centerX = x;
 	centerY = y;
 	radius = rad;
+
+	configure(name);
 }
 
 void Gauge::setNumRanges(int ranges)

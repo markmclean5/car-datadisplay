@@ -19,7 +19,7 @@ using namespace std;
 #include "touchscreen.h"
 #include "project.h"
 #include "Button.h"
-
+#include <vector>
 
 // Label and readout fonts, loop time
 Fontinfo avengeance;
@@ -99,10 +99,8 @@ int main()
 	float translucentBlack[] = {0,0,0,0.5};
 	float gray[] = {0.43,0.43,0.43,1};
 	// Create Boost gauge!!
-	Gauge BoostGauge(width/2,height/2,width/6);
-	BoostGauge.configure("Boost Gauge");
-	BoostGauge.setLabelFont(avengeance, 1);
-	BoostGauge.setLabelFont(avengeance, 2);
+	Gauge BoostGauge(width/2,height/2,width/6, "Boost Gauge");
+	//BoostGauge.configure("Boost Gauge");
 	BoostGauge.touchEnable();
 	BoostGauge.draw();
 
@@ -183,6 +181,12 @@ int main()
 	menuButton4.setText(menuButton4Text);
 	menuButton4.draw();
 	menuButton4.touchEnable();
+
+
+	//Vector of diplay objects
+	vector<Gauge> objects;
+
+
 	while(1)
 	{
 		loopTime = bcm2835_st_read();
@@ -195,11 +199,15 @@ int main()
 
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 
-		BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
+		//BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
 		//BoostGauge.updateVisuals();
-		BoostGauge.updateTouch(loopTouch);
-		if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
+		//BoostGauge.updateTouch(loopTouch);
+		//if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 		
+		for(int i = 0; i < objects.size();i++) {
+			objects[i].update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
+			objects[i].updateTouch(loopTouch);
+		}
 		button1.setValue(BoostDataStream.getRawUpdateRate());
 		button1.update();
 
@@ -217,7 +225,13 @@ int main()
 		if (menuButton1.isTouched())
 		{
 			cout << "Menu Button 1 was touched!!!" << endl;
-			menuButton1.fade(50, 1000, "AAA");
+			//menuButton1.fade(50, 1000, "AAA");
+			if(objects.size()==0) {
+				cout << "Creating Gauge!" << endl;
+				objects.push_back(Gauge(width/2,height/2,width/6, "Boost Gauge"));
+				objects[objects.size()-1].draw();
+			}
+			
 		}
 
 		menuButton2.update();

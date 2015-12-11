@@ -43,9 +43,9 @@ private:
 public:
 	
 	// Gauge itself
-	Gauge(int, int, int);							// Gauge constructor		(centerX, centerY, radius)
+	Gauge(int, int, int, std::string);			// Gauge constructor		(centerX, centerY, radius, name)
 	void setNumRanges(int);
-	void setEngUnits(std::string, int);				// Set engineering units string	(Eng Units string, range#)
+	void setEngUnits(std::string, int);			// Set engineering units string	(Eng Units string, range#)
 
  	// Draw function setters (tick marks & border)
 	void setBorderColor(float*);				// Set border color 			(rgba)
