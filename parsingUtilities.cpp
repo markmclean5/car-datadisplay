@@ -92,3 +92,34 @@ void parseColor(Configuration * cfg, string scope, string subscope, float* outpu
 		cout << ex.c_str() << endl;
 	}
 }
+
+/* Parse boolean */
+bool parseBool(Configuration * cfg, string scope, string attr){
+	bool result = false;
+	try {
+		string str;
+		str = cfg->lookupString(scope.c_str(), attr.c_str());
+		cout << "Lookup result: " << str << endl;
+
+		if(str.compare("true") == 0 || str.compare("TRUE") == 0)
+			result = true;
+		cout << "Result: "<< result << endl;
+	}
+	catch(const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+	}
+	return result;
+}
+/* Parse boolean inside subscope */
+bool parseBool(Configuration * cfg, string scope, string subscope, string attr){
+	try {
+		string str = cfg->lookupString(scope.c_str(), subscope.append(attr).c_str());
+		bool result = false;
+		if(str.compare("true") == 0 || str.compare("TRUE") == 0)
+			result = true;
+		return result;
+	}
+	catch(const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+	}
+}

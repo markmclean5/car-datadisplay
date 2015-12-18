@@ -11,6 +11,9 @@ using namespace std;
 class Button : public TouchableObject
 {
 private:
+
+	string buttonIdentifier;
+
 	// Size & location related properties
 	int readoutWidth, readoutHeight;		// Size of entire readout, including border stroke
 	int rectWidth, rectHeight;				// Size of rectangle to be drawn
@@ -23,9 +26,9 @@ private:
 	uint64_t lastUpdateTime;
 
 	// Graphics related properties
-	float* backgroundColor;
+	float backgroundColor[4];
 	float backgroundColorAlpha;
-	float* borderColor;
+	float borderColor[4];
 	float borderColorAlpha;
 	int borderWidth;
 
@@ -58,9 +61,10 @@ private:
 	bool pressedColorEnabled;
 	float* pressedBackgroundColor;
 	float* presssedTextColor;
+	void configure(string);
 
 public:
-	Button(int, int, int, int);				// Button constructor: center X, center Y, width, height
+	Button(int, int, int, int, string);				// Button constructor: center X, center Y, width, height
 	
 	void setBackgroundColor(float*);		// Set background color
 	void setBorder(float*, int);			// Set border color, border width

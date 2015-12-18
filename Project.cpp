@@ -105,7 +105,9 @@ int main()
 	BoostGauge.draw();
 
 	// Button 1: Refresh rate button
-	Button button1(width/2+115, height/2, 100, 50);
+	Button button1(width/2+115, height/2, 100, 50, "FramerateButton");
+	
+	/*
 	button1.setBorder(green, 2); 
 	button1.enableText('T');
 	button1.setTextColor(green);
@@ -115,6 +117,7 @@ int main()
 	button1.setValueRefreshRate(5); 
 	button1.setValueDecPlaces(2);
 	button1.setValueColor(red);
+	*/
 	button1.touchEnable();
 	button1.draw();
 
@@ -125,60 +128,27 @@ int main()
 	int mbPadding = 10;
 	int mbPeek = 10;
 	// Menu control button
-	Button menuControlButton(width-mbWidth/2-mbPadding, mbPadding+mbHeight/2, mbWidth, mbHeight);
-	menuControlButton.setCornerRadius(20);
-	menuControlButton.setBorder(gray, 2);
-	menuControlButton.enableText('C');
-	menuControlButton.setTextColor(gray);
+	Button menuControlButton(width-mbWidth/2-mbPadding, mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuControlButton");
 	string hideText = "HIDE";
 	string showText = "MENU";
 	string defaultText = " ";
-	menuControlButton.setText(defaultText);
-	menuControlButton.setPressDebounce(500);
-	menuControlButton.touchEnable();
 	menuControlButton.draw();
 
 	// Menu Buttons
-	Button menuButton1(mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight);
-	menuButton1.setCornerRadius(20);
-	menuButton1.setBorder(white,2);
-	menuButton1.enableText('C');
-	menuButton1.setTextColor(white);
-	string menuButton1Text = "Menu 1";
-	menuButton1.setText(menuButton1Text);
-	menuButton1.setPressDebounce(500);
+	Button menuButton1(mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton1");
 	menuButton1.draw();
 	menuButton1.touchEnable();
 
 
-	Button menuButton2(mbWidth+2*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight);
-	menuButton2.setCornerRadius(20);
-	menuButton2.setBorder(white,2);
-	menuButton2.enableText('C');
-	menuButton2.setTextColor(white);
-	string menuButton2Text = "Menu 2";
-	menuButton2.setText(menuButton2Text);
+	Button menuButton2(mbWidth+2*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton2");
 	menuButton2.draw();
 	menuButton2.touchEnable();
 
-	Button menuButton3(2*mbWidth+3*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight);
-	menuButton3.setCornerRadius(20);
-	menuButton3.setBorder(white,2);
-	menuButton3.enableText('C');
-	menuButton3.setTextColor(white);
-	string menuButton3Text = "Menu 3";
-	menuButton3.setText(menuButton3Text);
+	Button menuButton3(2*mbWidth+3*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton3");
 	menuButton3.draw();
 	menuButton3.touchEnable();
 
-	Button menuButton4(3*mbWidth+4*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight);
-
-	menuButton4.setCornerRadius(20);
-	menuButton4.setBorder(white,2);
-	menuButton4.enableText('C');
-	menuButton4.setTextColor(white);
-	string menuButton4Text = "Menu 4";
-	menuButton4.setText(menuButton4Text);
+	Button menuButton4(3*mbWidth+4*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton3");
 	menuButton4.draw();
 	menuButton4.touchEnable();
 
@@ -197,17 +167,14 @@ int main()
 		// Grab touch data at the begining of each loop and 
 		loopTouch = threadTouch;
 
+		// Draw background image
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
-
-		//BoostGauge.update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
-		//BoostGauge.updateVisuals();
-		//BoostGauge.updateTouch(loopTouch);
-		//if (BoostGauge.isTouched()) cout << "Boost Gauge was touched!!!" << endl;
 		
 		for(int i = 0; i < objects.size();i++) {
 			objects[i].update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
 			objects[i].updateTouch(loopTouch);
 		}
+
 		button1.setValue(BoostDataStream.getRawUpdateRate());
 		button1.update();
 
@@ -222,8 +189,7 @@ int main()
 		
 		menuButton1.update();
 		menuButton1.updateTouch(loopTouch);
-		if (menuButton1.isTouched())
-		{
+		if (menuButton1.isTouched()) {
 			cout << "Menu Button 1 was touched!!!" << endl;
 			//menuButton1.fade(50, 1000, "AAA");
 			if(objects.size()==0) {

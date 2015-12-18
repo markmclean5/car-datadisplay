@@ -22,4 +22,9 @@ void parseColor(Configuration*, string, float*, string);
 /* Parse color inside subscope */
 void parseColor(Configuration*, string, string, float*, string);
 
+/* Parse boolean */
+bool parseBool(Configuration*, string, string);
+/* Parse boolean inside subscope */
+bool parseBool(Configuration*, string, string, string);
+
 #endif

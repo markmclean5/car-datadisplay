@@ -1,12 +1,74 @@
 
+FramerateButton {
+	cornerRadius = "0";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	enableText = "true";
+	textAlign = "B";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Applesauce";
+	enableValue = "true";
+	valueAlign = "T";
+	valueColor = ["1.0", "1.0", "1.0", "1.0"];
+	valueRefreshRate = "5";
+	valueDecPlaces = "2";
+	pressDebounce = "500";
+}
 
-foo_srv {
-	timeout ?= "2 minutes";
-	log {
-		dir ?= "C:\foo\logs";
-		level ?= "0";
-		};
-	};
+MenuControlButton {
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "HIDE";
+	pressDebounce = "500";
+}	
+
+MenuButton1 {
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Menu 1";
+	pressDebounce = "500";
+}
+
+MenuButton2 {
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Menu 2";
+	pressDebounce = "500";
+}
+
+MenuButton3 {
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Menu 3";
+	pressDebounce = "500";
+}
+
+MenuButton4 {
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Menu 4";
+	pressDebounce = "500";
+}
 
 BoostGauge {
 	
