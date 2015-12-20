@@ -99,11 +99,8 @@ bool parseBool(Configuration * cfg, string scope, string attr){
 	try {
 		string str;
 		str = cfg->lookupString(scope.c_str(), attr.c_str());
-		cout << "Lookup result: " << str << endl;
-
 		if(str.compare("true") == 0 || str.compare("TRUE") == 0)
 			result = true;
-		cout << "Result: "<< result << endl;
 	}
 	catch(const ConfigurationException & ex) {
 		cout << ex.c_str() << endl;

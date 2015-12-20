@@ -19,6 +19,7 @@ using namespace std;
 #include "touchscreen.h"
 #include "project.h"
 #include "Button.h"
+#include "TextView.h"
 #include <vector>
 
 // Label and readout fonts, loop time
@@ -104,41 +105,28 @@ int main()
 	BoostGauge.touchEnable();
 	BoostGauge.draw();
 
-	// Button 1: Refresh rate button
-	Button button1(width/2+115, height/2, 100, 50, "FramerateButton");
-	
-	/*
-	button1.setBorder(green, 2); 
-	button1.enableText('T');
-	button1.setTextColor(green);
-	string textString = "Hz";
-	button1.setText(textString);
-	button1.enableValue('B');
-	button1.setValueRefreshRate(5); 
-	button1.setValueDecPlaces(2);
-	button1.setValueColor(red);
-	*/
-	button1.touchEnable();
-	button1.draw();
-
-
 	// Menu Button style properties
 	int mbWidth = 100;
 	int mbHeight = 50;
 	int mbPadding = 10;
 	int mbPeek = 10;
+
+	// Button 1: Refresh rate button
+	Button button1(width-1.5*mbWidth-2*mbPadding, mbPadding+mbHeight/2, 100, 50, "FramerateButton");
+	button1.touchEnable();
+	button1.draw();
 	// Menu control button
 	Button menuControlButton(width-mbWidth/2-mbPadding, mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuControlButton");
 	string hideText = "HIDE";
 	string showText = "MENU";
 	string defaultText = " ";
 	menuControlButton.draw();
+	menuControlButton.touchEnable();
 
 	// Menu Buttons
 	Button menuButton1(mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton1");
 	menuButton1.draw();
 	menuButton1.touchEnable();
-
 
 	Button menuButton2(mbWidth+2*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton2");
 	menuButton2.draw();
@@ -151,6 +139,19 @@ int main()
 	Button menuButton4(3*mbWidth+4*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton3");
 	menuButton4.draw();
 	menuButton4.touchEnable();
+
+	TextView textView1(width/6, height/2, width/3-15, width/3-15, "TextView1");
+	textView1.update();
+	textView1.addNewLine("TEST LINE 1");
+	textView1.addNewLine("TEST LINE 2");
+	textView1.addNewLine("TEST LINE 3");
+	textView1.addNewLine("TEST LINE 4");
+	textView1.addNewLine("TEST LINE 5");
+	textView1.addNewLine("TEST LINE 6");
+	textView1.addNewLine("TEST LINE 7");
+	textView1.addNewLine("TEST LINE 8");
+	textView1.addNewLine("TEST LINE 9");
+	textView1.addNewLine("TEST LINE 10");
 
 
 	//Vector of diplay objects
@@ -189,13 +190,19 @@ int main()
 		
 		menuButton1.update();
 		menuButton1.updateTouch(loopTouch);
-		if (menuButton1.isTouched()) {
+
+
+		if (menuButton1.isPressed()) {
 			cout << "Menu Button 1 was touched!!!" << endl;
-			//menuButton1.fade(50, 1000, "AAA");
 			if(objects.size()==0) {
 				cout << "Creating Gauge!" << endl;
 				objects.push_back(Gauge(width/2,height/2,width/6, "Boost Gauge"));
 				objects[objects.size()-1].draw();
+				menuButton1.setText("Remove");
+			}
+			else {
+				objects.erase(objects.end());
+				menuButton1.setText("Add");
 			}
 			
 		}
@@ -220,6 +227,13 @@ int main()
 		if (menuButton4.isTouched())
 		{
 			cout << "Menu Button 4 was touched!!!" << endl;
+		}
+
+		textView1.update();
+		textView1.updateTouch(loopTouch);
+		if (textView1.isTouched())
+		{
+			cout << "Text View 1 was touched!!!" << endl;
 		}
 
 		if (menuControlButton.isPressed())

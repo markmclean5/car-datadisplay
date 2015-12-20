@@ -1,12 +1,23 @@
-
-FramerateButton {
-	cornerRadius = "0";
+TextView1 {
+	cornerRadius = "20";
 	borderWidth = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	numLines = "10";
+	pressDebounce = "500";
+}
+
+
+FramerateButton {
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	enableText = "true";
 	textAlign = "B";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Applesauce";
+	defaultText = "Hz";
 	enableValue = "true";
 	valueAlign = "T";
 	valueColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -19,6 +30,7 @@ MenuControlButton {
 	cornerRadius = "20";
 	borderWidth = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -30,17 +42,19 @@ MenuButton1 {
 	cornerRadius = "20";
 	borderWidth = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Menu 1";
-	pressDebounce = "500";
+	defaultText = "Add";
+	pressDebounce = "1000";
 }
 
 MenuButton2 {
 	cornerRadius = "20";
 	borderWidth = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -63,6 +77,7 @@ MenuButton4 {
 	cornerRadius = "20";
 	borderWidth = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -73,9 +88,9 @@ MenuButton4 {
 BoostGauge {
 	
 	numRanges = "2";
-	borderColor = ["0.0", "1.0", "0.0", "1.0"];
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
 	backgroundColor = ["0.0", "0.0", "0.0", "0.5"];
-	needleColor = ["0.0", "1.0", "0.0", "1.0"];
+	needleColor = ["1.0", "0.0", "0.0", "1.0"];
 	range1 {
 		engUnits = "PSI";
 		dataRangeStart	=	"0";
@@ -91,8 +106,8 @@ BoostGauge {
 		labelIncrement = "5";
 		labelDecPlaces = "0";
 		majorTickColor = ["1.0", "0.0", "0.0", "1.0"];
-		minorTickColor = ["0.0", "1.0", "0.0", "1.0"];
-		labelColor = ["0.0", "0.0", "1.0", "1.0"];
+		minorTickColor = ["1.0", "1.0", "1.0", "1.0"];
+		labelColor = ["1.0", "0.0", "0.0", "1.0"];
 	};
 	range2 {
 		engUnits ="inHg";
@@ -109,9 +124,7 @@ BoostGauge {
 		labelIncrement = "10";
 		labelDecPlaces = "0";
 		majorTickColor = ["1.0", "0.0", "0.0", "1.0"];
-		minorTickColor = ["0.0", "1.0", "0.0", "1.0"];
-		labelColor = ["0.0", "0.0", "1.0", "1.0"];
+		minorTickColor = ["1.0", "1.0", "1.0", "1.0"];
+		labelColor = ["1.0", "0.0", "0.0", "1.0"];
 	};
-
-	
 };

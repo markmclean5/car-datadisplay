@@ -56,6 +56,7 @@ void Button::configure(string ident) {
 		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
 		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
 		parseColor(cfg, buttonName, borderColor, "borderColor");
+		parseColor(cfg, buttonName, backgroundColor, "backgroundColor");
 		borderColorAlpha = borderColor[3];
 		containsText = parseBool(cfg, buttonName, "enableText");
 		if(containsText) {
