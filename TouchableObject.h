@@ -123,7 +123,9 @@ public:
 	void updateVisuals(void);			// Called to update object visuals (handles moves and fades)
 	bool isMoving(void);				// Called to determine if an object is in motion
 
-	void move(int, int, int, string);	// Moves object (new X, new Y, duration (milliseconds), motion type string)
+	void moveTo(int, int, int, string);	// Moves object to (new X, new Y, duration (milliseconds), motion type string)
+	void move(int, int, int, string);	// Moves object (delta X, delta Y, duration (milliseconds), motion type string)
+
 	void fade(int, int, string);		// Fades object (final desired fade percentage, duration (milliseconds), fade type string)
 	void moveOffRight(void);			// Moves object off of the screen to the right
 	void moveOnRight(void);				// Moves object back onto the screen to its previous position from the right

@@ -36,6 +36,19 @@ void setupGraphics(int*,int*);
 
 bool menuHidden = false;
 
+//Vector of diplay objects
+vector<Gauge> objects;
+vector<Button> menu;
+
+int findMenuButton(string ident) {
+	int idx = 0;
+	for(int i = 0; i<menu.size(); i++) {
+		if(ident.compare(menu[i].getIdentifier()) == 0)
+			idx =i;
+	}
+	return idx;
+}
+
 // main()
 int main()
 {
@@ -112,50 +125,39 @@ int main()
 	int mbPeek = 10;
 
 	// Button 1: Refresh rate button
-	Button button1(width-1.5*mbWidth-2*mbPadding, mbPadding+mbHeight/2, 100, 50, "FramerateButton");
+	Button button1("FramerateButton");
 	button1.touchEnable();
 	button1.draw();
 	// Menu control button
-	Button menuControlButton(width-mbWidth/2-mbPadding, mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuControlButton");
+	Button menuControlButton("MenuControlButton");
 	string hideText = "HIDE";
 	string showText = "MENU";
 	string defaultText = " ";
 	menuControlButton.draw();
 	menuControlButton.touchEnable();
 
-	// Menu Buttons
-	Button menuButton1(mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton1");
-	menuButton1.draw();
-	menuButton1.touchEnable();
+	
 
-	Button menuButton2(mbWidth+2*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton2");
-	menuButton2.draw();
-	menuButton2.touchEnable();
-
-	Button menuButton3(2*mbWidth+3*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton3");
-	menuButton3.draw();
-	menuButton3.touchEnable();
-
-	Button menuButton4(3*mbWidth+4*mbPadding+mbWidth/2,mbPadding+mbHeight/2, mbWidth, mbHeight, "MenuButton3");
-	menuButton4.draw();
-	menuButton4.touchEnable();
+	Button exitButton(width-35, height-35, 50, 50, "ExitButton");
+	exitButton.draw();
+	exitButton.touchEnable();
 
 	TextView textView1(width/6, height/2, width/3-15, width/3-15, "TextView1");
 	textView1.update();
-	textView1.addNewLine("TEST LINE 1");
-	textView1.addNewLine("TEST LINE 2");
-	textView1.addNewLine("TEST LINE 3");
-	textView1.addNewLine("TEST LINE 4");
-	textView1.addNewLine("TEST LINE 5");
-	textView1.addNewLine("TEST LINE 6");
-	textView1.addNewLine("TEST LINE 7");
-	textView1.addNewLine("TEST LINE 8");
-	textView1.addNewLine("TEST LINE 9");
-	textView1.addNewLine("TEST LINE 10");
 
+	int lineNumber = 1;
 
-	//Vector of diplay objects
-	vector<Gauge> objects;
+	// Menu Buttons
+
+	menu.push_back(Button("MenuButton1"));
+	menu.push_back(Button("MenuButton2"));
+	menu.push_back(Button("MenuButton3"));
+	menu.push_back(Button("MenuButton4"));
+
+	for(int i = 0; i<menu.size(); i++) {
+		menu[i].touchEnable();
+	}
+
 
 
 	while(1)
@@ -188,45 +190,32 @@ int main()
 		menuControlButton.update();
 		menuControlButton.updateTouch(loopTouch);
 		
-		menuButton1.update();
-		menuButton1.updateTouch(loopTouch);
+		
 
+		for(int i = 0; i<menu.size(); i++) {
+			menu[i].update();
+			menu[i].updateTouch(loopTouch);
+		}
 
-		if (menuButton1.isPressed()) {
-			cout << "Menu Button 1 was touched!!!" << endl;
+		if(menu[findMenuButton("MenuButton1")].isPressed()) {
+			cout << "MenuButton1 was touched" << endl;
 			if(objects.size()==0) {
 				cout << "Creating Gauge!" << endl;
 				objects.push_back(Gauge(width/2,height/2,width/6, "Boost Gauge"));
 				objects[objects.size()-1].draw();
-				menuButton1.setText("Remove");
+				menu[findMenuButton("MenuButton1")].setText("Remove");
 			}
 			else {
 				objects.erase(objects.end());
-				menuButton1.setText("Add");
+				menu[findMenuButton("MenuButton1")].setText("Add");
 			}
-			
 		}
 
-		menuButton2.update();
-		menuButton2.updateTouch(loopTouch);
-		if (menuButton2.isTouched())
+		exitButton.update();
+		exitButton.updateTouch(loopTouch);
+		if (exitButton.isPressed())
 		{
-			cout << "Menu Button 2 was touched!!!" << endl;
-			BoostGauge.fade(100, 2000, "AAA");
-		}
-
-		menuButton3.update();
-		menuButton3.updateTouch(loopTouch);
-		if (menuButton3.isTouched())
-		{
-			cout << "Menu Button 3 was touched!!!" << endl;
-		}
-
-		menuButton4.update();
-		menuButton4.updateTouch(loopTouch);
-		if (menuButton4.isTouched())
-		{
-			cout << "Menu Button 4 was touched!!!" << endl;
+			cout << "Exit Button was pressed!!!" << endl;
 		}
 
 		textView1.update();
@@ -236,31 +225,31 @@ int main()
 			cout << "Text View 1 was touched!!!" << endl;
 		}
 
+		/*
 		if (menuControlButton.isPressed())
 		{
 			cout << "Exit Button was touched!!!" << endl;
 			if(!menuHidden)
 			{
-				menuButton1.move(mbPadding+mbWidth/2,0-mbHeight/2+mbPeek, 600, "AAA");
-				menuButton1.fade(60,600,"AAA");
-				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
+				
+				menuButton2.move(0, -50, 600, "AAA");
 				menuButton2.fade(60,600,"AAA");
-				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
+				menuButton3.move(0, -50, 600, "AAA");
 				menuButton3.fade(60,600,"AAA");
-				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, 0-mbHeight/2+mbPeek, 600, "AAA");
+				menuButton4.move(0, -50, 600, "AAA");
 				menuButton4.fade(60,600,"AAA");
 				menuHidden = true;
 
 			}
 			else
 			{
-				menuButton1.move(mbPadding+mbWidth/2,mbPadding+mbHeight/2, 600, "AAA");
+				menuButton1.move(0, 50, 600, "AAA");
 				menuButton1.fade(0,600,"AAA");
-				menuButton2.move(mbWidth+2*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
+				menuButton2.move(0, 50, 600, "AAA");
 				menuButton2.fade(0,600,"AAA");
-				menuButton3.move(2*mbWidth+3*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
+				menuButton3.move(0, 50, 600, "AAA");
 				menuButton3.fade(0,600,"AAA");
-				menuButton4.move(3*mbWidth+4*mbPadding+mbWidth/2, mbPadding+mbHeight/2, 600, "AAA");
+				menuButton4.move(0, 50, 600, "AAA");
 				menuButton4.fade(0,600,"AAA");
 				menuHidden = false;
 
@@ -268,6 +257,7 @@ int main()
 		}
 		if(menuHidden) menuControlButton.setText(showText);
 		else menuControlButton.setText(hideText);
+		*/
 		End();
 	}
 }

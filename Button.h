@@ -13,6 +13,7 @@ class Button : public TouchableObject
 private:
 
 	string buttonIdentifier;
+	bool givenSizeAndLocation;
 
 	// Size & location related properties
 	int readoutWidth, readoutHeight;		// Size of entire readout, including border stroke
@@ -64,7 +65,8 @@ private:
 	void configure(string);
 
 public:
-	Button(int, int, int, int, string);				// Button constructor: center X, center Y, width, height
+	Button(string);							// Button constructor: load size and location from config file
+	Button(int, int, int, int, string);		// Button constructor: takes size and location, config string
 	
 	void setBackgroundColor(float*);		// Set background color
 	void setBorder(float*, int);			// Set border color, border width
@@ -84,6 +86,7 @@ public:
 	void setValueDecPlaces(int);			// Set value number of decimal places
 	void setValue(float); 
 	void setValueRefreshRate(int);			// Set desired refresh frequency (Hz) 
+	string getIdentifier(void);
 };
 
 #endif

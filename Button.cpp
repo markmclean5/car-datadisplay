@@ -20,15 +20,11 @@ using namespace config4cpp;
 
 string valueString = "";
 
-/* Button Constructor */
-Button::Button(int cx, int cy, int w, int h, string identifier) {
+/* Button Constructor: load size and location from config file*/
+Button::Button(string identifier) {
+	givenSizeAndLocation = false;
 	buttonIdentifier = identifier;
 	lastUpdateTime = 0;
-	
-	centerX = cx;
-	centerY = cy;
-	readoutWidth = w;
-	readoutHeight = h;
 	valueColor = new float[4]{0,1,0,1};
 	valueColorAlpha = valueColor[3];
 	textColor = new float[4]{0,1,0,1};
@@ -36,11 +32,34 @@ Button::Button(int cx, int cy, int w, int h, string identifier) {
 	containsText = false;
 	containsValue = false;
 	cornerRadius = 0;
+	configure(buttonIdentifier);
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
-	configure(buttonIdentifier);
 }
+
+/* Button Constructor: load size and location from config file*/
+Button::Button(int cX, int cY, int w, int h, string identifier) {
+	givenSizeAndLocation = true;
+	centerX = cX;
+	centerY = cY;
+	readoutWidth = w;
+	readoutHeight = h;
+	buttonIdentifier = identifier;
+	lastUpdateTime = 0;
+	valueColor = new float[4]{0,1,0,1};
+	valueColorAlpha = valueColor[3];
+	textColor = new float[4]{0,1,0,1};
+	textColorAlpha = textColor[3];
+	containsText = false;
+	containsValue = false;
+	cornerRadius = 0;
+	configure(buttonIdentifier);
+	setRectangular();
+	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
+	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+}
+
 
 /* Button configure method */
 void Button::configure(string ident) {
@@ -49,6 +68,12 @@ void Button::configure(string ident) {
 	try {
 		cfg->parse("testConfig");
 		string buttonName = ident;
+		if(!givenSizeAndLocation){
+			readoutWidth = parseInt(cfg, buttonName, "width");
+			readoutHeight = parseInt(cfg, buttonName, "height");
+			centerX = parseInt(cfg, buttonName, "centerX");
+			centerY = parseInt(cfg, buttonName, "centerY");
+		}
 		cornerRadius = parseInt(cfg, buttonName, "cornerRadius");
 		borderWidth = parseInt(cfg, buttonName, "borderWidth");
 		rectHeight = readoutHeight-borderWidth;
@@ -58,6 +83,7 @@ void Button::configure(string ident) {
 		parseColor(cfg, buttonName, borderColor, "borderColor");
 		parseColor(cfg, buttonName, backgroundColor, "backgroundColor");
 		borderColorAlpha = borderColor[3];
+		backgroundColorAlpha = backgroundColor[3];
 		containsText = parseBool(cfg, buttonName, "enableText");
 		if(containsText) {
 			string textAlign = parseString(cfg, buttonName, "textAlign");
@@ -228,4 +254,8 @@ void Button::setValue(float val) {						// Set readout label
 		valueFontSize--;
 		valueWidth = TextWidth((char*)valueString.c_str(), SansTypeface, valueFontSize);
 	}	
+}
+
+string Button::getIdentifier(void) {
+	return buttonIdentifier;
 }

@@ -24,13 +24,28 @@ void TouchableObject::fade(int finalPercentage, int duration, string type){
 	}
 }
 
-/* Move method - move from current position to new position in given duration using move style */
-void TouchableObject::move(int finalX, int finalY, int dur, string type) {
+/* Move To method - move from current position to new position in given duration using move style */
+void TouchableObject::moveTo(int finalX, int finalY, int dur, string type) {
 	if(finalX != finalPosX || finalY != finalPosY) {
 		moveStartX = cX;
 		moveStartY = cY;	
 		finalPosX = finalX;
 		finalPosY = finalY;
+		moveStartTime = bcm2835_st_read();
+		moveDuration = dur;
+		motionType.assign(type);
+		moving = false;
+	}
+	else cout << "Move called which is already in progress" << endl;
+}
+
+/* Move method - move from current position to new position in given duration using move style */
+void TouchableObject::move(int deltaX, int deltaY, int dur, string type) {
+	if(moveStartX + deltaX != finalPosX || moveStartY + deltaY != finalPosY) {
+		moveStartX = cX;
+		moveStartY = cY;	
+		finalPosX = cX + deltaX;
+		finalPosY = cY + deltaY;
 		moveStartTime = bcm2835_st_read();
 		moveDuration = dur;
 		motionType.assign(type);
