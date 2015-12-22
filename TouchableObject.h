@@ -39,15 +39,21 @@ private:
 	/* Touch processing properties */
 	bool touchEnabled;	// Enables touch processing
 	bool touched;		// Current touch state
+	bool touchedOutside;// Current touch does not fall within object
 
 	/* Press processing properties */
 	bool pressDebounceEnabled;
 	uint64_t pressStartTime;
-	uint64_t debounceFinishTime;
+	uint64_t pressOutsideStartTime;
+	uint64_t pressDebounceFinishTime;
+	uint64_t pressOutsideDebounceFinishTime;
 	int debounceDuration;
 	bool pressed;
+	bool pressedOutside;
 	bool pressRead;
-	bool inDebounce;
+	bool pressOutsideRead;
+	bool inPressDebounce;
+	bool inPressOutsideDebounce;
 
 	/* Visibility properties */
 	bool visible;		// Current visibility state
@@ -123,7 +129,9 @@ public:
 	void updateVisuals(void);			// Called to update object visuals (handles moves and fades)
 	bool isMoving(void);				// Called to determine if an object is in motion
 
-	void move(int, int, int, string);	// Moves object (new X, new Y, duration (milliseconds), motion type string)
+	void moveTo(int, int, int, string);	// Moves object to (new X, new Y, duration (milliseconds), motion type string)
+	void move(int, int, int, string);	// Moves object (delta X, delta Y, duration (milliseconds), motion type string)
+
 	void fade(int, int, string);		// Fades object (final desired fade percentage, duration (milliseconds), fade type string)
 	void moveOffRight(void);			// Moves object off of the screen to the right
 	void moveOnRight(void);				// Moves object back onto the screen to its previous position from the right
@@ -143,6 +151,9 @@ public:
 
 	void setPressDebounce(int);
 	bool isPressed(void);
+
+	bool isTouchedOutside(void);
+	bool isPressedOutside(void);
 
 };
 
