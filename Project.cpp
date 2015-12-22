@@ -209,12 +209,15 @@ int main()
 				objects.erase(objects.end());
 				menu[findMenuButton("MenuButton1")].setText("Add");
 			}
+<<<<<<< HEAD
 		}
 
 		if(menu[findMenuButton("MenuButton2")].isPressed())
 		{
 			textView1.addNewLine("New Line #" + std::to_string(lineNumber));
 			lineNumber++;
+=======
+>>>>>>> origin/master
 		}
 
 		exitButton.update();
@@ -231,6 +234,7 @@ int main()
 			cout << "Text View 1 was touched!!!" << endl;
 		}
 
+<<<<<<< HEAD
 		
 		if (menuControlButton.isPressed()) {
 			if(!menuHidden)	{
@@ -238,13 +242,41 @@ int main()
 					menu[i].move(0, -50, 600, "AAA");
 					menu[i].fade(60,600,"AAA");
 				}
+=======
+		/*
+		if (menuControlButton.isPressed())
+		{
+			cout << "Exit Button was touched!!!" << endl;
+			if(!menuHidden)
+			{
+				
+				menuButton2.move(0, -50, 600, "AAA");
+				menuButton2.fade(60,600,"AAA");
+				menuButton3.move(0, -50, 600, "AAA");
+				menuButton3.fade(60,600,"AAA");
+				menuButton4.move(0, -50, 600, "AAA");
+				menuButton4.fade(60,600,"AAA");
+>>>>>>> origin/master
 				menuHidden = true;
 			}
+<<<<<<< HEAD
 			else {
 				for(int i = 0; i<menu.size(); i++) {
 					menu[i].move(0, 50, 600, "AAA");
 					menu[i].fade(0,600,"AAA");
 				}
+=======
+			else
+			{
+				menuButton1.move(0, 50, 600, "AAA");
+				menuButton1.fade(0,600,"AAA");
+				menuButton2.move(0, 50, 600, "AAA");
+				menuButton2.fade(0,600,"AAA");
+				menuButton3.move(0, 50, 600, "AAA");
+				menuButton3.fade(0,600,"AAA");
+				menuButton4.move(0, 50, 600, "AAA");
+				menuButton4.fade(0,600,"AAA");
+>>>>>>> origin/master
 				menuHidden = false;
 			}
 		}
@@ -254,6 +286,7 @@ int main()
 
 		if(menuHidden) menuControlButton.setText(showText);
 		else menuControlButton.setText(hideText);
+<<<<<<< HEAD
 
 		if(menu[findMenuButton("MenuButton3")].isPressed())
 		{
@@ -266,6 +299,9 @@ int main()
 			lineNumber++;
 		}
 
+=======
+		*/
+>>>>>>> origin/master
 		End();
 	}
 }

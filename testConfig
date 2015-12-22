@@ -86,7 +86,11 @@ MenuButton2 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
+<<<<<<< HEAD
 	defaultText = "Def. Line";
+=======
+	defaultText = "Add Line";
+>>>>>>> origin/master
 	pressDebounce = "100";
 }
 
