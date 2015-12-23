@@ -39,15 +39,21 @@ private:
 	/* Touch processing properties */
 	bool touchEnabled;	// Enables touch processing
 	bool touched;		// Current touch state
+	bool touchedOutside;// Current touch does not fall within object
 
 	/* Press processing properties */
 	bool pressDebounceEnabled;
 	uint64_t pressStartTime;
-	uint64_t debounceFinishTime;
+	uint64_t pressOutsideStartTime;
+	uint64_t pressDebounceFinishTime;
+	uint64_t pressOutsideDebounceFinishTime;
 	int debounceDuration;
 	bool pressed;
+	bool pressedOutside;
 	bool pressRead;
-	bool inDebounce;
+	bool pressOutsideRead;
+	bool inPressDebounce;
+	bool inPressOutsideDebounce;
 
 	/* Visibility properties */
 	bool visible;		// Current visibility state
@@ -145,6 +151,9 @@ public:
 
 	void setPressDebounce(int);
 	bool isPressed(void);
+
+	bool isTouchedOutside(void);
+	bool isPressedOutside(void);
 
 };
 

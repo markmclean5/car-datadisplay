@@ -8,6 +8,9 @@ private:
 	// Gauge itself
 	VGImage GaugeBuffer;
 
+	string gaugeIdentifier;
+	string gaugeGroup;
+
 	int centerX;
 	int centerY;
 	int radius;
@@ -70,8 +73,6 @@ public:
 	void setLabelDecPlaces(int, int);			// Set label # of dec places 	(# of decimal places, range #)
 	void setLabelFont(Fontinfo, int);			// Set label font				(font)
 
-
-
 	void setReadoutColor(float*);				// Set readout color 			(rgba)
 	void setReadoutDigits(int);					// Set readout # digits 		(# digits)
 	void setReadoutDecPlaces(int);				// Set readout # dec places 	(# of decimal places)
@@ -79,12 +80,13 @@ public:
 	void setReadoutRadius(float);				// Set readout radius 			(readout center radius)
 	void setReadoutFont(Fontinfo);				// Set label font 				(font)
 
-
 	void configure(string);						// Auto configure using configGauges file
-	// Update function
-	// (Call after setting all of the above!)
+	
+	// Update function (Call after setting all of the above!)
 	void update(float, std::string);			// Update gauge with value		(value, engineering units string)
 
+	string getIdentifier(void);
+	string getGroup(void);
 private:
 	// Internally accessed methods (called within draw / update functions)
 	void drawTickSet(float, float, float, float, float*, bool);			// Draw tick set(s): 
@@ -109,6 +111,9 @@ private:
 
 	float degToRad(float);						// Degrees to radians			(degrees)
 	void processConfigLine(string, int);
+
+
+
 
 };
 

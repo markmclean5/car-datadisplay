@@ -12,7 +12,9 @@ class Button : public TouchableObject
 {
 private:
 
-	string buttonIdentifier;
+	string buttonIdentifier;				// Button identifier string
+	string buttonGroup;						// Button group identifier string
+
 	bool givenSizeAndLocation;
 
 	// Size & location related properties
@@ -87,6 +89,7 @@ public:
 	void setValue(float); 
 	void setValueRefreshRate(int);			// Set desired refresh frequency (Hz) 
 	string getIdentifier(void);
+	string getGroup(void);
 };
 
 #endif

@@ -31,11 +31,14 @@ private:
 	float textColorAlpha;
 	int currentLine;
 
+	float** lineColors;
+
 public:
 	TextView(int, int, int, int, string);		// TextView Constructor: center X, center Y, width, height, identifier
 	void configure(string);
 	void update();
 	void addNewLine(string);
+	void addNewLine(string, float*);
 	void clearLastLine(void);
 	void clear(void);
 };

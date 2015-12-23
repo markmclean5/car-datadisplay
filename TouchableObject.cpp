@@ -98,18 +98,28 @@ void TouchableObject::updateTouch(touch_t touchStruct) {
 				int yMax = cY + rH/2;
 				if(touchStruct.abs_x >= xMin && touchStruct.abs_x <= xMax) {
 					if(touchStruct.abs_y >= yMin && touchStruct.abs_y <= yMax) touched = true;		
-					else touched = false;
+					else {
+						touched = false;
+						touchedOutside = true;
+					}
 				}
+				else touchedOutside = true;
 			}
 			else {					// Figure out if touch falls within circle bounds
 				float deltaX = touchStruct.abs_x - cX;
 				float deltaY = touchStruct.abs_y - cY;
 				float touchDist = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
 				if (touchDist <= cRad) touched = true;
-				else touched = false;
+				else {
+					touched = false;
+					touchedOutside = true;
+				}
 			}
 		}
-		else touched = false;
+		else {
+			touched = false;
+			touchedOutside = false;
+		}
 	}
 	pressProcessing();
 }
@@ -117,22 +127,42 @@ void TouchableObject::updateTouch(touch_t touchStruct) {
 void TouchableObject::pressProcessing(void) {
 	uint64_t currentTime = bcm2835_st_read();
 	// Start a press if the button is touched and not being maintained for debounce duration
-	if(!pressed && isTouched() && !inDebounce) {
-		inDebounce = true;
+	if(!pressed && isTouched() && !inPressDebounce) {
+		inPressDebounce = true;
 		pressed = true;
 		pressRead = false;
 		pressStartTime = bcm2835_st_read();
-		debounceFinishTime = pressStartTime + 1000*debounceDuration;
+		pressDebounceFinishTime = pressStartTime + 1000*debounceDuration;
 	}
 	// Finish a press if debounce duration is reached
-	if(inDebounce && (currentTime >= debounceFinishTime)) {
+	if(inPressDebounce && (currentTime >= pressDebounceFinishTime)) {
 		pressed = false;
-		inDebounce = false;
+		inPressDebounce = false;
 	}
 	// Finish a press once the press has been read
 	if(pressed && pressRead) {
 		pressed = false;
 	}
+
+	// Press outside processing
+	if(!pressedOutside && isTouchedOutside() && !inPressOutsideDebounce) {
+		inPressOutsideDebounce = true;
+		pressedOutside = true;
+		pressOutsideRead = false;
+		pressOutsideStartTime = bcm2835_st_read();
+		pressOutsideDebounceFinishTime = pressOutsideStartTime + 1000*debounceDuration;
+	}
+	// Finish a press outside if debounce duration is reached
+	if(inPressOutsideDebounce && (currentTime >= pressOutsideDebounceFinishTime)) {
+		pressedOutside = false;
+		inPressOutsideDebounce = false;
+	}
+
+	// Finish a press once the press has been read
+	if(pressedOutside && pressOutsideRead) {
+		pressedOutside = false;
+	}
+
 }
 
 /* TouchableObject Setters */
@@ -143,6 +173,16 @@ bool TouchableObject::isPressed(void) {
 	if(pressed) pressRead = true;
 	return pressed;
 }
+
+bool TouchableObject::isPressedOutside(void) {
+	if(pressedOutside) pressOutsideRead = true;
+	return pressedOutside;
+}
+
+bool TouchableObject::isTouchedOutside(void) {
+	return touchedOutside;
+}
+
 bool TouchableObject::isMoving(void) {
 	return moving;
 }
@@ -170,13 +210,16 @@ TouchableObject::TouchableObject(void) {
 	visible = false;
 	lpVisible = false;
 	touched = false;
+	touchedOutside = false;
 	finalPosX = -1;
 	finalPosY = -1;
 	movingOffRight = false;
 	movingOnRight = false;
 	pressed = false;
+	pressedOutside = false;
 	debounceDuration = 0;
-	inDebounce = false;
+	inPressDebounce = false;
+	inPressOutsideDebounce = false;
 	fadePercentage = 0;
 	finalFadePercentage = 0;
 }

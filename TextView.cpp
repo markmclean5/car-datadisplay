@@ -46,15 +46,21 @@ void TextView::configure(string ident) {
 		numLines = parseInt(cfg, textViewName, "numLines");
 		if(numLines==0) numLines = 1;
 		textViewData = new string[numLines];
+
+		parseColor(cfg, textViewName, textColor, "textColor");
+		textColorAlpha = textColor[3];
+		lineColors = new float*[numLines];
+		for(int i = 0; i<numLines; i++) {
+			lineColors[i] = new float[4];
+			lineColors[i] = textColor;
+		}
 		fontSize = rectHeight/(numLines+2);
-		// Check to see if padding is fixed
 		textPadding = (2*(rectHeight/numLines))/(numLines);
 		parseColor(cfg, textViewName, borderColor, "borderColor");
 		borderColorAlpha = borderColor[3];
 		parseColor(cfg, textViewName, backgroundColor, "backgroundColor");
 		backgroundColorAlpha = backgroundColor[3];
-		parseColor(cfg, textViewName, textColor, "textColor");
-		textColorAlpha = textColor[3];
+		
 		setPressDebounce(parseInt(cfg, textViewName, "pressDebounce"));
 	}catch(const ConfigurationException & ex) {
 		cout << ex.c_str() << endl;
@@ -88,23 +94,53 @@ void TextView::update(void) {
 		Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
 	}
 	int idx = 0;
-	setfill(textColor);
 	for(;idx<currentLine;idx++) {
+		setfill(lineColors[idx]);
 		Text(bottomLeftX + cornerRadius, bottomLeftY+rectHeight-(idx+1)*fontSize - (idx+1)*textPadding, (char*)textViewData[idx].c_str(), SansTypeface, fontSize);
 	}	
 }
 
 void TextView::addNewLine (string line) {
 	if(currentLine <= numLines-1){
-	textViewData[currentLine].assign(line);
+		textViewData[currentLine].assign(line);
+		lineColors[currentLine] = textColor;
 	}
 	else {
 		int idx = 0;
 		for(;idx<numLines-1;idx++)
 		{
 			textViewData[idx].assign(textViewData[idx+1]);
+			lineColors[idx] = lineColors[idx+1];
 		}
 		textViewData[currentLine-1].assign(line);
+		lineColors[currentLine-1] = textColor;
+	}
+	if(currentLine <= numLines-1)
+		currentLine++;
+}
+
+void TextView::clear(void)
+{
+	for(int line=0; line<numLines; line++) {
+		textViewData[line].clear();
+		currentLine = 0;
+	}
+}
+
+void TextView::addNewLine (string line, float* color) {
+	if(currentLine <= numLines-1){
+		textViewData[currentLine].assign(line);
+		lineColors[currentLine] = color;
+	}
+	else {
+		int idx = 0;
+		for(;idx<numLines-1;idx++)
+		{
+			textViewData[idx].assign(textViewData[idx+1]);
+			lineColors[idx] = lineColors[idx+1];
+		}
+		textViewData[currentLine-1].assign(line);
+		lineColors[currentLine-1] = color;
 	}
 	if(currentLine <= numLines-1)
 		currentLine++;

@@ -10,6 +10,7 @@ TextView1 {
 
 
 FramerateButton {
+	buttonGroup = "development";
 	width = "100";
 	height = "50";
 	centerX = "630";
@@ -30,39 +31,13 @@ FramerateButton {
 	pressDebounce = "500";
 }
 
-ExitButton {
-	cornerRadius = "10";
-	borderWidth = "1";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
-	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-	enableText = "true";
-	textAlign = "C";
-	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "X";
-	pressDebounce = "500";
-}	
-
-MenuControlButton {
-	width = "100";
-	height = "50";
-	centerX = "740";
-	centerY = "35";
-	cornerRadius = "20";
-	borderWidth = "1";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
-	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-	enableText = "true";
-	textAlign = "C";
-	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "HIDE";
-	pressDebounce = "500";
-}	
 
 MenuButton1 {
+	buttonGroup = "DataDisplayHomeMenu";
 	width = "100";
 	height = "50";
 	centerX = "60";
-	centerY = "35";
+	centerY = "-15";
 	cornerRadius = "20";
 	borderWidth = "1";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -71,14 +46,15 @@ MenuButton1 {
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
 	defaultText = "Add";
-	pressDebounce = "1000";
+	pressDebounce = "500";
 }
 
 MenuButton2 {
+	buttonGroup = "DataDisplayHomeMenu";
 	width = "100";
 	height = "50";
 	centerX = "170";
-	centerY = "35";
+	centerY = "-15";
 	cornerRadius = "20";
 	borderWidth = "1";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -86,15 +62,16 @@ MenuButton2 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Add Line";
-	pressDebounce = "100";
+	defaultText = "Def. Line";
+	pressDebounce = "500";
 }
 
 MenuButton3 {
+	buttonGroup = "DataDisplayHomeMenu";
 	width = "100";
 	height = "50";
 	centerX = "280";
-	centerY = "35";
+	centerY = "-15";
 	cornerRadius = "20";
 	borderWidth = "1";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -102,15 +79,16 @@ MenuButton3 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Menu 3";
+	defaultText = "Clear";
 	pressDebounce = "500";
 }
 
 MenuButton4 {
+	buttonGroup = "DataDisplayHomeMenu";
 	width = "100";
 	height = "50";
 	centerX = "390";
-	centerY = "35";
+	centerY = "-15";
 	cornerRadius = "20";
 	borderWidth = "1";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -118,16 +96,17 @@ MenuButton4 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Menu 4";
+	defaultText = "Blue Line";
 	pressDebounce = "500";
 }
 
 BoostGauge {
-	
+	gaugeGroup = "gauges";
 	numRanges = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
 	backgroundColor = ["0.0", "0.0", "0.0", "0.5"];
 	needleColor = ["1.0", "0.0", "0.0", "1.0"];
+	pressDebounce = "500";
 	range1 {
 		engUnits = "PSI";
 		dataRangeStart	=	"0";
@@ -164,4 +143,53 @@ BoostGauge {
 		minorTickColor = ["1.0", "1.0", "1.0", "1.0"];
 		labelColor = ["1.0", "0.0", "0.0", "1.0"];
 	};
+};
+
+
+Mode1Menu {
+	numButtons = "3";
+	buttonPadding = "10";
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	pressDebounce = "500";
+	isHorizontal = "true";
+	button1 {
+		buttonGroup = "DataDisplayHomeMenu";
+		cornerRadius = "20";
+		borderWidth = "1";
+		borderColor = ["1.0", "1.0", "1.0", "1.0"];
+		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+		enableText = "true";
+		textAlign = "C";
+		textColor = ["1.0", "1.0", "1.0", "1.0"];
+		defaultText = "B1";
+		pressDebounce = "500";
+	};
+	button2 {
+		buttonGroup = "DataDisplayHomeMenu";
+		cornerRadius = "20";
+		borderWidth = "1";
+		borderColor = ["1.0", "1.0", "1.0", "1.0"];
+		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+		enableText = "true";
+		textAlign = "C";
+		textColor = ["1.0", "1.0", "1.0", "1.0"];
+		defaultText = "B2";
+		pressDebounce = "500";
+	};
+	button3 {
+		buttonGroup = "DataDisplayHomeMenu";
+		cornerRadius = "20";
+		borderWidth = "1";
+		borderColor = ["1.0", "1.0", "1.0", "1.0"];
+		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+		enableText = "true";
+		textAlign = "C";
+		textColor = ["1.0", "1.0", "1.0", "1.0"];
+		defaultText = "B3";
+		pressDebounce = "500";
+	};
+	
 };

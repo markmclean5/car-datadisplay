@@ -22,8 +22,8 @@ string valueString = "";
 
 /* Button Constructor: load size and location from config file*/
 Button::Button(string identifier) {
-	givenSizeAndLocation = false;
 	buttonIdentifier = identifier;
+	givenSizeAndLocation = false;
 	lastUpdateTime = 0;
 	valueColor = new float[4]{0,1,0,1};
 	valueColorAlpha = valueColor[3];
@@ -40,12 +40,12 @@ Button::Button(string identifier) {
 
 /* Button Constructor: load size and location from config file*/
 Button::Button(int cX, int cY, int w, int h, string identifier) {
+	buttonIdentifier = identifier;
 	givenSizeAndLocation = true;
 	centerX = cX;
 	centerY = cY;
 	readoutWidth = w;
 	readoutHeight = h;
-	buttonIdentifier = identifier;
 	lastUpdateTime = 0;
 	valueColor = new float[4]{0,1,0,1};
 	valueColorAlpha = valueColor[3];
@@ -74,6 +74,7 @@ void Button::configure(string ident) {
 			centerX = parseInt(cfg, buttonName, "centerX");
 			centerY = parseInt(cfg, buttonName, "centerY");
 		}
+		buttonGroup = parseString(cfg, buttonName, "buttonGroup");
 		cornerRadius = parseInt(cfg, buttonName, "cornerRadius");
 		borderWidth = parseInt(cfg, buttonName, "borderWidth");
 		rectHeight = readoutHeight-borderWidth;
@@ -258,4 +259,8 @@ void Button::setValue(float val) {						// Set readout label
 
 string Button::getIdentifier(void) {
 	return buttonIdentifier;
+}
+
+string Button::getGroup(void) {
+	return buttonGroup;
 }

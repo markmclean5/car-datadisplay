@@ -24,10 +24,9 @@ using namespace config4cpp;
 
 Fontinfo avengeanceG;
 
-void Gauge::configure(string gaugeType) {
+void Gauge::configure(string ident) {
 	setlocale(LC_ALL, "");
-	char * scope = "BoostGauge";
-
+	gaugeIdentifier = ident;
 	Configuration * cfg = Configuration::create();
 
 	avengeanceG = loadfont(avengeance_glyphPoints, 
@@ -41,16 +40,16 @@ void Gauge::configure(string gaugeType) {
 
 	try {
 		cfg->parse("testConfig");
-		string gaugeName = "BoostGauge";
-
 		// Gauge attributes
-		numRanges = parseInt(cfg, gaugeName, "numRanges");
-		EngUnits = new std::string[numRanges];
-		parseColor(cfg, gaugeName, borderColor, "borderColor");
-		parseColor(cfg, gaugeName, backgroundColor, "backgroundColor");
-		parseColor(cfg, gaugeName, needleColor, "needleColor");
+		gaugeGroup = parseString(cfg, gaugeIdentifier, "gaugeGroup");
+		numRanges = parseInt(cfg, gaugeIdentifier, "numRanges");
+		parseColor(cfg, gaugeIdentifier, borderColor, "borderColor");
+		parseColor(cfg, gaugeIdentifier, backgroundColor, "backgroundColor");
+		parseColor(cfg, gaugeIdentifier, needleColor, "needleColor");
+		setPressDebounce(parseInt(cfg, gaugeIdentifier, "pressDebounce"));
 
 		if(numRanges==0) numRanges=1;
+		EngUnits = new std::string[numRanges];
 		startVal = new float[numRanges];
 		stopVal = new float[numRanges];
 		startAng = new float[numRanges];
@@ -78,23 +77,22 @@ void Gauge::configure(string gaugeType) {
 			labelColor[currentRange-1] = new float[4];
 			string currentRangeScope = rangeScope + to_string(currentRange);
 			int prefixSize = currentRangeScope.length();
-			string scope2 = scope;
-			EngUnits[currentRange-1] = parseString(cfg, scope2, currentRangeScope, ".engUnits");
-			majorInt[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".majorTickInterval");
-			minorInt[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".minorTickInterval");
-			startVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".dataRangeStart");
-			stopVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".dataRangeStop");			
-			startAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".angleRangeStart");
-			stopAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".angleRangeStop");
-			labelStartVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelValueStart");
-			labelStopVal[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelValueStop");
-			labelStartAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelAngleStart");
-			labelStopAng[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelAngleStop");
-			labelIncrement[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelIncrement");
-			labelDecPlaces[currentRange-1] = parseFloat(cfg, scope2, currentRangeScope, ".labelDecPlaces");
-			parseColor(cfg, scope2, currentRangeScope, majorTickColor[currentRange-1], ".majorTickColor");
-			parseColor(cfg, scope2, currentRangeScope, minorTickColor[currentRange-1], ".minorTickColor");
-			parseColor(cfg, scope2, currentRangeScope, labelColor[currentRange-1], ".labelColor");
+			EngUnits[currentRange-1] = parseString(cfg, gaugeIdentifier, currentRangeScope, ".engUnits");
+			majorInt[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".majorTickInterval");
+			minorInt[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".minorTickInterval");
+			startVal[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".dataRangeStart");
+			stopVal[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".dataRangeStop");			
+			startAng[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".angleRangeStart");
+			stopAng[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".angleRangeStop");
+			labelStartVal[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".labelValueStart");
+			labelStopVal[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".labelValueStop");
+			labelStartAng[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".labelAngleStart");
+			labelStopAng[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".labelAngleStop");
+			labelIncrement[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".labelIncrement");
+			labelDecPlaces[currentRange-1] = parseFloat(cfg, gaugeIdentifier, currentRangeScope, ".labelDecPlaces");
+			parseColor(cfg, gaugeIdentifier, currentRangeScope, majorTickColor[currentRange-1], ".majorTickColor");
+			parseColor(cfg, gaugeIdentifier, currentRangeScope, minorTickColor[currentRange-1], ".minorTickColor");
+			parseColor(cfg, gaugeIdentifier, currentRangeScope, labelColor[currentRange-1], ".labelColor");
 			labelFont[currentRange-1] = avengeanceG;
 		}
 	} catch(const ConfigurationException & ex) {
@@ -420,4 +418,11 @@ float Gauge::degToRad(float degrees)
 {
 	float radians = (3.14159*degrees)/180.;
 	return radians;
+}
+
+string Gauge::getIdentifier(void) {
+	return gaugeIdentifier;
+}
+string Gauge::getGroup(void) {
+	return gaugeGroup;
 }
