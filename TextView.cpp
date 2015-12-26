@@ -55,10 +55,6 @@ void TextView::configure(string ident) {
 			lineColors[i] = textColor;
 		}
 		fontSize = rectHeight/(numLines+2);
-<<<<<<< HEAD
-=======
-		// Check to see if padding is fixed
->>>>>>> origin/master
 		textPadding = (2*(rectHeight/numLines))/(numLines);
 		parseColor(cfg, textViewName, borderColor, "borderColor");
 		borderColorAlpha = borderColor[3];
@@ -106,27 +102,18 @@ void TextView::update(void) {
 
 void TextView::addNewLine (string line) {
 	if(currentLine <= numLines-1){
-<<<<<<< HEAD
 		textViewData[currentLine].assign(line);
 		lineColors[currentLine] = textColor;
-=======
-	textViewData[currentLine].assign(line);
->>>>>>> origin/master
 	}
 	else {
 		int idx = 0;
 		for(;idx<numLines-1;idx++)
 		{
 			textViewData[idx].assign(textViewData[idx+1]);
-<<<<<<< HEAD
 			lineColors[idx] = lineColors[idx+1];
 		}
 		textViewData[currentLine-1].assign(line);
 		lineColors[currentLine-1] = textColor;
-=======
-		}
-		textViewData[currentLine-1].assign(line);
->>>>>>> origin/master
 	}
 	if(currentLine <= numLines-1)
 		currentLine++;

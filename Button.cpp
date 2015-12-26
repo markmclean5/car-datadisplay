@@ -22,8 +22,8 @@ string valueString = "";
 
 /* Button Constructor: load size and location from config file*/
 Button::Button(string identifier) {
-	givenSizeAndLocation = false;
 	buttonIdentifier = identifier;
+	givenSizeAndLocation = false;
 	lastUpdateTime = 0;
 	valueColor = new float[4]{0,1,0,1};
 	valueColorAlpha = valueColor[3];
@@ -38,14 +38,14 @@ Button::Button(string identifier) {
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
 }
 
-/* Button Constructor: load size and location from config file*/
+/* Button Constructor: Use given location and size, load properties from config file*/
 Button::Button(int cX, int cY, int w, int h, string identifier) {
+	buttonIdentifier = identifier;
 	givenSizeAndLocation = true;
 	centerX = cX;
 	centerY = cY;
 	readoutWidth = w;
 	readoutHeight = h;
-	buttonIdentifier = identifier;
 	lastUpdateTime = 0;
 	valueColor = new float[4]{0,1,0,1};
 	valueColorAlpha = valueColor[3];
@@ -54,12 +54,36 @@ Button::Button(int cX, int cY, int w, int h, string identifier) {
 	containsText = false;
 	containsValue = false;
 	cornerRadius = 0;
+	selectable = false;
+	selected = false;
 	configure(buttonIdentifier);
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
 }
 
+/* Button Constructor: Use given location and size, call setters for everything else*/
+Button::Button(int cX, int cY, int w, int h) {
+	buttonIdentifier="";
+	givenSizeAndLocation = true;
+	centerX = cX;
+	centerY = cY;
+	readoutWidth = w;
+	readoutHeight = h;
+	lastUpdateTime = 0;
+	valueColor = new float[4]{0,1,0,1};
+	valueColorAlpha = valueColor[3];
+	textColor = new float[4]{0,1,0,1};
+	textColorAlpha = textColor[3];
+	containsText = false;
+	containsValue = false;
+	cornerRadius = 0;
+	selectable = false;
+	selected = false;
+	setRectangular();
+	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
+	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+}
 
 /* Button configure method */
 void Button::configure(string ident) {
@@ -74,6 +98,7 @@ void Button::configure(string ident) {
 			centerX = parseInt(cfg, buttonName, "centerX");
 			centerY = parseInt(cfg, buttonName, "centerY");
 		}
+		name = parseString(cfg, buttonName, "name");
 		cornerRadius = parseInt(cfg, buttonName, "cornerRadius");
 		borderWidth = parseInt(cfg, buttonName, "borderWidth");
 		rectHeight = readoutHeight-borderWidth;
@@ -100,16 +125,27 @@ void Button::configure(string ident) {
 			setValueDecPlaces(parseInt(cfg, buttonName, "valueDecPlaces"));
 		}
 
+		selectable = parseBool(cfg, buttonName, "selectable");
+		if(selectable) {
+			parseColor(cfg, buttonName, selectedBackgroundColor, "selectedBackgroundColor");
+			selectedBackgroundColorAlpha = selectedBackgroundColor[3];
+			parseColor(cfg, buttonName, selectedBorderColor, "selectedBorderColor");
+			selectedBorderColorAlpha = selectedBorderColor[3];
+			selectedBorderWidth = parseInt(cfg, buttonName, "selectedBorderWidth");
+			if(containsText) {
+				parseColor(cfg, buttonName, selectedTextColor, "selectedTextColor");
+				selectedTextColorAlpha = selectedTextColor[3];
+			}
+			if(containsValue) {
+				parseColor(cfg, buttonName, selectedValueColor, "selectedValueColor");
+				selectedValueColorAlpha = selectedValueColor[3];
+			}
+		}
 		setPressDebounce(parseInt(cfg, buttonName, "pressDebounce"));
 	}catch(const ConfigurationException & ex) {
 		cout << ex.c_str() << endl;
 	}
 	cfg->destroy();
-}
-
-/* Button draw */
-void Button::draw(void) {
-	update();
 }
 
 /* Button update */
@@ -125,21 +161,39 @@ void Button::update(void) {
 	// Handle fade:
 	if(getDesiredFadePercentage() != 0) {
 		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
-		backgroundColor[3] = backgroundColorAlpha * alphaScalar;
-		borderColor[3] = borderColorAlpha * alphaScalar;
-		textColor[3] = textColorAlpha * alphaScalar;
-		valueColor[3] = valueColorAlpha * alphaScalar;
+		if(selected){
+			selectedBackgroundColor[3] = selectedBackgroundColorAlpha * alphaScalar;
+			selectedBorderColor[3] = selectedBorderColorAlpha * alphaScalar;
+			selectedTextColor[3] = selectedTextColorAlpha * alphaScalar;
+			selectedValueColor[3] = selectedValueColorAlpha * alphaScalar;	
+		}
+		else {
+			backgroundColor[3] = backgroundColorAlpha * alphaScalar;
+			borderColor[3] = borderColorAlpha * alphaScalar;
+			textColor[3] = textColorAlpha * alphaScalar;
+			valueColor[3] = valueColorAlpha * alphaScalar;			
+		}
+
 	}
-	setfill(backgroundColor);
-	StrokeWidth(borderWidth);
-	setstroke(borderColor);
+	if(selected) {
+		setfill(selectedBackgroundColor);
+		StrokeWidth(selectedBorderWidth);
+		setstroke(selectedBorderColor);
+	}
+	else {
+		setfill(backgroundColor);
+		StrokeWidth(borderWidth);
+		setstroke(borderColor);
+	}
+	
 	if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
 	else {
 		float cornerHeight = 0.01 * cornerRadius * rectWidth;
 		Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
 	}
 	if(containsText) {
-		setfill(textColor);
+		if(selected) setfill(selectedTextColor);
+		else setfill(textColor);
 		StrokeWidth(0);
 		textFontSize = (rectHeight-borderWidth)/2;
 		int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
@@ -155,7 +209,8 @@ void Button::update(void) {
 			TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
 	}
 	if(containsValue) {
-		setfill(valueColor);
+		if(selected) setfill(selectedValueColor);
+		else setfill(valueColor);
 		if(valueVertAlign == 'T')
 			TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
 		if(valueVertAlign == 'C')
@@ -258,4 +313,65 @@ void Button::setValue(float val) {						// Set readout label
 
 string Button::getIdentifier(void) {
 	return buttonIdentifier;
+}
+
+void Button::setName(string name) {
+	buttonName = name;
+}
+
+string Button::getName(void) {
+	return buttonName;
+}
+
+void Button::select(void) {
+	if(selectable) {
+		selected = true;
+		rectHeight = readoutHeight-selectedBorderWidth;
+		rectWidth = readoutWidth - selectedBorderWidth;
+		bottomLeftX = centerX - (rectWidth+selectedBorderWidth/2) / 2;
+		bottomLeftY = centerY - (rectHeight+selectedBorderWidth/2) / 2;
+	}
+}
+
+void Button::deselect(void) {
+	selected = false;
+	rectHeight = readoutHeight-borderWidth;
+	rectWidth = readoutWidth - borderWidth;
+	bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
+	bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+}
+
+bool Button::isSelected(void) {
+	return selected;
+}
+
+void Button::setSelectedBorder(float color[4], int width) {
+	selectedBorderColor[0] = color[0];
+	selectedBorderColor[1] = color[1];
+	selectedBorderColor[2] = color[2];
+	selectedBorderColor[3] = color[3];
+	selectedBorderColorAlpha = selectedBorderColor[3];
+	selectedBorderWidth = width;
+}
+
+void Button::setSelectedBackgroundColor(float color[4]) {
+	selectedBackgroundColor[0] = color[0];
+	selectedBackgroundColor[1] = color[1];
+	selectedBackgroundColor[2] = color[2];
+	selectedBackgroundColor[3] = color[3];
+	selectedBackgroundColorAlpha = selectedBackgroundColor[3];
+}
+
+
+void Button::setSelectedTextColor(float color[4]) {
+	selectedTextColor[0] = color[0];
+	selectedTextColor[1] = color[1];
+	selectedTextColor[2] = color[2];
+	selectedTextColor[3] = color[3];
+	selectedTextColorAlpha = selectedTextColor[3];
+}
+
+
+void Button::setSelectable(void) {
+	selectable = true;
 }

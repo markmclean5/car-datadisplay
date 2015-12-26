@@ -20,6 +20,7 @@ using namespace std;
 #include "project.h"
 #include "Button.h"
 #include "TextView.h"
+#include "Menu.h"
 #include <vector>
 
 // Label and readout fonts, loop time
@@ -34,20 +35,8 @@ VGImage BackgroundImage;
 // Prototypes
 void setupGraphics(int*,int*);
 
-bool menuHidden = false;
-
 //Vector of diplay objects
-vector<Gauge> objects;
-vector<Button> menu;
-
-int findMenuButton(string ident) {
-	int idx = 0;
-	for(int i = 0; i<menu.size(); i++) {
-		if(ident.compare(menu[i].getIdentifier()) == 0)
-			idx =i;
-	}
-	return idx;
-}
+vector<TouchableObject> TObjects;
 
 // main()
 int main()
@@ -79,7 +68,7 @@ int main()
 		digits_characterMap, 
 		digits_glyphCount);
 	// Draw background
-	Image(0, 0, 800, 480, "background.jpg");
+	Image(0, 0, 800, 480, "wallpaper.jpg");
 	BackgroundImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
 	vgGetPixels(BackgroundImage, 0, 0, 0, 0, 800, 480);
 	DataStream BoostDataStream(2);
@@ -102,9 +91,6 @@ int main()
 	string eu2 = "inHg";
 	BoostDataStream.setEngUnits(eu2, 2);
 	// Color definitions (float r, float g, float b, float alpha)
-	float gaugeColor[] = {0,1,0,1};
-	float majorTickColor[] = {0,1,0,1};
-	float minorTickColor[] = {1,1,1,1};
 	float black[] = {0,0,0,1};
 	float green[] = {0,1,0,1};
 	float red[] = {1,0,0,1};
@@ -112,56 +98,19 @@ int main()
 	float white[] = {1,1,1,1};
 	float translucentBlack[] = {0,0,0,0.5};
 	float gray[] = {0.43,0.43,0.43,1};
-	// Create Boost gauge!!
-	Gauge BoostGauge(width/2,height/2,width/6, "Boost Gauge");
-	//BoostGauge.configure("Boost Gauge");
-	BoostGauge.touchEnable();
-	BoostGauge.draw();
-
-	// Menu Button style properties
-	int mbWidth = 100;
-	int mbHeight = 50;
-	int mbPadding = 10;
-	int mbPeek = 10;
 
 	// Button 1: Refresh rate button
-	Button button1("FramerateButton");
-	button1.touchEnable();
-	button1.draw();
-	// Menu control button
-	Button menuControlButton("MenuControlButton");
-	string hideText = "HIDE";
-	string showText = "MENU";
-	string defaultText = " ";
-	menuControlButton.draw();
-	menuControlButton.touchEnable();
-
-	
-
-	Button exitButton(width-35, height-35, 50, 50, "ExitButton");
-	exitButton.draw();
-	exitButton.touchEnable();
-
 	TextView textView1(width/6, height/2, width/3-15, width/3-15, "TextView1");
 	textView1.update();
 
-	int lineNumber = 1;
+	bool menuActive = false;
 
-	// Menu Buttons
-
-	menu.push_back(Button("MenuButton1"));
-	menu.push_back(Button("MenuButton2"));
-	menu.push_back(Button("MenuButton3"));
-	menu.push_back(Button("MenuButton4"));
-
-	for(int i = 0; i<menu.size(); i++) {
-		menu[i].touchEnable();
-	}
+	Menu Mode1Menu(width/2, height-40, width-20, 60, "Mode1Menu");
+	Mode1Menu.touchEnable();
+	Mode1Menu.selectButton("m1");
 
 
-
-	while(1)
-	{
+	while(1) {
 		loopTime = bcm2835_st_read();
 		char serialData[256];
 		readSerial(uart0_filestream, serialData);			// Capture serial data
@@ -169,146 +118,37 @@ int main()
 
 		// Grab touch data at the begining of each loop and 
 		loopTouch = threadTouch;
-
 		// Draw background image
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
-		
-		for(int i = 0; i < objects.size();i++) {
-			objects[i].update(BoostDataStream.getWeightedMADatum(), BoostDataStream.getEngUnits());
-			objects[i].updateTouch(loopTouch);
-		}
 
-		button1.setValue(BoostDataStream.getRawUpdateRate());
-		button1.update();
+		Mode1Menu.update(loopTouch);
 
-		button1.updateTouch(loopTouch);
-		if (button1.isTouched())
-		{
-			cout << "Button 1 was touched!!!" << endl;
-		}
+		if(Mode1Menu.isButtonPressed("m1")) Mode1Menu.selectButton("m1");
+		if(Mode1Menu.isButtonPressed("m2")) Mode1Menu.selectButton("m2");
+		if(Mode1Menu.isButtonPressed("m3")) Mode1Menu.selectButton("m3");
+		if(Mode1Menu.isButtonPressed("m4")) Mode1Menu.selectButton("m4");
+		if(Mode1Menu.isButtonPressed("m5")) Mode1Menu.selectButton("m5");
+		if(Mode1Menu.isButtonPressed("m6")) Mode1Menu.selectButton("m6");
 
-		menuControlButton.update();
-		menuControlButton.updateTouch(loopTouch);
-		
-		
-
-		for(int i = 0; i<menu.size(); i++) {
-			menu[i].update();
-			menu[i].updateTouch(loopTouch);
-		}
-
-		if(menu[findMenuButton("MenuButton1")].isPressed()) {
-			cout << "MenuButton1 was touched" << endl;
-			if(objects.size()==0) {
-				cout << "Creating Gauge!" << endl;
-				objects.push_back(Gauge(width/2,height/2,width/6, "Boost Gauge"));
-				objects[objects.size()-1].draw();
-				menu[findMenuButton("MenuButton1")].setText("Remove");
-			}
-			else {
-				objects.erase(objects.end());
-				menu[findMenuButton("MenuButton1")].setText("Add");
-			}
-<<<<<<< HEAD
-		}
-
-		if(menu[findMenuButton("MenuButton2")].isPressed())
-		{
-			textView1.addNewLine("New Line #" + std::to_string(lineNumber));
-			lineNumber++;
-=======
->>>>>>> origin/master
-		}
-
-		exitButton.update();
-		exitButton.updateTouch(loopTouch);
-		if (exitButton.isPressed())
-		{
-			cout << "Exit Button was pressed!!!" << endl;
-		}
-
-		textView1.update();
-		textView1.updateTouch(loopTouch);
-		if (textView1.isTouched())
-		{
-			cout << "Text View 1 was touched!!!" << endl;
-		}
-
-<<<<<<< HEAD
-		
-		if (menuControlButton.isPressed()) {
-			if(!menuHidden)	{
-				for(int i = 0; i<menu.size(); i++) {
-					menu[i].move(0, -50, 600, "AAA");
-					menu[i].fade(60,600,"AAA");
-				}
-=======
-		/*
-		if (menuControlButton.isPressed())
-		{
-			cout << "Exit Button was touched!!!" << endl;
-			if(!menuHidden)
+		if(!Mode1Menu.isHidden() && Mode1Menu.isPressedOutside())
 			{
-				
-				menuButton2.move(0, -50, 600, "AAA");
-				menuButton2.fade(60,600,"AAA");
-				menuButton3.move(0, -50, 600, "AAA");
-				menuButton3.fade(60,600,"AAA");
-				menuButton4.move(0, -50, 600, "AAA");
-				menuButton4.fade(60,600,"AAA");
->>>>>>> origin/master
-				menuHidden = true;
+				Mode1Menu.hide();
+				cout << "trying to hide menu" << endl;
 			}
-<<<<<<< HEAD
-			else {
-				for(int i = 0; i<menu.size(); i++) {
-					menu[i].move(0, 50, 600, "AAA");
-					menu[i].fade(0,600,"AAA");
-				}
-=======
-			else
+		else if(Mode1Menu.isHidden() && Mode1Menu.isPressedOutside())
 			{
-				menuButton1.move(0, 50, 600, "AAA");
-				menuButton1.fade(0,600,"AAA");
-				menuButton2.move(0, 50, 600, "AAA");
-				menuButton2.fade(0,600,"AAA");
-				menuButton3.move(0, 50, 600, "AAA");
-				menuButton3.fade(0,600,"AAA");
-				menuButton4.move(0, 50, 600, "AAA");
-				menuButton4.fade(0,600,"AAA");
->>>>>>> origin/master
-				menuHidden = false;
+				Mode1Menu.unhide();
+				cout << "trying to hide menu" << endl;
 			}
-		}
 
-		if(menuControlButton.isPressedOutside())
-			cout << "Somewhere other than the menu control button was pressed." << endl;
 
-		if(menuHidden) menuControlButton.setText(showText);
-		else menuControlButton.setText(hideText);
-<<<<<<< HEAD
 
-		if(menu[findMenuButton("MenuButton3")].isPressed())
-		{
-			textView1.clear();
-		}
-
-		if(menu[findMenuButton("MenuButton4")].isPressed())
-		{
-			textView1.addNewLine("New Blue Line #" + std::to_string(lineNumber), blue);
-			lineNumber++;
-		}
-
-=======
-		*/
->>>>>>> origin/master
 		End();
 	}
 }
 
 // setupGraphics()
-void setupGraphics(int* widthPtr, int* heightPtr)
-{	
+void setupGraphics(int* widthPtr, int* heightPtr) {	
 	init(widthPtr,heightPtr);
 	Start(*widthPtr, *heightPtr);		//Set up graphics, start picture
 	Background(0,0,0);

@@ -12,7 +12,9 @@ class Button : public TouchableObject
 {
 private:
 
-	string buttonIdentifier;
+	string buttonIdentifier;				// Button identifier string
+	string buttonName;
+	string name;
 	bool givenSizeAndLocation;
 
 	// Size & location related properties
@@ -26,16 +28,23 @@ private:
 	int desiredRefreshRate;
 	uint64_t lastUpdateTime;
 
-	// Graphics related properties
+	// Button visual properties
 	float backgroundColor[4];
 	float backgroundColorAlpha;
+	float selectedBackgroundColor[4];
+	float selectedBackgroundColorAlpha;
 	float borderColor[4];
 	float borderColorAlpha;
 	int borderWidth;
+	float selectedBorderColor[4];
+	float selectedBorderColorAlpha;
+	int selectedBorderWidth;
 
-	// Text properties
+	// Button text visual properties
 	float* textColor;
 	float textColorAlpha;
+	float selectedTextColor[4];
+	float selectedTextColorAlpha;
 	int textFontSize;
 	char textVertAlign;
 	string text;
@@ -44,6 +53,8 @@ private:
 	// Value properties
 	float* valueColor;
 	float valueColorAlpha;
+	float* selectedValueColor;
+	float selectedValueColorAlpha;
 	int valueFontSize;	
 	char valueVertAlign;
 	string formatSpecifierString;
@@ -51,42 +62,52 @@ private:
 	float value;
 	bool containsValue;
 
-
-	// Selection Properties
-	bool selectEnabled;
+	// Button selection properties
+	bool selectable;
 	bool selected;
-	float* selectedBackgroundColor;
-	float* selectedTextColor;
 
-	// Pressed Color Properties
-	bool pressedColorEnabled;
-	float* pressedBackgroundColor;
-	float* presssedTextColor;
+
+
+	
+
 	void configure(string);
 
 public:
 	Button(string);							// Button constructor: load size and location from config file
 	Button(int, int, int, int, string);		// Button constructor: takes size and location, config string
-	
+	Button(int, int, int, int);				// Button constructor: takes size and location, requires setter calls
 	void setBackgroundColor(float*);		// Set background color
+	void setSelectedBackgroundColor(float*);// Set selected background color
 	void setBorder(float*, int);			// Set border color, border width
+	void setSelectedBorder(float*, int);	// Set selected border color, border width
 	void setCornerRadius(int);				// Set corner radius if rounded 
-
-	void draw(void);
-	void update(void);
+					
+	void update(void); 						// Button update & draw function
 
 	// Text methods
-	void enableText(char);						// enables text, vertical alignment (T,C.B)
-	void setTextColor(float*);				// set text color
-	void setText(string);					// sets 
+	void enableText(char);					// Enable text, vertical alignment (T,C.B)
+	void setTextColor(float*);				// Set text color
+	void setSelectedTextColor(float*);		// Set selected text color
+	void setText(string);					// Set text 
 
 	// Value methods
-	void enableValue(char);					// enables value (vertical alignment (T,C.B)
-	void setValueColor(float*);					// set value color
+	void enableValue(char);					// Enable value (vertical alignment (T,C.B)
+	void setValueColor(float*);				// Set value color
+	void setSelectedValueColor(float*);		// Set selected value color
 	void setValueDecPlaces(int);			// Set value number of decimal places
 	void setValue(float); 
-	void setValueRefreshRate(int);			// Set desired refresh frequency (Hz) 
-	string getIdentifier(void);
+	void setValueRefreshRate(int);			// Set desired refresh frequency (Hz)
+
+	// Name and Identifier methods 
+	string getIdentifier(void);				// Get button identifier
+	string getName(void);					// Get button name
+	void setName(string);					// Set button name
+
+	// Selection methods
+	void select(void);
+	void deselect(void);
+	bool isSelected(void);
+	void setSelectable(void);
 };
 
 #endif
