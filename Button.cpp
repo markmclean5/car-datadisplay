@@ -98,7 +98,11 @@ void Button::configure(string ident) {
 			centerX = parseInt(cfg, buttonName, "centerX");
 			centerY = parseInt(cfg, buttonName, "centerY");
 		}
+<<<<<<< HEAD
 		name = parseString(cfg, buttonName, "name");
+=======
+		buttonGroup = parseString(cfg, buttonName, "buttonGroup");
+>>>>>>> origin/master
 		cornerRadius = parseInt(cfg, buttonName, "cornerRadius");
 		borderWidth = parseInt(cfg, buttonName, "borderWidth");
 		rectHeight = readoutHeight-borderWidth;
@@ -315,6 +319,7 @@ string Button::getIdentifier(void) {
 	return buttonIdentifier;
 }
 
+<<<<<<< HEAD
 void Button::setName(string name) {
 	buttonName = name;
 }
@@ -374,4 +379,8 @@ void Button::setSelectedTextColor(float color[4]) {
 
 void Button::setSelectable(void) {
 	selectable = true;
+=======
+string Button::getGroup(void) {
+	return buttonGroup;
+>>>>>>> origin/master
 }

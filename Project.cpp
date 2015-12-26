@@ -105,9 +105,13 @@ int main()
 
 	bool menuActive = false;
 
+<<<<<<< HEAD
 	Menu Mode1Menu(width/2, height-40, width-20, 60, "Mode1Menu");
 	Mode1Menu.touchEnable();
 	Mode1Menu.selectButton("m1");
+=======
+	Menu Mode1Menu(width-10-width/6, height/2, width/6, 0.75*height, "Mode1Menu");
+>>>>>>> origin/master
 
 
 	while(1) {
@@ -120,6 +124,7 @@ int main()
 		loopTouch = threadTouch;
 		// Draw background image
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
+<<<<<<< HEAD
 
 		Mode1Menu.update(loopTouch);
 
@@ -142,6 +147,12 @@ int main()
 			}
 
 
+=======
+
+		Mode1Menu.update(loopTouch);
+
+		if(Mode1Menu.menuButtons[1].isPressed()) cout << "B1 was pressed!!!!!" << endl;
+>>>>>>> origin/master
 
 		End();
 	}

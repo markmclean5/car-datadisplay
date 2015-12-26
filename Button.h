@@ -13,8 +13,13 @@ class Button : public TouchableObject
 private:
 
 	string buttonIdentifier;				// Button identifier string
+<<<<<<< HEAD
 	string buttonName;
 	string name;
+=======
+	string buttonGroup;						// Button group identifier string
+
+>>>>>>> origin/master
 	bool givenSizeAndLocation;
 
 	// Size & location related properties
@@ -96,6 +101,7 @@ public:
 	void setSelectedValueColor(float*);		// Set selected value color
 	void setValueDecPlaces(int);			// Set value number of decimal places
 	void setValue(float); 
+<<<<<<< HEAD
 	void setValueRefreshRate(int);			// Set desired refresh frequency (Hz)
 
 	// Name and Identifier methods 
@@ -108,6 +114,11 @@ public:
 	void deselect(void);
 	bool isSelected(void);
 	void setSelectable(void);
+=======
+	void setValueRefreshRate(int);			// Set desired refresh frequency (Hz) 
+	string getIdentifier(void);
+	string getGroup(void);
+>>>>>>> origin/master
 };
 
 #endif

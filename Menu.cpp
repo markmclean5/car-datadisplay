@@ -27,18 +27,26 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	setRectWidthHeight(width, height);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);	// Called by derived class to set rectangular touch area bottom left corner
 	cornerRadius = 0;
+<<<<<<< HEAD
 	isHorizontal = true;
 	hideable = false;
 	hidden = false;
 	configure(menuIdentifier);
 	menuSelectMode = "manual";
 	configureButtons = false;
+=======
+	configure(menuIdentifier);
+	isHorizontal = true;
+>>>>>>> origin/master
 }
 
 void Menu::configure(string ident) {
 	setlocale(LC_ALL, "");
 	Configuration * cfg = Configuration::create();
+<<<<<<< HEAD
 	
+=======
+>>>>>>> origin/master
 	try {
 		cfg->parse("testConfig");
 		string menuName = ident;
@@ -52,6 +60,7 @@ void Menu::configure(string ident) {
 		borderColorAlpha = borderColor[3];
 		parseColor(cfg, menuName, backgroundColor, "backgroundColor");
 		backgroundColorAlpha = backgroundColor[3];
+<<<<<<< HEAD
 		pressDebounce = parseInt(cfg, menuName, "pressDebounce");
 		setPressDebounce(pressDebounce);
 		isHorizontal = parseBool(cfg, menuName, "isHorizontal");
@@ -138,15 +147,54 @@ void Menu::configure(string ident) {
 			menuButtons[idx].touchEnable();
 			buttonNames[idx] = menuButtons[idx].getName();
 		}
+=======
+		setPressDebounce(parseInt(cfg, menuName, "pressDebounce"));
+		isHorizontal = parseBool(cfg, menuName, "isHorizontal");
+
+		numButtons = parseInt(cfg, menuName, "numButtons");
+		buttonPadding = parseInt(cfg, menuName, "buttonPadding");
+		if(numButtons==0) numButtons = 1;
+		if(isHorizontal) {
+			buttonWidth = (rectWidth - buttonPadding*(numButtons+1))/numButtons; 
+			buttonHeight = rectHeight - 2*buttonPadding;
+		}
+
+		int buttonCenterX = centerX - rectWidth/2 + buttonPadding + buttonWidth/2;
+		int buttonCenterY = centerY;
+		int offsetX = buttonPadding+ buttonWidth;
+		int offsetY = 0;
+
+		string buttonScope = "button";
+		int currentButton = 1;
+		for(;currentButton<=numButtons;currentButton++) {
+
+			menuButtons.push_back(Button(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton)));
+			cout << "Config string:"<<menuName+"."+ buttonScope + std::to_string(currentButton) << endl;
+			buttonCenterX+=offsetX;
+			buttonCenterY+=offsetY;
+		}
+
+		for(int idx = 0; idx < menuButtons.size(); idx++) {
+			menuButtons[idx].touchEnable();
+		}
+
+>>>>>>> origin/master
 	}catch(const ConfigurationException & ex) {
 		cout << ex.c_str() << endl;
 	}
 	cfg->destroy();
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 }
 
 void Menu::update(touch_t menuTouch) {
 	updateVisuals();
+<<<<<<< HEAD
 	updateTouch(menuTouch);
+=======
+>>>>>>> origin/master
 	// Handle movement: current position is not desired position
 	if(centerX != getDesiredPosX() || centerY != getDesiredPosY()) {
 		centerX = getDesiredPosX();
@@ -171,6 +219,7 @@ void Menu::update(touch_t menuTouch) {
 	for(int idx = 0;idx<menuButtons.size();idx++) {
 		menuButtons[idx].update();
 		menuButtons[idx].updateTouch(menuTouch);
+<<<<<<< HEAD
 		buttonSelectStates[idx] = menuButtons[idx].isSelected();
 	}
 }
@@ -252,3 +301,7 @@ void Menu::unhide(void) {
 bool Menu::isHidden(void) {
 	return hidden;
 }
+=======
+	}
+}
+>>>>>>> origin/master

@@ -31,6 +31,78 @@ FramerateButton {
 	pressDebounce = "500";
 }
 
+<<<<<<< HEAD
+=======
+
+MenuButton1 {
+	buttonGroup = "DataDisplayHomeMenu";
+	width = "100";
+	height = "50";
+	centerX = "60";
+	centerY = "-15";
+	cornerRadius = "20";
+	borderWidth = "1";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Add";
+	pressDebounce = "500";
+}
+
+MenuButton2 {
+	buttonGroup = "DataDisplayHomeMenu";
+	width = "100";
+	height = "50";
+	centerX = "170";
+	centerY = "-15";
+	cornerRadius = "20";
+	borderWidth = "1";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Def. Line";
+	pressDebounce = "500";
+}
+
+MenuButton3 {
+	buttonGroup = "DataDisplayHomeMenu";
+	width = "100";
+	height = "50";
+	centerX = "280";
+	centerY = "-15";
+	cornerRadius = "20";
+	borderWidth = "1";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Clear";
+	pressDebounce = "500";
+}
+
+MenuButton4 {
+	buttonGroup = "DataDisplayHomeMenu";
+	width = "100";
+	height = "50";
+	centerX = "390";
+	centerY = "-15";
+	cornerRadius = "20";
+	borderWidth = "1";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	enableText = "true";
+	textAlign = "C";
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	defaultText = "Blue Line";
+	pressDebounce = "500";
+}
+
+>>>>>>> origin/master
 BoostGauge {
 	gaugeGroup = "gauges";
 	numRanges = "2";
@@ -78,6 +150,7 @@ BoostGauge {
 
 
 Mode1Menu {
+<<<<<<< HEAD
 	numButtons = "6";
 	buttonPadding = "10";
 	cornerRadius = "10";
@@ -116,4 +189,51 @@ Mode1Menu {
 	buttonText5 = "Mode 5";
 	buttonName6 = "m6";
 	buttonText6 = "Mode 6";
+=======
+	numButtons = "3";
+	buttonPadding = "10";
+	cornerRadius = "20";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	pressDebounce = "500";
+	isHorizontal = "true";
+	button1 {
+		buttonGroup = "DataDisplayHomeMenu";
+		cornerRadius = "20";
+		borderWidth = "1";
+		borderColor = ["1.0", "1.0", "1.0", "1.0"];
+		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+		enableText = "true";
+		textAlign = "C";
+		textColor = ["1.0", "1.0", "1.0", "1.0"];
+		defaultText = "B1";
+		pressDebounce = "500";
+	};
+	button2 {
+		buttonGroup = "DataDisplayHomeMenu";
+		cornerRadius = "20";
+		borderWidth = "1";
+		borderColor = ["1.0", "1.0", "1.0", "1.0"];
+		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+		enableText = "true";
+		textAlign = "C";
+		textColor = ["1.0", "1.0", "1.0", "1.0"];
+		defaultText = "B2";
+		pressDebounce = "500";
+	};
+	button3 {
+		buttonGroup = "DataDisplayHomeMenu";
+		cornerRadius = "20";
+		borderWidth = "1";
+		borderColor = ["1.0", "1.0", "1.0", "1.0"];
+		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+		enableText = "true";
+		textAlign = "C";
+		textColor = ["1.0", "1.0", "1.0", "1.0"];
+		defaultText = "B3";
+		pressDebounce = "500";
+	};
+	
+>>>>>>> origin/master
 };

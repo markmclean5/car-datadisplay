@@ -15,7 +15,10 @@ class Menu : public TouchableObject {
 private:
 	string menuIdentifier;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 	int width, height;
 	int borderWidth;
 	int centerX, centerY;
@@ -26,10 +29,15 @@ private:
 	float borderColorAlpha;
 	float backgroundColor[4];
 	float backgroundColorAlpha;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 	int buttonPadding;
 	int numButtons;
 	bool isHorizontal;
 
+<<<<<<< HEAD
 	int pressDebounce;
 
 	bool hideable;
@@ -61,12 +69,18 @@ private:
 
 	void configure(string);
 	int getVectorIndex(string);
+=======
+	int buttonWidth, buttonHeight;
+
+	void configure(string);
+>>>>>>> origin/master
 
 
 public:
 	Menu(int, int, int, int, string);		// Menu Constructor: center X, center Y, width, height, identifier
 	vector<Button> menuButtons;
 	void update(touch_t);
+<<<<<<< HEAD
 	bool isButtonPressed(string);
 	bool isButtonSelected(string);
 	void selectButton(string);
@@ -76,6 +90,8 @@ public:
 	void unhide(void);
 	bool isHidden(void);
 
+=======
+>>>>>>> origin/master
 };
 
 #endif
