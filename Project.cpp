@@ -21,6 +21,7 @@ using namespace std;
 #include "Button.h"
 #include "TextView.h"
 #include "Menu.h"
+#include "Serial.h"
 #include <vector>
 
 // Label and readout fonts, loop time
@@ -37,6 +38,12 @@ void setupGraphics(int*,int*);
 
 //Vector of diplay objects
 vector<TouchableObject> TObjects;
+
+
+float sendcolor[] = {1.0, 0.4, 0.4, 1.0};
+
+
+
 
 // main()
 int main()
@@ -99,19 +106,22 @@ int main()
 	float translucentBlack[] = {0,0,0,0.5};
 	float gray[] = {0.43,0.43,0.43,1};
 
-	// Button 1: Refresh rate button
 	TextView textView1(width/6, height/2, width/3-15, width/3-15, "TextView1");
 	textView1.update();
 
 	bool menuActive = false;
 
-<<<<<<< HEAD
 	Menu Mode1Menu(width/2, height-40, width-20, 60, "Mode1Menu");
 	Mode1Menu.touchEnable();
-	Mode1Menu.selectButton("m1");
-=======
-	Menu Mode1Menu(width-10-width/6, height/2, width/6, 0.75*height, "Mode1Menu");
->>>>>>> origin/master
+	//Mode1Menu.selectButton("m1");
+
+	Menu TestCommandMenu(width-width/4, height/2-40, width/2-20, height-80, "TestCommandMenu");
+	TestCommandMenu.touchEnable();
+
+	Serial ELMSerial("/dev/ELM327", 5);
+	ELMSerial.serialWrite("ATZ");
+
+	TextView SerialViewer(width/4, height/2-40, width/2-20, height-80, "SerialViewer");
 
 
 	while(1) {
@@ -124,14 +134,55 @@ int main()
 		loopTouch = threadTouch;
 		// Draw background image
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
-<<<<<<< HEAD
 
 		Mode1Menu.update(loopTouch);
+		TestCommandMenu.update(loopTouch);
 
-		if(Mode1Menu.isButtonPressed("m1")) Mode1Menu.selectButton("m1");
-		if(Mode1Menu.isButtonPressed("m2")) Mode1Menu.selectButton("m2");
-		if(Mode1Menu.isButtonPressed("m3")) Mode1Menu.selectButton("m3");
-		if(Mode1Menu.isButtonPressed("m4")) Mode1Menu.selectButton("m4");
+		string testCommand = TestCommandMenu.getPressedButtonName();
+		if(!testCommand.empty()){
+			SerialViewer.addNewLine(testCommand, sendcolor);
+			ELMSerial.serialWrite(testCommand);
+			TestCommandMenu.selectButton(testCommand);
+		}
+
+
+		SerialViewer.update();
+		
+
+		string data = ELMSerial.serialRead();
+
+		float receivecolor[] = {0.4, 0.69, 1.0, 1.0};
+		if(!data.empty()) {
+			cout << "Data: " << endl << data << endl;
+			cout << "Data characters: " << endl;
+			for(int idx=0; idx<data.size(); idx++)
+				cout << (int)data[idx] << " ";
+			cout << endl;
+			SerialViewer.addNewLine(data, receivecolor);
+		}
+
+		if(Mode1Menu.isButtonPressed("m1")) {
+			Mode1Menu.selectButton("m1");
+			SerialViewer.addNewLine("ATZ", sendcolor);
+			ELMSerial.serialWrite("ATZ");
+
+		}
+		if(Mode1Menu.isButtonPressed("m2")) {
+			Mode1Menu.selectButton("m2");
+			SerialViewer.addNewLine("ATE0", sendcolor);
+			ELMSerial.serialWrite("ATE0");
+
+		}
+		if(Mode1Menu.isButtonPressed("m3")) {
+			Mode1Menu.selectButton("m3");
+			SerialViewer.addNewLine("", sendcolor);
+			ELMSerial.serialWrite("\n");
+
+		}
+		if(Mode1Menu.isButtonPressed("m4")) {
+			Mode1Menu.selectButton("m4");
+			SerialViewer.clear();
+		}
 		if(Mode1Menu.isButtonPressed("m5")) Mode1Menu.selectButton("m5");
 		if(Mode1Menu.isButtonPressed("m6")) Mode1Menu.selectButton("m6");
 
@@ -147,12 +198,6 @@ int main()
 			}
 
 
-=======
-
-		Mode1Menu.update(loopTouch);
-
-		if(Mode1Menu.menuButtons[1].isPressed()) cout << "B1 was pressed!!!!!" << endl;
->>>>>>> origin/master
 
 		End();
 	}

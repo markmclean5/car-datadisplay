@@ -8,6 +8,16 @@ TextView1 {
 	pressDebounce = "500";
 }
 
+SerialViewer {
+	cornerRadius = "10";
+	borderWidth = "2";
+	borderColor = ["0.43", "0.43", "0.43", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	textColor = ["1.0", "1.0", "1.0", "1.0"];
+	numLines = "25";
+	pressDebounce = "500";
+}
+
 
 FramerateButton {
 	buttonGroup = "development";
@@ -31,78 +41,6 @@ FramerateButton {
 	pressDebounce = "500";
 }
 
-<<<<<<< HEAD
-=======
-
-MenuButton1 {
-	buttonGroup = "DataDisplayHomeMenu";
-	width = "100";
-	height = "50";
-	centerX = "60";
-	centerY = "-15";
-	cornerRadius = "20";
-	borderWidth = "1";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
-	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-	enableText = "true";
-	textAlign = "C";
-	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Add";
-	pressDebounce = "500";
-}
-
-MenuButton2 {
-	buttonGroup = "DataDisplayHomeMenu";
-	width = "100";
-	height = "50";
-	centerX = "170";
-	centerY = "-15";
-	cornerRadius = "20";
-	borderWidth = "1";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
-	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-	enableText = "true";
-	textAlign = "C";
-	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Def. Line";
-	pressDebounce = "500";
-}
-
-MenuButton3 {
-	buttonGroup = "DataDisplayHomeMenu";
-	width = "100";
-	height = "50";
-	centerX = "280";
-	centerY = "-15";
-	cornerRadius = "20";
-	borderWidth = "1";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
-	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-	enableText = "true";
-	textAlign = "C";
-	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Clear";
-	pressDebounce = "500";
-}
-
-MenuButton4 {
-	buttonGroup = "DataDisplayHomeMenu";
-	width = "100";
-	height = "50";
-	centerX = "390";
-	centerY = "-15";
-	cornerRadius = "20";
-	borderWidth = "1";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
-	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-	enableText = "true";
-	textAlign = "C";
-	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "Blue Line";
-	pressDebounce = "500";
-}
-
->>>>>>> origin/master
 BoostGauge {
 	gaugeGroup = "gauges";
 	numRanges = "2";
@@ -150,16 +88,17 @@ BoostGauge {
 
 
 Mode1Menu {
-<<<<<<< HEAD
 	numButtons = "6";
 	buttonPadding = "10";
 	cornerRadius = "10";
 	borderWidth = "1";
-	borderColor = ["0.43", "0.43", "0.43", "1.0"];
+	borderColor = ["0.43", "0.43", "0.43", "0.0"];
 	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	pressDebounce = "500";
 	isHorizontal = "true";
-	selectMode = "radio";
+	#selectMode = "radio";
+	selectMode = "timed";
+	timedSelectDuration = "100";
 	hideable = "true";
 	hideDuration = "500";
 	hideDeltaX = "0";
@@ -178,62 +117,62 @@ Mode1Menu {
 	buttonSelectedBorderWidth = "2";
 	buttonSelectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
 	buttonName1 = "m1";
-	buttonText1 = "Mode 1";
+	buttonText1 = "Reset";
 	buttonName2 = "m2";
-	buttonText2 = "Mode 2";
+	buttonText2 = "Echo";
 	buttonName3 = "m3";
-	buttonText3 = "Mode 3";
+	buttonText3 = "CR";
 	buttonName4 = "m4";
-	buttonText4 = "Mode 4";
+	buttonText4 = "Clear";
 	buttonName5 = "m5";
 	buttonText5 = "Mode 5";
 	buttonName6 = "m6";
 	buttonText6 = "Mode 6";
-=======
-	numButtons = "3";
+};
+
+
+
+TestCommandMenu {
+	numButtons = "8";
 	buttonPadding = "10";
-	cornerRadius = "20";
-	borderWidth = "2";
-	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	cornerRadius = "10";
+	borderWidth = "1";
+	borderColor = ["0.43", "0.43", "0.43", "0.0"];
 	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
 	pressDebounce = "500";
-	isHorizontal = "true";
-	button1 {
-		buttonGroup = "DataDisplayHomeMenu";
-		cornerRadius = "20";
-		borderWidth = "1";
-		borderColor = ["1.0", "1.0", "1.0", "1.0"];
-		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-		enableText = "true";
-		textAlign = "C";
-		textColor = ["1.0", "1.0", "1.0", "1.0"];
-		defaultText = "B1";
-		pressDebounce = "500";
-	};
-	button2 {
-		buttonGroup = "DataDisplayHomeMenu";
-		cornerRadius = "20";
-		borderWidth = "1";
-		borderColor = ["1.0", "1.0", "1.0", "1.0"];
-		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-		enableText = "true";
-		textAlign = "C";
-		textColor = ["1.0", "1.0", "1.0", "1.0"];
-		defaultText = "B2";
-		pressDebounce = "500";
-	};
-	button3 {
-		buttonGroup = "DataDisplayHomeMenu";
-		cornerRadius = "20";
-		borderWidth = "1";
-		borderColor = ["1.0", "1.0", "1.0", "1.0"];
-		backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
-		enableText = "true";
-		textAlign = "C";
-		textColor = ["1.0", "1.0", "1.0", "1.0"];
-		defaultText = "B3";
-		pressDebounce = "500";
-	};
-	
->>>>>>> origin/master
+	isHorizontal = "false";
+	#selectMode = "radio";
+	selectMode = "timed";
+	timedSelectDuration = "100";
+	hideable = "true";
+	hideDuration = "500";
+	hideDeltaX = "0";
+	hideDeltaY = "50";
+	hideFade = "60";
+	configureButtons = "true";
+	buttonCornerRadius = "10";
+	buttonBorderWidth = "2";
+	buttonBorderColor = ["0.43", "0.43", "0.43", "1.0"];
+	buttonBackgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	buttonTextColor = ["1.0", "1.0", "1.0", "1.0"];
+	buttonSelectedBackgroundColor = ["0.43", "0.43", "0.43", "0.4"];
+	buttonSelectedBorderColor = ["1.0", "1.0", "1.0", "1.0"];
+	buttonSelectedBorderWidth = "2";
+	buttonSelectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
+	buttonName1 = "ATDP";
+	buttonText1 = "Protocol";
+	buttonName2 = "ATMA";
+	buttonText2 = "Mon.All";
+	buttonName3 = "0100";
+	buttonText3 = "00-PIDSup1";
+	buttonName4 = "0101";
+	buttonText4 = "01-MonSts";
+	buttonName5 = "0102";
+	buttonText5 = "O2-FrzDTC";
+	buttonName6 = "0103";
+	buttonText6 = "03-FuelSts";
+	buttonName7 = "0104";
+	buttonText7 = "04-CalcLoad";
+	buttonName8 = "0105";
+	buttonText8 = "05-ECT";
 };
