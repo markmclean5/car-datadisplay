@@ -36,6 +36,8 @@ DataStream::DataStream(int ranges)
 	currentTime = 0;
 	lastTime = 0;
 	updateRate = 0;
+	desiredUpdateRate = 0;
+	lastUpdateTime = 0;
 }
 
 void DataStream::setDebugMode(bool debugMode)
@@ -169,7 +171,15 @@ float DataStream::getRawUpdateRate(void)
 }
 float DataStream::getReadoutUpdateRate(void)
 {
-	return 0;
+	uint64_t currentTime = bcm2835_st_read();
+	if(desiredUpdateRate == 0)	desiredUpdateRate = 5;
+	uint64_t nextTime = lastUpdateTime + (1000000/desiredUpdateRate);
+	if(currentTime>=nextTime) {
+		readoutUpdateRate = getRawUpdateRate();
+		lastUpdateTime = currentTime;
+	}
+
+	return readoutUpdateRate;
 }
 
 void DataStream::update (char* serialData, uint64_t updateTime)

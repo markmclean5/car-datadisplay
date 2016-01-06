@@ -36,6 +36,7 @@ Button::Button(string identifier) {
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+	bufferSaved = false;
 }
 
 /* Button Constructor: Use given location and size, load properties from config file*/
@@ -83,6 +84,8 @@ Button::Button(int cX, int cY, int w, int h) {
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+	
+	//bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
 }
 
 /* Button configure method */
@@ -153,11 +156,14 @@ void Button::update(void) {
 	updateVisuals();
 	// Handle movement: current position is not desired position
 	if(centerX != getDesiredPosX() || centerY != getDesiredPosY()) {
+		bufferSaved = false;
 		centerX = getDesiredPosX();
 		centerY = getDesiredPosY();
 		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
 		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
 	}
+
+	/*
 	// Handle fade:
 	if(getDesiredFadePercentage() != 0) {
 		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
@@ -173,56 +179,79 @@ void Button::update(void) {
 			textColor[3] = textColorAlpha * alphaScalar;
 			valueColor[3] = valueColorAlpha * alphaScalar;			
 		}
+	}
 
-	}
-	if(selected) {
-		setfill(selectedBackgroundColor);
-		StrokeWidth(selectedBorderWidth);
-		setstroke(selectedBorderColor);
-	}
-	else {
-		setfill(backgroundColor);
-		StrokeWidth(borderWidth);
-		setstroke(borderColor);
-	}
-	
-	if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
-	else {
-		float cornerHeight = 0.01 * cornerRadius * rectWidth;
-		Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
-	}
-	if(containsText) {
-		if(selected) setfill(selectedTextColor);
-		else setfill(textColor);
-		StrokeWidth(0);
-		textFontSize = (rectHeight-borderWidth)/2;
-		int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
-		while(textWidth > 0.9*rectWidth) {
-			textFontSize--;
-			textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+	*/
+	if(!bufferSaved) {
+		if(selected) {
+			setfill(selectedBackgroundColor);
+			StrokeWidth(selectedBorderWidth);
+			setstroke(selectedBorderColor);
 		}
-		if(textVertAlign == 'T')
+		else {
+			setfill(backgroundColor);
+			StrokeWidth(borderWidth);
+			setstroke(borderColor);
+		}
+		if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
+		else {
+			float cornerHeight = 0.01 * cornerRadius * rectWidth;
+			Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
+		}
+		if(containsText) {
+			if(selected) setfill(selectedTextColor);
+			else setfill(textColor);
+			StrokeWidth(0);
+			textFontSize = (rectHeight-borderWidth)/2;
+			int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+			while(textWidth > 0.9*rectWidth) {
+				textFontSize--;
+				textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+			}
+			if(textVertAlign == 'T')
 			TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize-2);
-		if(textVertAlign == 'C')
-			TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize-2);
-		if(textVertAlign == 'B')
-			TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
+			if(textVertAlign == 'C')
+				TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize-2);
+			if(textVertAlign == 'B')
+				TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
+		}
+		if(containsValue) {
+			if(selected) setfill(selectedValueColor);
+			else setfill(valueColor);
+			if(valueVertAlign == 'T')
+				TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			if(valueVertAlign == 'C')
+				TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			if(valueVertAlign == 'B')
+				TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+		}
+
+		/*
+		if(!isMoving() && !selected) {
+			vgGetPixels(bufferImage, centerX-readoutWidth/2, centerY-readoutHeight/2, centerX - readoutWidth/2, centerY - readoutHeight/2, readoutWidth, readoutHeight);
+			bufferSaved = true;
+			cout << "Button image saved" << endl;
+		}
+		*/
 	}
-	if(containsValue) {
-		if(selected) setfill(selectedValueColor);
-		else setfill(valueColor);
-		if(valueVertAlign == 'T')
-			TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-		if(valueVertAlign == 'C')
-			TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-		if(valueVertAlign == 'B')
-			TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+	/*
+	else if(bufferSaved) {
+		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
+		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
+		Fill(255,255,255,alphaScalar);		// Alpha applied to vgDrawImage due to VG_DRAW_IMAGE_MULTIPLY
+		vgDrawImage(bufferImage);
+		//cout << "Using button image" << endl;
+		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_NORMAL);
 	}
+	*/
+
+
 }
 
 void Button::setCornerRadius(int rad)
 {
 	cornerRadius = rad;
+	bufferSaved = false;
 }
 
 void Button::setValueDecPlaces(int dec)						// Set number of digits before & after decimal
@@ -233,6 +262,7 @@ void Button::setValueDecPlaces(int dec)						// Set number of digits before & af
 	formatSpecifierString = "%.";
 	formatSpecifierString.append(decPlacesText);
 	formatSpecifierString.append("f");
+	bufferSaved = false;
 }
 void Button::setBackgroundColor(float color[4])
 {
@@ -241,6 +271,7 @@ void Button::setBackgroundColor(float color[4])
 	backgroundColor[2] = color[2];
 	backgroundColor[3] = color[3];
 	backgroundColorAlpha = backgroundColor[3];
+	bufferSaved = false;
 }
 void Button::setValueColor(float color[4])
 {
@@ -249,6 +280,7 @@ void Button::setValueColor(float color[4])
 	valueColor[2] = color[2];
 	valueColor[3] = color[3];
 	valueColorAlpha = valueColor[3];
+	bufferSaved = false;
 }
 void Button::setTextColor(float color[4])
 {
@@ -257,6 +289,7 @@ void Button::setTextColor(float color[4])
 	textColor[2] = color[2];
 	textColor[3] = color[3];
 	textColorAlpha = textColor[3];
+	bufferSaved = false;
 }
 void Button::setBorder(float color[4], int width)		// Set border color, border width
 {
@@ -270,6 +303,7 @@ void Button::setBorder(float color[4], int width)		// Set border color, border w
 	rectWidth = readoutWidth - borderWidth;
 	bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
 	bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+	bufferSaved = false;
 }
 void Button::setValueRefreshRate(int rate) {			// Set desired refresh frequency (Hz)
 	desiredRefreshRate = rate;
@@ -277,16 +311,19 @@ void Button::setValueRefreshRate(int rate) {			// Set desired refresh frequency 
 void Button::enableValue(char v) {
 	valueVertAlign = v;
 	containsValue = true;
+	bufferSaved = false;
 }
 
 void Button::enableText(char v) {
 	textVertAlign = v;
 	containsText = true;
+	bufferSaved = false;
 }
 
 /* Set button text */
 void Button::setText(string txt) {						// Set readout label
 	text.assign(txt);
+	bufferSaved = false;
 }
 
 /* Set button value */
@@ -308,7 +345,8 @@ void Button::setValue(float val) {						// Set readout label
 	while(valueWidth > 0.9*rectWidth) {
 		valueFontSize--;
 		valueWidth = TextWidth((char*)valueString.c_str(), SansTypeface, valueFontSize);
-	}	
+	}
+	bufferSaved = false;
 }
 
 string Button::getIdentifier(void) {
@@ -324,21 +362,26 @@ string Button::getName(void) {
 }
 
 void Button::select(void) {
-	if(selectable) {
+	if(selectable && (selected == false)) {
 		selected = true;
 		rectHeight = readoutHeight-selectedBorderWidth;
 		rectWidth = readoutWidth - selectedBorderWidth;
 		bottomLeftX = centerX - (rectWidth+selectedBorderWidth/2) / 2;
 		bottomLeftY = centerY - (rectHeight+selectedBorderWidth/2) / 2;
+		bufferSaved = false;
 	}
 }
 
 void Button::deselect(void) {
-	selected = false;
-	rectHeight = readoutHeight-borderWidth;
-	rectWidth = readoutWidth - borderWidth;
-	bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
-	bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+	if(selected) {
+		selected = false;
+		rectHeight = readoutHeight-borderWidth;
+		rectWidth = readoutWidth - borderWidth;
+		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
+		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+		bufferSaved = false;
+	}
+	
 }
 
 bool Button::isSelected(void) {
@@ -352,6 +395,8 @@ void Button::setSelectedBorder(float color[4], int width) {
 	selectedBorderColor[3] = color[3];
 	selectedBorderColorAlpha = selectedBorderColor[3];
 	selectedBorderWidth = width;
+	bufferSaved = false;
+
 }
 
 void Button::setSelectedBackgroundColor(float color[4]) {
@@ -360,6 +405,7 @@ void Button::setSelectedBackgroundColor(float color[4]) {
 	selectedBackgroundColor[2] = color[2];
 	selectedBackgroundColor[3] = color[3];
 	selectedBackgroundColorAlpha = selectedBackgroundColor[3];
+	bufferSaved = false;
 }
 
 
@@ -369,9 +415,17 @@ void Button::setSelectedTextColor(float color[4]) {
 	selectedTextColor[2] = color[2];
 	selectedTextColor[3] = color[3];
 	selectedTextColorAlpha = selectedTextColor[3];
+	bufferSaved = false;
 }
 
 
 void Button::setSelectable(void) {
 	selectable = true;
 }
+
+/*
+Button::~Button(void) {
+	vgDestroyImage(bufferImage);
+	cout << "Button destructor called :(" << endl;
+}
+*/

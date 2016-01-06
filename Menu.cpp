@@ -12,36 +12,45 @@
 #include <locale.h>
 #include <config4cpp/Configuration.h>
 #include "parsingUtilities.h"
+#include <memory>
 
 #include "Menu.h"
 using namespace std;
 using namespace config4cpp;
 
+/*	Menu constructor: creates menu about provided center coordinate with provided size
+	and configures menu using identifier string. */
 Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	menuIdentifier = identifier;
 	centerX = cx;
 	centerY = cy;
 	width = w;
 	height = h;
+	// Configure menu as TouchableObject
 	setRectangular();
-	setRectWidthHeight(width, height);	// Called by derived class to set rectangular touch area size
-	setRectCenter(centerX, centerY);	// Called by derived class to set rectangular touch area bottom left corner
+	setRectWidthHeight(width, height);
+	setRectCenter(centerX, centerY);
+	// Default property values
 	cornerRadius = 0;
 	isHorizontal = true;
 	hideable = false;
 	hidden = false;
-	
+	menuSelectMode = "manual";
+	configureButtons = false;
+
+
 	timedSelectionStart = bcm2835_st_read();
 	timedSelectionEnd = 0;
-	menuSelectMode = "manual";
+
+	// Call configure
 	configure(menuIdentifier);
-	configureButtons = false;
 }
 
+
+/* Menu configuration: capture menu properties from configuration file entry with the provided string */ 
 void Menu::configure(string ident) {
 	setlocale(LC_ALL, "");
 	Configuration * cfg = Configuration::create();
-	
 	try {
 		cfg->parse("testConfig");
 		string menuName = ident;
@@ -62,6 +71,7 @@ void Menu::configure(string ident) {
 		buttonNames = new string[numButtons];
 		buttonCfgText = new string[numButtons];
 		buttonSelectStates = new bool[numButtons];
+		menuButtons.reserve(numButtons);
 		buttonPadding = parseInt(cfg, menuName, "buttonPadding");
 		menuSelectMode = parseString(cfg, menuName, "selectMode");
 		if(menuSelectMode.compare("timed") == 0)
@@ -80,10 +90,8 @@ void Menu::configure(string ident) {
 			buttonCornerRadius = parseInt(cfg, menuName, "buttonCornerRadius");
 			for(int i=1; i<=numButtons; i++) {
 				buttonNames[i-1] = parseString(cfg, menuName, "buttonName"+std::to_string(i));
-				cout << "button name read " << buttonNames[i-1] << endl;
 				buttonCfgText[i-1] = parseString(cfg, menuName, "buttonText"+std::to_string(i));
 			}
-			cout << "Button configure okay." << endl;
 		}
 		hideable = parseBool(cfg, menuName, "hideable");
 		if(hideable) {
@@ -107,15 +115,15 @@ void Menu::configure(string ident) {
 			buttonWidth = rectWidth - 2*buttonPadding;
 			buttonHeight = (rectHeight - buttonPadding*(numButtons+1))/numButtons;
 			buttonCenterX = centerX;
-			buttonCenterY = centerY - rectHeight/2 +buttonPadding + buttonHeight/2;
+			buttonCenterY = centerY + rectHeight/2 -buttonPadding - buttonHeight/2;
 			offsetX = 0;
-			offsetY = buttonPadding + buttonHeight;
+			offsetY = - buttonPadding - buttonHeight;
 		}
 		string buttonScope = "button";
 		int currentButton = 1;
 		for(;currentButton<=numButtons;currentButton++) {
 			if(configureButtons){
-				menuButtons.push_back(Button(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight));
+				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight);
 				int b = menuButtons.size()-1;
 				menuButtons[b].setSelectable();
 				menuButtons[b].setBorder(buttonBorderColor, buttonBorderWidth);
@@ -129,10 +137,9 @@ void Menu::configure(string ident) {
 				menuButtons[b].setName(buttonNames[currentButton-1]);
 				menuButtons[b].setText(buttonCfgText[currentButton-1]);
 				menuButtons[b].setPressDebounce(pressDebounce);
-				cout << "create & call setters for button name " << menuButtons[b].getName() << endl;
 			}
 			else{
-				menuButtons.push_back(Button(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton)));
+				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton));
 			}
 			buttonCenterX+=offsetX;
 			buttonCenterY+=offsetY;
@@ -149,6 +156,7 @@ void Menu::configure(string ident) {
 	cfg->destroy();
 }
 
+/* Menu update function: updates buttons, states, and draws menu */
 void Menu::update(touch_t menuTouch) {
 	uint64_t currentTime = bcm2835_st_read();
 	updateVisuals();
@@ -187,10 +195,12 @@ bool Menu::isButtonPressed(string name) {
 	return menuButtons[getVectorIndex(name)].isPressed();
 }
 
+/* Returns the selected state of the first button which matches the provided name */
 bool Menu::isButtonSelected(string name) {
 	return menuButtons[getVectorIndex(name)].isSelected();
 }
 
+/* Selects the first button which matches the provided name */
 void Menu::selectButton(string name) {
 	if(menuSelectMode.compare("radio") == 0) {
 		for(int idx = 0; idx<menuButtons.size(); idx++) {
@@ -214,10 +224,12 @@ void Menu::selectButton(string name) {
 
 }
 
+/* Deselects the first button which matches the provided name */
 void Menu::deselectButton(string name) {
 	menuButtons[getVectorIndex(name)].deselect();
 }
 
+/* Returns the index of the first item in the menu buttons vector which matches the provided name */
 int Menu::getVectorIndex(string name) {
 	int idx = 0;
 	for(;idx<menuButtons.size();idx++) {
@@ -227,17 +239,13 @@ int Menu::getVectorIndex(string name) {
 	return idx;
 }
 
+
+/* Called to hide the menu if not hidden (move fade to configured coordinate and alpha) */
 void Menu::hide(void) {
-	cout << "hide called: " << endl;
-	cout << " - hidden: "<< hidden << endl;
-	cout << " - hideable: "<< hideable << endl;
-	cout << " - isMoving: "<< isMoving() << endl; 
 	if(!hidden && hideable && !isMoving()) {
-		cout << "hide criteria met" << endl;
 		move(hideDeltaX, hideDeltaY, hideDuration, "AAA");
 		if(hideFade != 0)
 			fade(hideFade, hideDuration, "AAA");
-
 		for(int idx = 0; idx<menuButtons.size(); idx++) {
 			menuButtons[idx].move(hideDeltaX, hideDeltaY, hideDuration, "AAA");
 			if(hideFade != 0)
@@ -247,11 +255,8 @@ void Menu::hide(void) {
 	}
 
 }
-void Menu::unhide(void) {
-	cout << "unhide called: " << endl;
-	cout << " - hidden: "<< hidden << endl;
-	cout << " - hideable: "<< hideable << endl;
-	cout << " - isMoving: "<< isMoving() << endl; 
+/* Called to unhide the menu if hidden (move back and fade to original alpha) */
+void Menu::unhide(void) { 
 	if(hidden && hideable && !isMoving()) {
 		move(-hideDeltaX, -hideDeltaY, hideDuration, "AAA");
 		if(hideFade != 0)
@@ -266,17 +271,17 @@ void Menu::unhide(void) {
 	hidden = false;
 }
 
+/* Gets menu current hide state */
 bool Menu::isHidden(void) {
 	return hidden;
 }
-
+/* Loop through buttons in menu, returns name of first button which is pressed */
 string Menu::getPressedButtonName(void) {
 	string name = "";
 	for(int idx = 0; idx<menuButtons.size(); idx++)
 	{
 		if(menuButtons[idx].isPressed()) {
 			name.append(menuButtons[idx].getName());
-			cout << "Returning pressed button name"<< name << endl;
 			break;
 		}
 	}

@@ -5,12 +5,15 @@
 #include <termios.h>		//Used for UART
 #include <stdlib.h>
 #include <algorithm>
+#include "bcm2835.h"
 
 #include "Serial.h"
 
 using namespace std;
 
-Serial::Serial(string portName, int baudRate) {
+Serial::Serial(string portName, speed_t baudRate) {
+	readUntilBuffer = "";
+	endCharReceived = false;
 	uart_filestream = -1;
 	//OPEN THE UART
 	//The flags (defined in fcntl.h):
@@ -43,7 +46,7 @@ Serial::Serial(string portName, int baudRate) {
 	//	PARODD - Odd parity (else even)
 	struct termios options;
 	tcgetattr(uart_filestream, &options);
-	options.c_cflag = B38400 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+	options.c_cflag = baudRate | CS8 | CLOCAL | CREAD;		//<Set baud rate
 	options.c_iflag = IGNPAR;
 	options.c_oflag = 0;
 	options.c_lflag = 0;
@@ -70,7 +73,7 @@ string Serial::serialRead(void) {
 			rx_buffer[rx_length] = '\0';
 			//cout << rx_length <<" bytes received."<<endl;
 			data.append(rx_buffer);
-
+			// Remove all carriage returns (ascii 13)
 			data.erase (std::remove(data.begin(), data.end(), (char)13), data.end());
 		}
 	}
@@ -85,4 +88,46 @@ void Serial::serialWrite(string data) {
 			printf("UART TX error\n");
 		}
 	}
+	lastWriteTime = bcm2835_st_read();
+	readTimeoutTime = lastWriteTime + 1000*readTimeout;
+	timeoutState = false;
+	//endCharReceived = false;
+	//readUntilBuffer = "";
+}
+
+string Serial::serialReadUntil(void) {
+	string output = "";
+	//uint64_t currentTime = bcm2835_st_read();
+	//if(!endCharReceived && (currentTime >= readTimeoutTime)) {
+	//	timeoutState = true;
+	//	readUntilBuffer = "";
+	//}
+	string data = serialRead();
+		if(!data.empty()) {
+		readUntilBuffer.append(data);
+	}
+	size_t endCharLocation = readUntilBuffer.find_first_of(endChar);
+	if(endCharLocation != std::string::npos){
+		endCharReceived = true;
+	}
+
+	if(endCharReceived) {
+		output.assign(readUntilBuffer.substr(0,endCharLocation+1));
+		string temp = readUntilBuffer.substr(endCharLocation+1, std::string::npos);
+		readUntilBuffer.assign(temp);
+		endCharReceived = false;
+	}
+	return output;
+}
+
+bool Serial::timedOut(void) {
+	return timeoutState;
+}
+
+void Serial::setEndChar(char c) {
+	endChar = c;
+}
+
+void Serial::setReadTimeout(int timeout) {
+	readTimeout = timeout;
 }

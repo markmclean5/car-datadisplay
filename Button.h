@@ -8,9 +8,11 @@
 /********************************/
 using namespace std;
 
-class Button : public TouchableObject
-{
+class Button : public TouchableObject {
 private:
+
+	VGImage bufferImage;
+	bool bufferSaved;
 
 	string buttonIdentifier;				// Button identifier string
 	string buttonName;
@@ -66,14 +68,11 @@ private:
 	bool selectable;
 	bool selected;
 
-
-
-	
-
 	void configure(string);
 
 public:
-	Button(string);							// Button constructor: load size and location from config file
+	Button(string);
+	//~Button(void);						// Button destructor
 	Button(int, int, int, int, string);		// Button constructor: takes size and location, config string
 	Button(int, int, int, int);				// Button constructor: takes size and location, requires setter calls
 	void setBackgroundColor(float*);		// Set background color

@@ -111,18 +111,22 @@ int main()
 
 	bool menuActive = false;
 
-	Menu Mode1Menu(width/2, height-40, width-20, 60, "Mode1Menu");
+	Menu Mode1Menu(width/2, height-30, width-20, 50, "Mode1Menu");
 	Mode1Menu.touchEnable();
-	//Mode1Menu.selectButton("m1");
+	Mode1Menu.selectButton("m1");
+	int currentMode = 0;
 
-	Menu TestCommandMenu(width-width/4, height/2-40, width/2-20, height-80, "TestCommandMenu");
-	TestCommandMenu.touchEnable();
-
-	Serial ELMSerial("/dev/ELM327", 5);
+	Serial ELMSerial("/dev/ELM327", B38400);
 	ELMSerial.serialWrite("ATZ");
+	ELMSerial.setEndChar('>');
+	ELMSerial.setReadTimeout(5000);
 
-	TextView SerialViewer(width/4, height/2-40, width/2-20, height-80, "SerialViewer");
+	int currentPIDMenuPage = 0;
+	int desiredPIDMenuPage = 1;
+	int numPages = 3;
 
+	vector<Menu> PIDMenus;
+	string menuPrefix = "PIDMenu";
 
 	while(1) {
 		loopTime = bcm2835_st_read();
@@ -135,70 +139,124 @@ int main()
 		// Draw background image
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 
+
+		// Update menus
 		Mode1Menu.update(loopTouch);
-		TestCommandMenu.update(loopTouch);
-
-		string testCommand = TestCommandMenu.getPressedButtonName();
-		if(!testCommand.empty()){
-			SerialViewer.addNewLine(testCommand, sendcolor);
-			ELMSerial.serialWrite(testCommand);
-			TestCommandMenu.selectButton(testCommand);
-		}
 
 
-		SerialViewer.update();
-		
-
-		string data = ELMSerial.serialRead();
-
-		float receivecolor[] = {0.4, 0.69, 1.0, 1.0};
-		if(!data.empty()) {
-			cout << "Data: " << endl << data << endl;
-			cout << "Data characters: " << endl;
-			for(int idx=0; idx<data.size(); idx++)
-				cout << (int)data[idx] << " ";
-			cout << endl;
-			SerialViewer.addNewLine(data, receivecolor);
-		}
-
-		if(Mode1Menu.isButtonPressed("m1")) {
-			Mode1Menu.selectButton("m1");
-			SerialViewer.addNewLine("ATZ", sendcolor);
-			ELMSerial.serialWrite("ATZ");
-
-		}
-		if(Mode1Menu.isButtonPressed("m2")) {
-			Mode1Menu.selectButton("m2");
-			SerialViewer.addNewLine("ATE0", sendcolor);
-			ELMSerial.serialWrite("ATE0");
-
-		}
-		if(Mode1Menu.isButtonPressed("m3")) {
-			Mode1Menu.selectButton("m3");
-			SerialViewer.addNewLine("", sendcolor);
-			ELMSerial.serialWrite("\n");
-
-		}
-		if(Mode1Menu.isButtonPressed("m4")) {
-			Mode1Menu.selectButton("m4");
-			SerialViewer.clear();
-		}
+		if(Mode1Menu.isButtonPressed("m1")) Mode1Menu.selectButton("m1");
+		if(Mode1Menu.isButtonPressed("m2")) Mode1Menu.selectButton("m2");
+		if(Mode1Menu.isButtonPressed("m3")) Mode1Menu.selectButton("m3");
+		if(Mode1Menu.isButtonPressed("m4")) Mode1Menu.selectButton("m4");
 		if(Mode1Menu.isButtonPressed("m5")) Mode1Menu.selectButton("m5");
 		if(Mode1Menu.isButtonPressed("m6")) Mode1Menu.selectButton("m6");
 
-		if(!Mode1Menu.isHidden() && Mode1Menu.isPressedOutside())
-			{
-				Mode1Menu.hide();
-				cout << "trying to hide menu" << endl;
+
+		if(Mode1Menu.isButtonSelected("m6")) {
+			TextView SerialViewer(width/4, height/2, width/2-20, 360, "SerialViewer");
+			Menu SerialViewerMenu(width/4, 30, width/2-20, 50, "SerialViewerMenu");
+			SerialViewerMenu.touchEnable();
+			Menu PIDPageMenu(width-width/4, 30, width/2-20, 50, "PIDPageMenu");
+			PIDPageMenu.touchEnable();
+			while(1) {
+				loopTime = bcm2835_st_read();
+				loopTouch = threadTouch;
+				char mode6serialData[256];
+				readSerial(uart0_filestream, mode6serialData);			// Capture serial data
+				BoostDataStream.update(mode6serialData, loopTime);		// Update datastream with serial data
+				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
+				Mode1Menu.update(loopTouch);
+				SerialViewerMenu.update(loopTouch);
+				PIDPageMenu.update(loopTouch);
+				for(int i = 0; i<PIDMenus.size(); i++) {
+					PIDMenus[i].update(loopTouch);
+				}
+				string serialViewerCommand = SerialViewerMenu.getPressedButtonName();
+				if(!serialViewerCommand.empty()) {
+					SerialViewerMenu.selectButton(serialViewerCommand);
+					if(serialViewerCommand.compare("Reset") == 0) {
+						SerialViewer.addNewLine("ATZ", sendcolor);
+						ELMSerial.serialWrite("ATZ");
+					}
+					if(serialViewerCommand.compare("Auto") == 0) {
+						SerialViewer.addNewLine("ATSP0", sendcolor);
+						ELMSerial.serialWrite("ATSP0");
+					}
+					if(serialViewerCommand.compare("Disp") == 0) {
+						SerialViewer.addNewLine("ATDP", sendcolor);
+						ELMSerial.serialWrite("ATDP");
+					}
+					if(serialViewerCommand.compare("Clear") == 0) {
+						SerialViewer.clear();
+					}
+				}
+
+				string PIDPageMenuCommand = PIDPageMenu.getPressedButtonName();
+				if(!PIDPageMenuCommand.empty()) {
+					if(PIDPageMenuCommand.compare("Next") == 0 && (currentPIDMenuPage < numPages)) {
+						PIDPageMenu.selectButton(PIDPageMenuCommand);
+						desiredPIDMenuPage++;
+					}
+					if(PIDPageMenuCommand.compare("Prev") == 0 && (currentPIDMenuPage > 1)) {
+						PIDPageMenu.selectButton(PIDPageMenuCommand);
+						desiredPIDMenuPage--;
+					}
+				}
+
+				if(currentPIDMenuPage != desiredPIDMenuPage) {
+					if(PIDMenus.size()!=0) PIDMenus.erase(PIDMenus.begin());
+					PIDMenus.push_back(Menu(width-width/4, height/2, width/2-20, 360, menuPrefix + std::to_string(desiredPIDMenuPage)));
+					PIDMenus[0].touchEnable();
+					currentPIDMenuPage = desiredPIDMenuPage;
+				}
+				string commandString = PIDMenus[PIDMenus.size()-1].getPressedButtonName();
+				if(!commandString.empty()) {
+					PIDMenus[PIDMenus.size()-1].selectButton(commandString);
+					SerialViewer.addNewLine(commandString, sendcolor);
+					ELMSerial.serialWrite(commandString);
+				}
+
+				// Display refresh rate in SerialViewer
+				//SerialViewer.addNewLine(std::to_string(BoostDataStream.getReadoutUpdateRate()));
+				SerialViewer.update();
+				string data = ELMSerial.serialReadUntil();
+
+				float receivecolor[] = {0.4, 0.69, 1.0, 1.0};
+				if(!data.empty()) {
+					cout << "Data: " << endl << data << endl;
+					cout << "Data characters: " << endl;
+					for(int idx=0; idx<data.size(); idx++)
+						cout << (int)data[idx] << " ";
+					cout << endl;
+					SerialViewer.addNewLine(data, receivecolor);
+				}
+				if(Mode1Menu.isButtonPressed("m1")) {
+					Mode1Menu.selectButton("m1");
+					break;
+				}
+				if(Mode1Menu.isButtonPressed("m2")) {
+					Mode1Menu.selectButton("m2");
+					break;
+				}
+				if(Mode1Menu.isButtonPressed("m3")) {
+					Mode1Menu.selectButton("m3");
+					break;
+				}
+				if(Mode1Menu.isButtonPressed("m4")) {
+					Mode1Menu.selectButton("m4");
+					break;
+				}
+				if(Mode1Menu.isButtonPressed("m5")) {
+					Mode1Menu.selectButton("m5");
+					break;
+				}
+				End();
 			}
-		else if(Mode1Menu.isHidden() && Mode1Menu.isPressedOutside())
-			{
-				Mode1Menu.unhide();
-				cout << "trying to hide menu" << endl;
-			}
+
+		}
 
 
-
+		// Write screen buffer to screen
 		End();
 	}
 }

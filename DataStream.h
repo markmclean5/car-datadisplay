@@ -54,8 +54,10 @@ private:	// Class Private properties
 	// Add more timing replated properties
 	uint64_t lastTime;
 	uint64_t currentTime;
+	uint64_t lastUpdateTime;
 	float updateRate;			// The rate at which DataStream.update() is being called 
-	// 
+	float readoutUpdateRate;
+	int desiredUpdateRate; 
 
 public:		// Class members
 	// Setters (call before update!!!!)

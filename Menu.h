@@ -64,11 +64,11 @@ private:
 
 	void configure(string);
 	int getVectorIndex(string);
-
+	vector<Button> menuButtons;
 
 public:
 	Menu(int, int, int, int, string);		// Menu Constructor: center X, center Y, width, height, identifier
-	vector<Button> menuButtons;
+	
 	void update(touch_t);
 	bool isButtonPressed(string);
 	bool isButtonSelected(string);
