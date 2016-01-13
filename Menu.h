@@ -14,7 +14,8 @@ using namespace std;
 class Menu : public TouchableObject {
 private:
 	string menuIdentifier;
-
+	VGImage bufferImage;
+	bool bufferSaved;
 
 	int width, height;
 	int borderWidth;
@@ -29,8 +30,14 @@ private:
 	int buttonPadding;
 	int numButtons;
 	bool isHorizontal;
-
 	int pressDebounce;
+
+
+	bool titled;
+	string title;
+	float titleColor[4];
+	int titleFontSize;
+	int titlePercentHeight;
 
 	bool hideable;
 	int hideDeltaX;
@@ -41,7 +48,7 @@ private:
 	bool hidden;
 	bool configureButtons;
 
-	// Button configuration properties to be used in button creatio
+	// Button configuration properties to be used in button creation
 	float buttonBackgroundColor[4];
 	float buttonSelectedBackgroundColor[4];
 	float buttonBorderColor[4];

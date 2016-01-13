@@ -41,6 +41,9 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 
 	timedSelectionStart = bcm2835_st_read();
 	timedSelectionEnd = 0;
+	bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
+	bufferSaved = false;
+
 
 	// Call configure
 	configure(menuIdentifier);
@@ -161,32 +164,51 @@ void Menu::update(touch_t menuTouch) {
 	uint64_t currentTime = bcm2835_st_read();
 	updateVisuals();
 	updateTouch(menuTouch);
+	bool useBuffer = true;
 	// Handle movement: current position is not desired position
 	if(centerX != getDesiredPosX() || centerY != getDesiredPosY()) {
 		centerX = getDesiredPosX();
 		centerY = getDesiredPosY();
 		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
 		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+		bufferSaved = false;
 	}
 	// Handle fade:
 	if(getDesiredFadePercentage() != 0) {
 		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
 		backgroundColor[3] = backgroundColorAlpha * alphaScalar;
 		borderColor[3] = borderColorAlpha * alphaScalar;
+		bufferSaved = false;
 	}
-	setfill(backgroundColor);
-	StrokeWidth(borderWidth);
-	setstroke(borderColor);
-	if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
-	else {
-		float cornerHeight = 0.01 * cornerRadius * rectWidth;
-		Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
-	}
+
+
 	for(int idx = 0;idx<menuButtons.size();idx++) {
-		if((menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && menuButtons[idx].isSelected())
+		if((menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && menuButtons[idx].isSelected()) {
 			menuButtons[idx].deselect();
-		buttonSelectStates[idx] = menuButtons[idx].isSelected();
-		menuButtons[idx].update();
+			bufferSaved = false;
+		}
+		buttonSelectStates[idx] = menuButtons[idx].isSelected();		
+	}
+
+
+	if(!bufferSaved) {
+		setfill(backgroundColor);
+		StrokeWidth(borderWidth);
+		setstroke(borderColor);
+		if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
+		else {
+			float cornerHeight = 0.01 * cornerRadius * rectWidth;
+			Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
+		}
+		for(int idx = 0;idx<menuButtons.size();idx++) {
+			menuButtons[idx].update();
+		}
+		vgGetPixels(bufferImage, centerX-width/2, centerY-height/2, centerX - width/2, centerY - height/2, width, height);
+		bufferSaved = true;
+	}
+	else vgDrawImage(bufferImage);
+
+	for(int idx = 0;idx<menuButtons.size();idx++) {
 		menuButtons[idx].updateTouch(menuTouch);
 	}
 }
@@ -221,12 +243,14 @@ void Menu::selectButton(string name) {
 		}
 		
 	}
+	bufferSaved = false;
 
 }
 
 /* Deselects the first button which matches the provided name */
 void Menu::deselectButton(string name) {
 	menuButtons[getVectorIndex(name)].deselect();
+	bufferSaved = false;
 }
 
 /* Returns the index of the first item in the menu buttons vector which matches the provided name */

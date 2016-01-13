@@ -3,10 +3,11 @@ using namespace std;
 #include <stdio.h>
 #include <unistd.h>
 #include "VG/openvg.h"	//
-#include "VG/vgu.h"	//
+#include "VG/vgu.h"		//
+#include "EGL/egl.h"	// EGL for pbuffers
 #include "fontinfo.h"	// Openvg
-#include "shapes.h"	//
-#include <stdlib.h>	//
+#include "shapes.h"		//
+#include <stdlib.h>		//
 #include "serial.h"	// Serial functions
 #include "Gauge.h"	// Gauge class
 #include "DataStream.h"	// DataStream class
@@ -16,13 +17,16 @@ using namespace std;
 #include "avengeance.inc"	// *** Label Fonts
 #include "digits.inc"		// *** Label Fonts
 #include <bcm2835.h>
+#include <vector>
+
+// Project Classes & utilities
 #include "touchscreen.h"
 #include "project.h"
 #include "Button.h"
 #include "TextView.h"
 #include "Menu.h"
 #include "Serial.h"
-#include <vector>
+
 
 // Label and readout fonts, loop time
 Fontinfo avengeance;
@@ -38,7 +42,6 @@ void setupGraphics(int*,int*);
 
 //Vector of diplay objects
 vector<TouchableObject> TObjects;
-
 
 float sendcolor[] = {1.0, 0.4, 0.4, 1.0};
 
@@ -136,6 +139,8 @@ int main()
 
 		// Grab touch data at the begining of each loop and 
 		loopTouch = threadTouch;
+
+
 		// Draw background image
 		vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 
@@ -217,7 +222,9 @@ int main()
 				}
 
 				// Display refresh rate in SerialViewer
-				//SerialViewer.addNewLine(std::to_string(BoostDataStream.getReadoutUpdateRate()));
+				SerialViewer.addNewLine(std::to_string(BoostDataStream.getReadoutUpdateRate()));
+
+				
 				SerialViewer.update();
 				string data = ELMSerial.serialReadUntil();
 
