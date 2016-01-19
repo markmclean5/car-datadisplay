@@ -88,6 +88,8 @@ BoostGauge {
 
 
 Mode1Menu {
+	titled = "false";
+	scrollable = "false";
 	numButtons = "6";
 	buttonPadding = "7";
 	cornerRadius = "10";
@@ -132,6 +134,8 @@ Mode1Menu {
 
 
 SerialViewerMenu {
+	titled = "false";
+	scrollable = "false";
 	numButtons = "4";
 	buttonPadding = "7";
 	cornerRadius = "10";
@@ -164,6 +168,8 @@ SerialViewerMenu {
 };
 
 PIDPageMenu {
+	scrollable = "false";
+	titled = "false";
 	numButtons = "2";
 	buttonPadding = "7";
 	cornerRadius = "10";
@@ -197,6 +203,21 @@ PIDPageMenu {
 };
 
 PIDMenu1 {
+	titled = "true";
+	titlePercentHeight = "9";
+	titleText = "Parameters";
+	titleFontSize = "20";
+	titleColor = ["1.0", "0.0", "0.0", "1.0"];
+	scrollable = "true";
+	totalItems = "16";
+	scrollItems = "8";
+	scrollButtonPercentHeight = "9";
+	prevButton = "true";
+	prevButtonText = "PREV";
+	nextButton = "true";
+	nextButtonText = "NEXT";
+
+
 	numButtons = "8";
 	buttonPadding = "7";
 	cornerRadius = "10";
@@ -234,6 +255,22 @@ PIDMenu1 {
 	buttonText7 = "0106 Bank1 STFT";
 	buttonName8 = "0107";
 	buttonText8 = "0107 Bank1 LTFT";
+	buttonName9 = "0108";
+	buttonText9 = "0108 Bank2 STFT";
+	buttonName10 = "0109";
+	buttonText10 = "0109 Bank2 LTFT";
+	buttonName11 = "100A";
+	buttonText11 = "010A Fuel Press";
+	buttonName12 = "010B";
+	buttonText12 = "010B Man Abs Press";
+	buttonName13 = "010C";
+	buttonText13 = "010C Eng RPM";
+	buttonName14 = "010D";
+	buttonText14 = "010D Veh Speed";
+	buttonName15 = "010E";
+	buttonText15 = "010E Timing Adv";
+	buttonName16 = "010F";
+	buttonText16 = "010F Int Air Temp";
 };
 PIDMenu2 {
 	numButtons = "8";

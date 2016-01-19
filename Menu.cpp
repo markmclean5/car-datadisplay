@@ -37,126 +37,14 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	hidden = false;
 	menuSelectMode = "manual";
 	configureButtons = false;
-
-
 	timedSelectionStart = bcm2835_st_read();
 	timedSelectionEnd = 0;
 	bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
 	bufferSaved = false;
-
-
-	// Call configure
-	configure(menuIdentifier);
-}
-
-
-/* Menu configuration: capture menu properties from configuration file entry with the provided string */ 
-void Menu::configure(string ident) {
-	setlocale(LC_ALL, "");
-	Configuration * cfg = Configuration::create();
-	try {
-		cfg->parse("testConfig");
-		string menuName = ident;
-		cornerRadius = parseInt(cfg, menuName, "cornerRadius");
-		borderWidth = parseInt(cfg, menuName, "borderWidth");
-		rectHeight = height - borderWidth;
-		rectWidth = width - borderWidth;
-		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
-		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
-		parseColor(cfg, menuName, borderColor, "borderColor");
-		borderColorAlpha = borderColor[3];
-		parseColor(cfg, menuName, backgroundColor, "backgroundColor");
-		backgroundColorAlpha = backgroundColor[3];
-		pressDebounce = parseInt(cfg, menuName, "pressDebounce");
-		setPressDebounce(pressDebounce);
-		isHorizontal = parseBool(cfg, menuName, "isHorizontal");
-		numButtons = parseInt(cfg, menuName, "numButtons");
-		buttonNames = new string[numButtons];
-		buttonCfgText = new string[numButtons];
-		buttonSelectStates = new bool[numButtons];
-		menuButtons.reserve(numButtons);
-		buttonPadding = parseInt(cfg, menuName, "buttonPadding");
-		menuSelectMode = parseString(cfg, menuName, "selectMode");
-		if(menuSelectMode.compare("timed") == 0)
-			timedSelectDuration = parseInt(cfg, menuName, "timedSelectDuration");
-		
-		configureButtons = parseBool(cfg, menuName, "configureButtons");
-		if(configureButtons) {
-			parseColor(cfg, menuName, buttonBackgroundColor, "buttonBackgroundColor");
-			parseColor(cfg, menuName, buttonSelectedBackgroundColor, "buttonSelectedBackgroundColor");
-			parseColor(cfg, menuName, buttonBorderColor, "buttonBorderColor");
-			parseColor(cfg, menuName, buttonSelectedBorderColor, "buttonSelectedBorderColor");
-			parseColor(cfg, menuName, buttonTextColor, "buttonTextColor");
-			parseColor(cfg, menuName, buttonSelectedTextColor, "buttonSelectedTextColor");
-			buttonBorderWidth = parseInt(cfg, menuName, "buttonBorderWidth");
-			buttonSelectedBorderWidth = parseInt(cfg, menuName, "buttonSelectedBorderWidth");
-			buttonCornerRadius = parseInt(cfg, menuName, "buttonCornerRadius");
-			for(int i=1; i<=numButtons; i++) {
-				buttonNames[i-1] = parseString(cfg, menuName, "buttonName"+std::to_string(i));
-				buttonCfgText[i-1] = parseString(cfg, menuName, "buttonText"+std::to_string(i));
-			}
-		}
-		hideable = parseBool(cfg, menuName, "hideable");
-		if(hideable) {
-			hideDeltaX = parseInt(cfg, menuName, "hideDeltaX");
-			hideDeltaY = parseInt(cfg, menuName, "hideDeltaY");
-			hideFade = parseInt(cfg, menuName, "hideFade");
-			hideDuration = parseInt(cfg, menuName, "hideDuration");
-		}
-		if(numButtons==0) numButtons = 1;
-		int buttonCenterX, buttonCenterY;
-		int offsetX, offsetY;
-		if(isHorizontal) {
-			buttonWidth = (rectWidth - buttonPadding*(numButtons+1))/numButtons; 
-			buttonHeight = rectHeight - 2*buttonPadding;
-			buttonCenterX = centerX - rectWidth/2 + buttonPadding + buttonWidth/2;
-			buttonCenterY = centerY;
-			offsetX = buttonPadding+ buttonWidth;
-			offsetY = 0;
-		}
-		else {
-			buttonWidth = rectWidth - 2*buttonPadding;
-			buttonHeight = (rectHeight - buttonPadding*(numButtons+1))/numButtons;
-			buttonCenterX = centerX;
-			buttonCenterY = centerY + rectHeight/2 -buttonPadding - buttonHeight/2;
-			offsetX = 0;
-			offsetY = - buttonPadding - buttonHeight;
-		}
-		string buttonScope = "button";
-		int currentButton = 1;
-		for(;currentButton<=numButtons;currentButton++) {
-			if(configureButtons){
-				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight);
-				int b = menuButtons.size()-1;
-				menuButtons[b].setSelectable();
-				menuButtons[b].setBorder(buttonBorderColor, buttonBorderWidth);
-				menuButtons[b].setSelectedBorder(buttonSelectedBorderColor, buttonSelectedBorderWidth);
-				menuButtons[b].setCornerRadius(buttonCornerRadius);
-				menuButtons[b].setBackgroundColor(buttonBackgroundColor);
-				menuButtons[b].setSelectedBackgroundColor(buttonSelectedBackgroundColor);
-				menuButtons[b].enableText('C');
-				menuButtons[b].setTextColor(buttonTextColor);
-				menuButtons[b].setSelectedTextColor(buttonSelectedTextColor);
-				menuButtons[b].setName(buttonNames[currentButton-1]);
-				menuButtons[b].setText(buttonCfgText[currentButton-1]);
-				menuButtons[b].setPressDebounce(pressDebounce);
-			}
-			else{
-				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton));
-			}
-			buttonCenterX+=offsetX;
-			buttonCenterY+=offsetY;
-		}
-		
-		// Loop through all menu button elements, also set populate Button ID array to minimize future vector searching
-		for(int idx = 0; idx < menuButtons.size(); idx++) {
-			menuButtons[idx].touchEnable();
-			buttonNames[idx] = menuButtons[idx].getName();
-		}
-	}catch(const ConfigurationException & ex) {
-		cout << ex.c_str() << endl;
-	}
-	cfg->destroy();
+	titled = false;
+	scrollable = false;
+	title = "";
+	configure(menuIdentifier);		// Configure the menu
 }
 
 /* Menu update function: updates buttons, states, and draws menu */
@@ -180,8 +68,7 @@ void Menu::update(touch_t menuTouch) {
 		borderColor[3] = borderColorAlpha * alphaScalar;
 		bufferSaved = false;
 	}
-
-
+	// Selection processing
 	for(int idx = 0;idx<menuButtons.size();idx++) {
 		if((menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && menuButtons[idx].isSelected()) {
 			menuButtons[idx].deselect();
@@ -189,9 +76,64 @@ void Menu::update(touch_t menuTouch) {
 		}
 		buttonSelectStates[idx] = menuButtons[idx].isSelected();		
 	}
+	
+
+	// Previous button pressed
+	if(scrollable && prevButton && previousBtn->isPressed()) {
+		cout << "prev btn pressed" << endl;
+		uint64_t currentTime = bcm2835_st_read();
+		timedSelectionStart = currentTime;
+		timedSelectionEnd = timedSelectionStart + (1000*timedSelectDuration);
+		previousBtn->select();
+
+		if(menuItemsRemaining < totalItems){
+			topMenuItemIndex -= scrollItems;
+			menuItemsRemaining += scrollItems;
+		}
+		if(activeButtons < numButtons) activeButtons += scrollItems;
+		int currentButton = 1;
+		for(;currentButton<=activeButtons;currentButton++) {
+			menuButtons[currentButton-1].setName(buttonNames[topMenuItemIndex+currentButton-1]);
+			menuButtons[currentButton-1].setText(buttonCfgText[topMenuItemIndex+currentButton-1]);
+		}
 
 
+		bufferSaved = false;
+	}
+
+	// Next button pressed
+	if(scrollable && nextButton && nextBtn->isPressed()) {
+		uint64_t currentTime = bcm2835_st_read();
+		timedSelectionStart = currentTime;
+		timedSelectionEnd = timedSelectionStart + (1000*timedSelectDuration);
+		nextBtn->select();
+		if(menuItemsRemaining >= scrollItems){
+			topMenuItemIndex += scrollItems;
+			menuItemsRemaining -= scrollItems;
+		}
+		if(menuItemsRemaining < activeButtons) activeButtons = menuItemsRemaining;
+		int currentButton = 1;
+		for(;currentButton<=activeButtons;currentButton++) {
+			menuButtons[currentButton-1].setName(buttonNames[topMenuItemIndex+currentButton-1]);
+			menuButtons[currentButton-1].setText(buttonCfgText[topMenuItemIndex+currentButton-1]);
+		}
+		bufferSaved = false;
+	}
+
+
+	if(scrollable && prevButton && (menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && previousBtn->isSelected()) {
+			previousBtn->deselect();
+			bufferSaved = false;
+	}
+	if(scrollable && nextButton && (menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && nextBtn->isSelected()) {
+			nextBtn->deselect();
+			bufferSaved = false;
+	}
+
+
+	// Draw menu if buffer image is not saved or is out of date
 	if(!bufferSaved) {
+		// Background & border
 		setfill(backgroundColor);
 		StrokeWidth(borderWidth);
 		setstroke(borderColor);
@@ -200,19 +142,236 @@ void Menu::update(touch_t menuTouch) {
 			float cornerHeight = 0.01 * cornerRadius * rectWidth;
 			Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
 		}
-		for(int idx = 0;idx<menuButtons.size();idx++) {
+		// Title
+		if(titled) {
+			int titleHeight = titlePercentHeight/100. * rectHeight;
+			int titleBottonLeftX = centerX - rectWidth/2 + buttonPadding;
+			int titleBottomLeftY = centerY + rectHeight/2 - buttonPadding - titleHeight;
+			setfill(titleColor);
+
+			if(titleFontSize > titleHeight) titleFontSize = titleHeight;
+			TextMid(centerX, titleBottomLeftY + (titleHeight - titleFontSize)/2, (char*)title.c_str(), SansTypeface, titleFontSize);
+			//StrokeWidth(1);
+			//Stroke(255,255,255,1); 
+			//Rect(titleBottonLeftX,  titleBottomLeftY, buttonWidth, titleHeight);
+		}
+		// Buttons
+		for(int idx = 0;idx<activeButtons;idx++) {
 			menuButtons[idx].update();
 		}
+		if(scrollable && prevButton) previousBtn->update();
+		if(scrollable && nextButton) nextBtn->update();
+		// Save buffer image
 		vgGetPixels(bufferImage, centerX-width/2, centerY-height/2, centerX - width/2, centerY - height/2, width, height);
 		bufferSaved = true;
 	}
 	else vgDrawImage(bufferImage);
 
-	for(int idx = 0;idx<menuButtons.size();idx++) {
+	for(int idx = 0;idx<activeButtons;idx++) {
 		menuButtons[idx].updateTouch(menuTouch);
 	}
+	if(scrollable && prevButton) previousBtn->updateTouch(menuTouch);
+	if(scrollable && nextButton) nextBtn->updateTouch(menuTouch);
+
 }
 
+
+/* Menu configuration: capture menu properties from configuration file entry with the provided string */ 
+void Menu::configure(string ident) {
+	setlocale(LC_ALL, "");
+	Configuration * cfg = Configuration::create();
+	cout << "Configuring menu" << endl;
+	try {
+		cfg->parse("testConfig");
+		string menuName = ident;
+		cornerRadius = parseInt(cfg, menuName, "cornerRadius");
+		borderWidth = parseInt(cfg, menuName, "borderWidth");
+		// Given position and border, determine size and start coordinate of menu rectangle
+		rectHeight = height - borderWidth;
+		rectWidth = width - borderWidth;
+		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
+		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
+		// Colors, save initial alphas for fading later on
+		parseColor(cfg, menuName, borderColor, "borderColor");
+		borderColorAlpha = borderColor[3];
+		parseColor(cfg, menuName, backgroundColor, "backgroundColor");
+		backgroundColorAlpha = backgroundColor[3];
+		// Title configuration
+		titled = parseBool(cfg, menuName, "titled");
+		if(titled) {
+			parseColor(cfg, menuName, titleColor, "titleColor");
+			titleColorAlpha = titleColor[3];
+			title = parseString(cfg, menuName, "titleText");
+			titlePercentHeight = parseInt(cfg, menuName, "titlePercentHeight");
+			titleFontSize = parseInt(cfg, menuName, "titleFontSize");	
+		}
+		// Scrollable configuration
+		scrollable = parseBool(cfg, menuName, "scrollable");
+		if(scrollable) {
+			cout << "scrollable menu!" << endl;
+			totalItems = parseInt(cfg, menuName, "totalItems");
+			scrollItems = parseInt(cfg, menuName, "scrollItems");
+			scrollButtonPercentHeight = parseInt(cfg, menuName, "scrollButtonPercentHeight");
+			prevButton = parseBool(cfg, menuName, "prevButton");
+			prevButtonText = parseString(cfg, menuName, "prevButtonText");
+			nextButton = parseBool(cfg, menuName, "nextButton");
+			nextButtonText = parseString(cfg, menuName, "nextButtonText");
+			topMenuItemIndex = 0;
+			menuItemsRemaining = totalItems;
+		}
+		pressDebounce = parseInt(cfg, menuName, "pressDebounce");
+		setPressDebounce(pressDebounce);
+		isHorizontal = parseBool(cfg, menuName, "isHorizontal");
+		numButtons = parseInt(cfg, menuName, "numButtons");
+		// Set up arrays to store names, text, and select states for entire 
+		if(!scrollable) totalItems = numButtons;
+		buttonNames = new string[totalItems];
+		buttonCfgText = new string[totalItems];
+		buttonSelectStates = new bool[totalItems];
+		activeButtons = numButtons;
+		menuButtons.reserve(numButtons);
+		buttonPadding = parseInt(cfg, menuName, "buttonPadding");
+		// Menu select mode
+		menuSelectMode = parseString(cfg, menuName, "selectMode");
+		if(menuSelectMode.compare("timed") == 0)
+			timedSelectDuration = parseInt(cfg, menuName, "timedSelectDuration");
+		// Configure buttons - all menu buttons inherit the button_ proprties
+		configureButtons = parseBool(cfg, menuName, "configureButtons");
+		if(configureButtons) {
+			parseColor(cfg, menuName, buttonBackgroundColor, "buttonBackgroundColor");
+			parseColor(cfg, menuName, buttonSelectedBackgroundColor, "buttonSelectedBackgroundColor");
+			parseColor(cfg, menuName, buttonBorderColor, "buttonBorderColor");
+			parseColor(cfg, menuName, buttonSelectedBorderColor, "buttonSelectedBorderColor");
+			parseColor(cfg, menuName, buttonTextColor, "buttonTextColor");
+			parseColor(cfg, menuName, buttonSelectedTextColor, "buttonSelectedTextColor");
+			buttonBorderWidth = parseInt(cfg, menuName, "buttonBorderWidth");
+			buttonSelectedBorderWidth = parseInt(cfg, menuName, "buttonSelectedBorderWidth");
+			buttonCornerRadius = parseInt(cfg, menuName, "buttonCornerRadius");
+			// Store names and text for all menu items
+			for(int i=1; i<=totalItems; i++) {
+				buttonNames[i-1] = parseString(cfg, menuName, "buttonName"+std::to_string(i));
+				buttonCfgText[i-1] = parseString(cfg, menuName, "buttonText"+std::to_string(i));
+			}
+		}
+
+		// Hide (move to "hidden" location, and fade)
+		hideable = parseBool(cfg, menuName, "hideable");
+		if(hideable) {
+			hideDeltaX = parseInt(cfg, menuName, "hideDeltaX");
+			hideDeltaY = parseInt(cfg, menuName, "hideDeltaY");
+			hideFade = parseInt(cfg, menuName, "hideFade");
+			hideDuration = parseInt(cfg, menuName, "hideDuration");
+		}
+		if(numButtons==0) numButtons = 1;
+		int buttonCenterX, buttonCenterY;
+		int offsetX, offsetY;
+		// Horizontal menu
+		if(isHorizontal) {
+			buttonWidth = (rectWidth - buttonPadding*(numButtons+1))/numButtons; 
+			buttonHeight = rectHeight - 2*buttonPadding;
+			buttonCenterX = centerX - rectWidth/2 + buttonPadding + buttonWidth/2;
+			buttonCenterY = centerY;
+			offsetX = buttonPadding+ buttonWidth;
+			offsetY = 0;
+		}
+		// Vertical menu: supports title
+		else {
+			if(titled) {
+				if(!scrollable)
+					buttonHeight = (rectHeight - (rectHeight*(titlePercentHeight/100.)) - buttonPadding*(numButtons+1))/numButtons;
+				else
+					buttonHeight = (rectHeight - (rectHeight*(titlePercentHeight/100.) + (rectHeight*(scrollButtonPercentHeight/100.))) - buttonPadding*(numButtons+1))/numButtons;
+				buttonCenterY = centerY + rectHeight/2 - 2*buttonPadding - buttonHeight/2 - rectHeight*(titlePercentHeight/100.);
+			}
+			else {
+				buttonHeight = (rectHeight - buttonPadding*(numButtons+1))/numButtons;
+				buttonCenterY = centerY + rectHeight/2 -buttonPadding - buttonHeight/2;
+			}
+			offsetX = 0;
+			offsetY = - buttonPadding - buttonHeight;
+			buttonCenterX = centerX;
+			buttonWidth = rectWidth - 2*buttonPadding;
+		}
+		string buttonScope = "button";
+		int currentButton = 1;
+		for(;currentButton<=numButtons;currentButton++) {
+			if(configureButtons){
+				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight);
+				int b = menuButtons.size()-1;
+				menuButtons[b].setSelectable();
+				menuButtons[b].setBorder(buttonBorderColor, buttonBorderWidth);
+				menuButtons[b].setSelectedBorder(buttonSelectedBorderColor, buttonSelectedBorderWidth);
+				menuButtons[b].setCornerRadius(buttonCornerRadius);
+				menuButtons[b].setBackgroundColor(buttonBackgroundColor);
+				menuButtons[b].setSelectedBackgroundColor(buttonSelectedBackgroundColor);
+				menuButtons[b].enableText('C');
+				menuButtons[b].setTextColor(buttonTextColor);
+				menuButtons[b].setSelectedTextColor(buttonSelectedTextColor);
+				menuButtons[b].setName(buttonNames[currentButton-1]);
+				menuButtons[b].setText(buttonCfgText[currentButton-1]);
+				menuButtons[b].setPressDebounce(pressDebounce);
+				menuButtons[b].touchEnable();
+			}
+			else
+				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton));
+			buttonCenterX+=offsetX;
+			buttonCenterY+=offsetY;
+		}
+
+		if(scrollable) {
+			cout << "creating scroll btns" << endl;
+			int scrollButtonHeight = rectHeight*(scrollButtonPercentHeight/100.) - buttonPadding;
+			int scrollButtonWidth = rectWidth/2 - 3*buttonPadding;
+			int scrollButtonCenterY = centerY - rectHeight/2 + scrollButtonHeight/2 + buttonPadding;
+			int prevButtonCenterX = centerX - rectWidth/2 + scrollButtonWidth/2 + buttonPadding;
+			int nextButtonCenterX = centerX + rectWidth/2 - scrollButtonWidth/2 - buttonPadding;
+			if(prevButton) {
+				cout << "prev button" << endl;
+				previousBtn = new Button(prevButtonCenterX, scrollButtonCenterY, scrollButtonWidth, scrollButtonHeight);
+				cout << "created previous btn" << endl;
+				previousBtn->setSelectable();
+				cout << "configuring previous btn" << endl;
+				previousBtn->setBorder(buttonBorderColor, buttonBorderWidth);
+				previousBtn->setSelectedBorder(buttonSelectedBorderColor, buttonSelectedBorderWidth);
+				previousBtn->setCornerRadius(buttonCornerRadius);
+				previousBtn->setBackgroundColor(buttonBackgroundColor);
+				previousBtn->setSelectedBackgroundColor(buttonSelectedBackgroundColor);
+				previousBtn->enableText('C');
+				previousBtn->setTextColor(buttonTextColor);
+				previousBtn->setSelectedTextColor(buttonSelectedTextColor);
+				previousBtn->setName("PREV");
+				previousBtn->setText(prevButtonText);
+				previousBtn->setPressDebounce(pressDebounce);
+			}
+			cout << "size with prev" << menuButtons.size() << endl;
+			if(nextButton) {
+				cout << "next button" << endl;
+				nextBtn = new Button(nextButtonCenterX, scrollButtonCenterY, scrollButtonWidth, scrollButtonHeight);
+				nextBtn->setSelectable();
+				nextBtn->setBorder(buttonBorderColor, buttonBorderWidth);
+				nextBtn->setSelectedBorder(buttonSelectedBorderColor, buttonSelectedBorderWidth);
+				nextBtn->setCornerRadius(buttonCornerRadius);
+				nextBtn->setBackgroundColor(buttonBackgroundColor);
+				nextBtn->setSelectedBackgroundColor(buttonSelectedBackgroundColor);
+				nextBtn->enableText('C');
+				nextBtn->setTextColor(buttonTextColor);
+				nextBtn->setSelectedTextColor(buttonSelectedTextColor);
+				nextBtn->setName("NEXT");
+				nextBtn->setText(nextButtonText);
+				nextBtn->setPressDebounce(pressDebounce);
+			}
+			cout << "size with prev and next" << menuButtons.size() << endl;
+		}
+		// Enable scroll buttons
+		if(scrollable && prevButton) previousBtn->touchEnable();
+		if(scrollable && nextButton) nextBtn->touchEnable();
+	}catch(const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+	}
+	cfg->destroy();
+}
+
+/* Returns the pressed state of the first button which matches the provided name */
 bool Menu::isButtonPressed(string name) {
 	return menuButtons[getVectorIndex(name)].isPressed();
 }
@@ -232,7 +391,6 @@ void Menu::selectButton(string name) {
 			}
 		}
 		menuButtons[getVectorIndex(name)].select();
-		
 	}
 	else if(menuSelectMode.compare("timed") == 0) {
 		uint64_t currentTime = bcm2835_st_read();
@@ -257,7 +415,7 @@ void Menu::deselectButton(string name) {
 int Menu::getVectorIndex(string name) {
 	int idx = 0;
 	for(;idx<menuButtons.size();idx++) {
-		if(name.compare(buttonNames[idx]) == 0) break;
+		if(name.compare(buttonNames[idx+topMenuItemIndex]) == 0) break;
 	}
 	//cout << "String: " << name << " Index: " << idx << endl;
 	return idx;

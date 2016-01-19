@@ -44,13 +44,11 @@ void setupGraphics(int*,int*);
 vector<TouchableObject> TObjects;
 
 float sendcolor[] = {1.0, 0.4, 0.4, 1.0};
-
-
+float colour[4];
 
 
 // main()
-int main()
-{
+int main() {
 	int width, height;					// display width & height
 	setupGraphics(&width, &height);		// Initialize display
 	int uart0_filestream = openSerial();
@@ -131,6 +129,99 @@ int main()
 	vector<Menu> PIDMenus;
 	string menuPrefix = "PIDMenu";
 
+	// Off screen buffer hijinks
+
+	float color1;
+
+
+	VGImage myImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
+
+	static const EGLint attribute_list[] = {
+		EGL_RED_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_BLUE_SIZE, 8,
+		EGL_ALPHA_SIZE, 8,
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_NONE
+	};
+
+	EGLint num_config;
+	EGLBoolean result;
+	EGLConfig config;
+
+	EGLDisplay realDisplay = eglGetCurrentDisplay();
+	if(realDisplay == EGL_NO_DISPLAY)
+	{
+		cout << "Failed to get current display" << endl;
+	}
+
+
+	result = eglChooseConfig(realDisplay, attribute_list, &config, 1, &num_config);
+	
+	//result = eglGetConfigs(realDisplay, config, 1, 1);
+	if(result == EGL_FALSE) {
+		cout << "Failed to choose config" << endl;
+	}
+
+
+	EGLSurface realSurface = eglGetCurrentSurface(EGL_DRAW);
+
+	if(realSurface == EGL_NO_SURFACE) {
+		cout << "Failed to get current surface" << endl;
+	}
+
+	EGLContext realContext = eglGetCurrentContext();
+
+	if(realContext == EGL_NO_CONTEXT) {
+		cout << "Failed to get current context" << endl;
+	}
+
+	static const EGLint surfAttr[] = {
+		EGL_HEIGHT, 480,
+		EGL_WIDTH, 800,
+		EGL_NONE
+	};
+
+	EGLSurface mySurface = eglCreatePbufferFromClientBuffer (realDisplay, EGL_OPENVG_IMAGE, (EGLClientBuffer)myImage, config, surfAttr);
+
+
+	if(mySurface == EGL_NO_SURFACE) {
+		cout << "Failed to create pbuffer surface" << endl;
+	}
+	result = eglMakeCurrent(realDisplay, mySurface, mySurface, realContext);
+	if(result == EGL_FALSE)
+	{
+		cout << "Failed to make new display current" << endl;
+	}
+
+
+
+	
+
+
+	//int broken = 1;
+	int morebroken = 17;
+	//float borked = 5;
+
+	RGBA(0, 0, 0, 0.1, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, 800, 480);
+
+	Stroke(255,255,255,1);
+	StrokeWidth(10);
+	Line(width/2-100, height/2, width/2+100, height/2);
+
+
+	eglMakeCurrent(realDisplay, realSurface, realSurface, realContext);
+	if(result == EGL_FALSE)
+	{
+		cout << "Failed to make original display current" << endl;
+	}
+
+	//End();
+
+	//
+
 	while(1) {
 		loopTime = bcm2835_st_read();
 		char serialData[256];
@@ -170,6 +261,20 @@ int main()
 				readSerial(uart0_filestream, mode6serialData);			// Capture serial data
 				BoostDataStream.update(mode6serialData, loopTime);		// Update datastream with serial data
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
+				//vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
+				
+
+
+				// Draws image saved in buffer:
+				// Needed to use vgDrawImage to get opacity to work
+				// Needed to set VG_MATRIX_MODE to apply translations to image matrices
+				vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
+				vgTranslate(400, 0);
+				vgDrawImage(myImage);
+				vgTranslate(-400, 0);
+				vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+
+				
 				Mode1Menu.update(loopTouch);
 				SerialViewerMenu.update(loopTouch);
 				PIDPageMenu.update(loopTouch);
@@ -261,8 +366,6 @@ int main()
 			}
 
 		}
-
-
 		// Write screen buffer to screen
 		End();
 	}
