@@ -93,6 +93,46 @@ void parseColor(Configuration * cfg, string scope, string subscope, float* outpu
 	}
 }
 
+/* Parse float array */
+void parseFloatArray(Configuration* cfg, string scope, int length, float* output, string attr) {
+	try {
+		StringVector array;
+		int idx = 0;
+		cfg->lookupList(scope.c_str(), attr.c_str(), array);
+		for(;idx<length;idx++) {
+			output[idx] = stof(array[idx]);
+		}
+	}
+	catch(const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+	}
+}
+
+/* Parse float array inside subscope */
+void parseFloatArray(Configuration* cfg, string scope, string subscope, int length, float* output, string attr) {
+	try {
+		StringVector array;
+		int idx = 0;
+		cfg->lookupList(scope.c_str(), subscope.append(attr).c_str(), array);
+		for(;idx<length;idx++) {
+			output[idx] = stof(array[idx]);
+		}
+	}
+	catch(const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 /* Parse boolean */
 bool parseBool(Configuration * cfg, string scope, string attr){
 	bool result = false;

@@ -22,6 +22,11 @@ void parseColor(Configuration*, string, float*, string);
 /* Parse color inside subscope */
 void parseColor(Configuration*, string, string, float*, string);
 
+/* Parse float array */
+void parseFloatArray(Configuration*, string, int, float*, string);
+/* Parse float array */
+void parseFloatArray(Configuration*, string, string, int, float*, string);
+
 /* Parse boolean */
 bool parseBool(Configuration*, string, string);
 /* Parse boolean inside subscope */

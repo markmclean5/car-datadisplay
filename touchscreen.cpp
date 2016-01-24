@@ -13,7 +13,7 @@ using namespace std;
 #include <pthread.h>
 
 #include "touchscreen.h"
-#include "project.h"
+//#include "project.h"
 
 /* touchinit starts the touch event thread */
 int touchinit(int w, int h)

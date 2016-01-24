@@ -44,6 +44,7 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	titled = false;
 	scrollable = false;
 	title = "";
+	topMenuItemIndex = 0;
 	configure(menuIdentifier);		// Configure the menu
 }
 
@@ -96,8 +97,6 @@ void Menu::update(touch_t menuTouch) {
 			menuButtons[currentButton-1].setName(buttonNames[topMenuItemIndex+currentButton-1]);
 			menuButtons[currentButton-1].setText(buttonCfgText[topMenuItemIndex+currentButton-1]);
 		}
-
-
 		bufferSaved = false;
 	}
 
@@ -133,6 +132,8 @@ void Menu::update(touch_t menuTouch) {
 
 	// Draw menu if buffer image is not saved or is out of date
 	if(!bufferSaved) {
+
+		cout << "buffer not saved, creating buffer" << endl;
 		// Background & border
 		setfill(backgroundColor);
 		StrokeWidth(borderWidth);
@@ -148,12 +149,8 @@ void Menu::update(touch_t menuTouch) {
 			int titleBottonLeftX = centerX - rectWidth/2 + buttonPadding;
 			int titleBottomLeftY = centerY + rectHeight/2 - buttonPadding - titleHeight;
 			setfill(titleColor);
-
 			if(titleFontSize > titleHeight) titleFontSize = titleHeight;
 			TextMid(centerX, titleBottomLeftY + (titleHeight - titleFontSize)/2, (char*)title.c_str(), SansTypeface, titleFontSize);
-			//StrokeWidth(1);
-			//Stroke(255,255,255,1); 
-			//Rect(titleBottonLeftX,  titleBottomLeftY, buttonWidth, titleHeight);
 		}
 		// Buttons
 		for(int idx = 0;idx<activeButtons;idx++) {
@@ -166,6 +163,7 @@ void Menu::update(touch_t menuTouch) {
 		bufferSaved = true;
 	}
 	else vgDrawImage(bufferImage);
+
 
 	for(int idx = 0;idx<activeButtons;idx++) {
 		menuButtons[idx].updateTouch(menuTouch);
@@ -180,9 +178,9 @@ void Menu::update(touch_t menuTouch) {
 void Menu::configure(string ident) {
 	setlocale(LC_ALL, "");
 	Configuration * cfg = Configuration::create();
-	cout << "Configuring menu" << endl;
+	cout << "Configuring menu: " << ident << endl;
 	try {
-		cfg->parse("testConfig");
+		cfg->parse("/home/pi/openvg/client/testConfig");
 		string menuName = ident;
 		cornerRadius = parseInt(cfg, menuName, "cornerRadius");
 		borderWidth = parseInt(cfg, menuName, "borderWidth");
@@ -460,8 +458,7 @@ bool Menu::isHidden(void) {
 /* Loop through buttons in menu, returns name of first button which is pressed */
 string Menu::getPressedButtonName(void) {
 	string name = "";
-	for(int idx = 0; idx<menuButtons.size(); idx++)
-	{
+	for(int idx = 0; idx<menuButtons.size(); idx++) {
 		if(menuButtons[idx].isPressed()) {
 			name.append(menuButtons[idx].getName());
 			break;

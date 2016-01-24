@@ -93,7 +93,7 @@ void Button::configure(string ident) {
 	setlocale(LC_ALL, "");
 	Configuration * cfg = Configuration::create();
 	try {
-		cfg->parse("testConfig");
+		cfg->parse("/home/pi/openvg/client/testConfig");
 		string buttonName = ident;
 		if(!givenSizeAndLocation){
 			readoutWidth = parseInt(cfg, buttonName, "width");
