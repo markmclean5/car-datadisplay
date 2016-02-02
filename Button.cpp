@@ -10,10 +10,10 @@
 #include "Button.h"
 #include <stdio.h>
 #include <bcm2835.h>
-
+#include "parsingUtilities.h"
 #include <locale.h>
 #include <config4cpp/Configuration.h>
-#include "parsingUtilities.h"
+
 
 using namespace std;
 using namespace config4cpp;
@@ -90,6 +90,7 @@ Button::Button(int cX, int cY, int w, int h) {
 
 /* Button configure method */
 void Button::configure(string ident) {
+	cout << "Configuring button: " << ident << endl;
 	setlocale(LC_ALL, "");
 	Configuration * cfg = Configuration::create();
 	try {
@@ -153,6 +154,7 @@ void Button::configure(string ident) {
 
 /* Button update */
 void Button::update(void) {
+	//cout << "Button update called for : " << buttonIdentifier << endl;
 	updateVisuals();
 	// Handle movement: current position is not desired position
 	if(centerX != getDesiredPosX() || centerY != getDesiredPosY()) {
@@ -163,87 +165,51 @@ void Button::update(void) {
 		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
 	}
 
-	/*
-	// Handle fade:
-	if(getDesiredFadePercentage() != 0) {
-		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
-		if(selected){
-			selectedBackgroundColor[3] = selectedBackgroundColorAlpha * alphaScalar;
-			selectedBorderColor[3] = selectedBorderColorAlpha * alphaScalar;
-			selectedTextColor[3] = selectedTextColorAlpha * alphaScalar;
-			selectedValueColor[3] = selectedValueColorAlpha * alphaScalar;	
-		}
-		else {
-			backgroundColor[3] = backgroundColorAlpha * alphaScalar;
-			borderColor[3] = borderColorAlpha * alphaScalar;
-			textColor[3] = textColorAlpha * alphaScalar;
-			valueColor[3] = valueColorAlpha * alphaScalar;			
-		}
-	}
 
-	*/
-	if(!bufferSaved) {
-		if(selected) {
-			setfill(selectedBackgroundColor);
-			StrokeWidth(selectedBorderWidth);
-			setstroke(selectedBorderColor);
+	if(selected) {
+		setfill(selectedBackgroundColor);
+		StrokeWidth(selectedBorderWidth);
+		setstroke(selectedBorderColor);
+	}
+	else {
+		setfill(backgroundColor);
+		StrokeWidth(borderWidth);
+		setstroke(borderColor);
+	}
+	if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
+	else {
+		float cornerHeight = 0.01 * cornerRadius * rectWidth;
+		Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
+	}
+	if(containsText) {
+		if(selected) setfill(selectedTextColor);
+		else setfill(textColor);
+		StrokeWidth(0);
+		textFontSize = (rectHeight-borderWidth)/2;
+		int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+		while(textWidth > 0.9*rectWidth) {
+			textFontSize--;
+			textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
 		}
-		else {
-			setfill(backgroundColor);
-			StrokeWidth(borderWidth);
-			setstroke(borderColor);
-		}
-		if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
-		else {
-			float cornerHeight = 0.01 * cornerRadius * rectWidth;
-			Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
-		}
-		if(containsText) {
-			if(selected) setfill(selectedTextColor);
-			else setfill(textColor);
-			StrokeWidth(0);
-			textFontSize = (rectHeight-borderWidth)/2;
-			int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
-			while(textWidth > 0.9*rectWidth) {
-				textFontSize--;
-				textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
-			}
-			if(textVertAlign == 'T')
-			TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize-2);
-			if(textVertAlign == 'C')
-				TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize-2);
-			if(textVertAlign == 'B')
-				TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
-		}
-		if(containsValue) {
-			if(selected) setfill(selectedValueColor);
-			else setfill(valueColor);
-			if(valueVertAlign == 'T')
-				TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-			if(valueVertAlign == 'C')
-				TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-			if(valueVertAlign == 'B')
-				TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-		}
+		if(textVertAlign == 'T')
+		TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize-2);
+		if(textVertAlign == 'C')
+			TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize-2);
+		if(textVertAlign == 'B')
+			TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
+	}
+	if(containsValue) {
+		if(selected) setfill(selectedValueColor);
+		else setfill(valueColor);
+		if(valueVertAlign == 'T')
+			TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+		if(valueVertAlign == 'C')
+			TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+		if(valueVertAlign == 'B')
+			TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+	}
+	
 
-		/*
-		if(!isMoving() && !selected) {
-			vgGetPixels(bufferImage, centerX-readoutWidth/2, centerY-readoutHeight/2, centerX - readoutWidth/2, centerY - readoutHeight/2, readoutWidth, readoutHeight);
-			bufferSaved = true;
-			cout << "Button image saved" << endl;
-		}
-		*/
-	}
-	/*
-	else if(bufferSaved) {
-		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
-		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
-		Fill(255,255,255,alphaScalar);		// Alpha applied to vgDrawImage due to VG_DRAW_IMAGE_MULTIPLY
-		vgDrawImage(bufferImage);
-		//cout << "Using button image" << endl;
-		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_NORMAL);
-	}
-	*/
 
 
 }
@@ -422,10 +388,3 @@ void Button::setSelectedTextColor(float color[4]) {
 void Button::setSelectable(void) {
 	selectable = true;
 }
-
-/*
-Button::~Button(void) {
-	vgDestroyImage(bufferImage);
-	cout << "Button destructor called :(" << endl;
-}
-*/

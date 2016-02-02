@@ -6,7 +6,16 @@
 class Gauge: public TouchableObject{
 private:
 	// Gauge itself
-	VGImage GaugeBuffer;
+	VGImage GaugeBuffer;		// Now going to be the VGImage buffer for "off-screen surface"
+
+	EGLint num_config;
+	EGLBoolean result;
+	EGLConfig config;
+	EGLDisplay realDisplay;
+	EGLSurface realSurface;
+	EGLContext realContext;
+	EGLSurface mySurface;
+
 
 	string gaugeIdentifier;
 	string gaugeGroup;

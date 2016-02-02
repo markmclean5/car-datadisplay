@@ -37,3 +37,41 @@
 	}
 
 }
+
+010C {
+	fullName = "Engine RPM";
+	shortName = "RPM";
+
+	supportedMinVal = "0";
+	supportedMaxVal = "16383.75";
+	numDataBytes = "2";
+
+	AGain = "256";
+	AOffset = "0";
+
+	BGain = "1";
+	BOffset = "0";
+
+	CGain = "1";
+	COffset = "0";
+
+	DGain = "1";
+	DOffset = "0";
+
+	TotalGain = "0.25";
+	TotalOffset = "0";
+
+	numRanges = "1";
+
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "16383.75";
+		engUnits = "RPM";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+
+	}
+
+}

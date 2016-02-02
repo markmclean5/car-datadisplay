@@ -72,6 +72,9 @@ private:
 
 public:
 	Button(string);
+
+
+	void update(touch_t) {}
 	//~Button(void);						// Button destructor
 	Button(int, int, int, int, string);		// Button constructor: takes size and location, config string
 	Button(int, int, int, int);				// Button constructor: takes size and location, requires setter calls

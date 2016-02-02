@@ -25,7 +25,16 @@ EGLSurface bufferSurface;		// Pixel buffer surface
 VGImage bufferImage;			// VGImage color buffer for pixel buffer surface 
 
 // Initialize pixel buffer surface of given pixel size (width & height) using provided VGImage as the color buffer
-EGLSurface createBufferSurface(int, int, VGImage);		
+EGLSurface createBufferSurface(int, int, VGImage);
+
+
+
+
+
+
+
+
+
 
 
 #endif

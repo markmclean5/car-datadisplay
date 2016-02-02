@@ -50,6 +50,7 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 
 /* Menu update function: updates buttons, states, and draws menu */
 void Menu::update(touch_t menuTouch) {
+	//cout << "Menu update called for " << menuIdentifier << endl;
 	uint64_t currentTime = bcm2835_st_read();
 	updateVisuals();
 	updateTouch(menuTouch);
@@ -309,6 +310,8 @@ void Menu::configure(string ident) {
 				menuButtons[b].setText(buttonCfgText[currentButton-1]);
 				menuButtons[b].setPressDebounce(pressDebounce);
 				menuButtons[b].touchEnable();
+				menuButtons[b].deselect();
+				buttonSelectStates[b] = false;
 			}
 			else
 				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton));
@@ -460,6 +463,18 @@ string Menu::getPressedButtonName(void) {
 	string name = "";
 	for(int idx = 0; idx<menuButtons.size(); idx++) {
 		if(menuButtons[idx].isPressed()) {
+			name.append(menuButtons[idx].getName());
+			break;
+		}
+	}
+	return name;
+}
+
+/* Gets name of first selected button in menu */
+string Menu::getSelectedButtonName(void) {
+	string name = "";
+	for(int idx = 0; idx<numButtons; idx++) {
+		if(menuButtons[idx].isSelected()) {
 			name.append(menuButtons[idx].getName());
 			break;
 		}

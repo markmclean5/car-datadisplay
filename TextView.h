@@ -41,6 +41,8 @@ public:
 	void addNewLine(string, float*);
 	void clearLastLine(void);
 	void clear(void);
+
+	void update(touch_t){}
 };
 
 #endif

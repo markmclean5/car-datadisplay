@@ -8,6 +8,7 @@
 #include "shapes.h"			//
 #include <cmath>			// Math (float remainder operation)
 #include "TouchableObject.h"
+#include "EGL/egl.h"		// EGL for pbuffers
 #include "Gauge.h"			// Gauge 
 #include <stdio.h>
 #include <fstream>
@@ -39,7 +40,7 @@ void Gauge::configure(string ident) {
 		avengeance_glyphCount);
 
 	try {
-		cfg->parse("testConfig");
+		cfg->parse("/home/pi/openvg/client/testConfig");
 		// Gauge attributes
 		gaugeGroup = parseString(cfg, gaugeIdentifier, "gaugeGroup");
 		numRanges = parseInt(cfg, gaugeIdentifier, "numRanges");
@@ -104,6 +105,45 @@ void Gauge::configure(string ident) {
 // Gauge Draw Method
 void Gauge::draw(void)
 {
+
+	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
+
+	realDisplay = eglGetCurrentDisplay();
+	if(realDisplay == EGL_NO_DISPLAY) cout << "Failed to get current display" << endl;
+
+	static const EGLint attribute_list[] = {
+		EGL_RED_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_BLUE_SIZE, 8,
+		EGL_ALPHA_SIZE, 8,
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_NONE
+	};
+	result = eglChooseConfig(realDisplay, attribute_list, &config, 1, &num_config);
+	if(result == EGL_FALSE) cout << "Failed to choose config" << endl;
+	realSurface = eglGetCurrentSurface(EGL_DRAW);
+	if(realSurface == EGL_NO_SURFACE) cout << "Failed to get current surface" << endl;
+	realContext = eglGetCurrentContext();
+	if(realContext == EGL_NO_CONTEXT) cout << "Failed to get current context" << endl;
+	static const EGLint surfAttr[] = {
+		EGL_HEIGHT, radius*2,
+		EGL_WIDTH, radius*2,
+		EGL_NONE
+	};
+	mySurface = eglCreatePbufferFromClientBuffer (realDisplay, EGL_OPENVG_IMAGE, (EGLClientBuffer)GaugeBuffer, config, surfAttr);
+	if(mySurface == EGL_NO_SURFACE) cout << "Failed to create pbuffer surface" << endl;
+
+	// Switch to pbuffer surface
+	result = eglMakeCurrent(realDisplay, mySurface, mySurface, realContext);
+	if(result == EGL_FALSE) cout << "Failed to make new display current" << endl;
+	
+	float surfaceBackgroundColor[4];
+	RGBA(0, 0, 0, 0, surfaceBackgroundColor);
+	vgSetfv(VG_CLEAR_COLOR, 4, surfaceBackgroundColor);
+	vgClear(0, 0, radius*2, radius*2);
+
+	vgTranslate(radius-centerX, radius-centerY);
+
 	// Gauge sizing
 	float borderWidth = 0.03 * radius;
 	gaugeRadius = radius - borderWidth/2;
@@ -141,9 +181,13 @@ void Gauge::draw(void)
 	setstroke(borderColor);
 	Circle(centerX,centerY,gaugeRadius*2);	// Draw gauge border (on top of ticks)
 
-	// Save gauge image in buffer
-	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
-	vgGetPixels(GaugeBuffer, centerX-radius, centerY-radius, centerX - radius, centerY - radius, 2*radius, 2*radius);
+	vgTranslate(centerX-radius, centerY-radius);
+
+	// Switch back to original surface
+	eglMakeCurrent(realDisplay, realSurface, realSurface, realContext);
+	if(result == EGL_FALSE) cout << "Failed to make original display current" << endl;
+
+	
 }
 
 void Gauge::update(float value, std::string units)
@@ -172,9 +216,22 @@ void Gauge::update(float value, std::string units)
 		vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
 		float alphaScalar = (100. - getDesiredFadePercentage()) / 100.;
 		Fill(255,255,255,alphaScalar);		// Alpha applied to vgDrawImage due to VG_DRAW_IMAGE_MULTIPLY
+
+
+		// Draws image saved in buffer:
+		// Needed to use vgDrawImage to get opacity to work
+		// Needed to set VG_MATRIX_MODE to apply translations to image matrices
+		vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
+		vgTranslate(centerX - radius, centerY - radius);
 		vgDrawImage(GaugeBuffer);
+		vgTranslate(radius - centerX, radius - centerY);
+		vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+
+
 		float needleAngle = -value * (stopAng[dataRange]-startAng[dataRange])/abs(stopVal[dataRange]-startVal[dataRange]);	
 		drawNeedle(needleAngle);
+				vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_NORMAL);
+
 	}	
 }
 

@@ -47,6 +47,14 @@ private:
 	uint64_t pressOutsideStartTime;
 	uint64_t pressDebounceFinishTime;
 	uint64_t pressOutsideDebounceFinishTime;
+
+	uint64_t releaseStartTime;
+	uint64_t releaseFinishTime;
+
+	bool released;
+	bool inReleaseDebounce;
+	bool releaseRead;
+
 	int debounceDuration;
 	bool pressed;
 	bool pressedOutside;
@@ -119,6 +127,10 @@ protected:
 	void setRectCenter(int, int);		// Called by derived class to set rectangular touch area bottom left corner
 
 public:
+
+	virtual void update(void){}
+	virtual void update(touch_t){}
+
 	/* Control methods */
 	void touchEnable(void);				// Enables touch functionality
 	void touchDisable(void);			// Disables touch functionality

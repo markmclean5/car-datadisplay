@@ -134,15 +134,37 @@ void TouchableObject::pressProcessing(void) {
 		pressStartTime = bcm2835_st_read();
 		pressDebounceFinishTime = pressStartTime + 1000*debounceDuration;
 	}
-	// Finish a press if debounce duration is reached
-	if(inPressDebounce && (currentTime >= pressDebounceFinishTime)) {
+	// Finish a press if debounce duration is reached and the object is no longer touched.. also trigger a release
+	if(inPressDebounce && (currentTime >= pressDebounceFinishTime) && !isTouched()) {
 		pressed = false;
 		inPressDebounce = false;
+		released = true;
+		releaseStartTime = bcm2835_st_read();
+		releaseFinishTime = releaseStartTime + 1000*debounceDuration;
+		inReleaseDebounce = true;
+		releaseRead = false;
 	}
+
+
+	// Finish a release if debounce duration is reached
+	if(inReleaseDebounce && (currentTime >= releaseFinishTime)) {
+		released = false;
+		inReleaseDebounce = false;
+	}
+
+
+
 	// Finish a press once the press has been read
 	if(pressed && pressRead) {
 		pressed = false;
 	}
+
+
+	// finish a release once the release has been read
+	if(released && releaseRead) {
+		released = false;
+	}
+
 
 	// Press outside processing
 	if(!pressedOutside && isTouchedOutside() && !inPressOutsideDebounce) {
@@ -173,6 +195,12 @@ bool TouchableObject::isPressed(void) {
 	if(pressed) pressRead = true;
 	return pressed;
 }
+
+bool TouchableObject::isReleased(void) {
+	if(released) releaseRead = true;
+	return released;
+}
+
 
 bool TouchableObject::isPressedOutside(void) {
 	if(pressedOutside) pressOutsideRead = true;
@@ -220,6 +248,11 @@ TouchableObject::TouchableObject(void) {
 	debounceDuration = 0;
 	inPressDebounce = false;
 	inPressOutsideDebounce = false;
+
+
+	released = false;
+	inReleaseDebounce = false;
+
 	fadePercentage = 0;
 	finalFadePercentage = 0;
 }

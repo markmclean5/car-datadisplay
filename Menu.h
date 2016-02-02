@@ -98,6 +98,7 @@ public:
 	void deselectButton(string);			// Deselect the button with the provided name
 
 	string getPressedButtonName(void);		// Return the name of the pressed button
+	string getSelectedButtonName(void);		// Return the name of the first selected button
 
 	void hide(void);						// Hide (and or fade) the menu
 	void unhide(void);						// Un-hide (and or un-fade) the menu
