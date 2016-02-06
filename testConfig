@@ -66,7 +66,7 @@ HOTBUTTON_DisplayObjectMenu {
 	buttonSelectedBorderColor = ["1.0", "1.0", "1.0", "1.0"];
 	buttonSelectedBorderWidth = "2";
 	buttonSelectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
-	buttonName1 = "g1";
+	buttonName1 = "Gauge";
 	buttonText1 = "Gauge";
 	buttonName2 = "g2";
 	buttonText2 = "Graph";
@@ -137,7 +137,7 @@ g1 {
 	buttonText11 = "010A Fuel Press";
 	buttonName12 = "010B";
 	buttonText12 = "010B Man Abs Press";
-	buttonName13 = "010C";
+	buttonName13 = "RPM";
 	buttonText13 = "010C Eng RPM";
 	buttonName14 = "010D";
 	buttonText14 = "010D Veh Speed";
@@ -440,10 +440,14 @@ hotBtn1 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "1";
+	defaultText = "+";
 	enableValue = "false";
 	pressDebounce = "500";
-	selectable = "false";
+	selectable = "true";
+	selectedBackgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	selectedBorderColor = ["1.0", "0.0", "0.0", "1.0"];
+	selectedBorderWidth = "3";
+	selectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
 };
 hotBtn2 {
 	name = "hotButton2";
@@ -454,10 +458,14 @@ hotBtn2 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "2";
+	defaultText = "+";
 	enableValue = "false";
 	pressDebounce = "500";
-	selectable = "false";
+	selectable = "true";
+	selectedBackgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	selectedBorderColor = ["1.0", "0.0", "0.0", "1.0"];
+	selectedBorderWidth = "3";
+	selectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
 };
 
 hotBtn3 {
@@ -469,10 +477,14 @@ hotBtn3 {
 	enableText = "true";
 	textAlign = "C";
 	textColor = ["1.0", "1.0", "1.0", "1.0"];
-	defaultText = "3";
+	defaultText = "+";
 	enableValue = "false";
 	pressDebounce = "500";
-	selectable = "false";
+	selectable = "true";
+	selectedBackgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	selectedBorderColor = ["1.0", "0.0", "0.0", "1.0"];
+	selectedBorderWidth = "3";
+	selectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
 };
 
 

@@ -1,7 +1,7 @@
 CXX=distcc arm-linux-gnueabihf-g++ -std=gnu++0x $(INCLUDEFLAGS) -g
 INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -I.. -I/home/pi/openvg/client/config4cpp/include
 LIBFLAGS=-L/opt/vc/lib -L/opt/vc/lib -L/home/pi/openvg/client/config4cpp/lib -lGLESv2 -lEGL -lbcm_host -lpthread  -ljpeg
-objects = touchscreen.o Gauge.o TouchableObject.o DataStream.o Button.o TextView.o Menu.o Serial.o parsingUtilities.o PID.o Project.o
+objects = touchscreen.o Gauge.o TouchableObject.o DisplayableObject.o DataStream.o Button.o TextView.o Menu.o Serial.o parsingUtilities.o PID.o Project.o
 
 all: $(objects) Project
 
@@ -14,6 +14,7 @@ DataStream.o: DataStream.cpp
 Gauge.o: Gauge.cpp
 Serial.o: Serial.cpp
 TouchableObject.o: TouchableObject.cpp
+DisplayableObject.o: DisplayableObject.cpp
 touchscreen.o: touchscreen.cpp
 parsingUtilities.o: parsingUtilities.cpp
 PID.o: PID.cpp

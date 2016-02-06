@@ -83,6 +83,14 @@ private:
 	uint64_t timedSelectionStart;
 	uint64_t timedSelectionEnd;
 
+	uint64_t prevBtnSelectionStart;
+	uint64_t prevBtnSelectionEnd;
+	uint64_t nextBtnSelectionStart;
+	uint64_t nextBtnSelectionEnd;
+
+
+
+
 
 	void configure(string);					// Menu configuration
 	int getVectorIndex(string);

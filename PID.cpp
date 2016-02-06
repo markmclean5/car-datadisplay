@@ -47,6 +47,7 @@ void PID::configure(string ident) {
 		string PIDName = ident;
 		fullName = parseString(cfg, PIDName, "fullName");
 		shortName = parseString(cfg, PIDName, "shortName");
+		command = parseString(cfg, PIDName, "command");
 
 		numRanges = parseInt(cfg, PIDName, "numRanges");
 
@@ -111,6 +112,11 @@ void PID::configure(string ident) {
 		cout << ex.c_str() << endl;
 	}
 	cfg->destroy();
+}
+
+
+string PID::getCommand(void) {
+	return command;
 }
 
 

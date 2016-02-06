@@ -188,15 +188,15 @@ void Button::update(void) {
 		textFontSize = (rectHeight-borderWidth)/2;
 		int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
 		while(textWidth > 0.9*rectWidth) {
-			textFontSize--;
+			textFontSize-=0.25;
 			textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
 		}
 		if(textVertAlign == 'T')
-		TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize-2);
+		TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize);
 		if(textVertAlign == 'C')
-			TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize-2);
+			TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize);
 		if(textVertAlign == 'B')
-			TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize-2);
+			TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize);
 	}
 	if(containsValue) {
 		if(selected) setfill(selectedValueColor);

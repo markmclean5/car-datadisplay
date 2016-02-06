@@ -4,6 +4,8 @@
 	fullName = "Engine Coolant Temperature";
 	shortName = "ECT";
 
+	command = "0105";
+
 	supportedMinVal = "-40";
 	supportedMaxVal = "215";
 	numDataBytes = "1";
@@ -38,9 +40,11 @@
 
 }
 
-010C {
+RPM {
 	fullName = "Engine RPM";
 	shortName = "RPM";
+
+	command = "010C";
 
 	supportedMinVal = "0";
 	supportedMaxVal = "16383.75";

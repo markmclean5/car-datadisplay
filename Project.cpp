@@ -41,6 +41,7 @@ void setupGraphics(int*,int*);
 //Dashboard mode vectors
 vector<Button> DASHBOARD_HotButtons;
 vector<Gauge> DASHBOARD_Gauges;
+vector<PID> DASHBOARD_PIDs;
 
 // Color definitions (float r, float g, float b, float alpha)
 float black[] = {0,0,0,1};
@@ -81,9 +82,6 @@ int main() {
 	ELMSerial.setEndChar('>');
 	ELMSerial.setReadTimeout(5000);
 
-	PID TestPID("010C");
-
-
 
 
 	///////////////////////////////////////
@@ -118,24 +116,53 @@ int main() {
 		if(Mode1Menu.isButtonPressed("m4")) Mode1Menu.selectButton("m4");
 		if(Mode1Menu.isButtonPressed("m5")) Mode1Menu.selectButton("m5");
 
+		
+
 		//////////////////////////////////////
 		// Mode 1 - DASHBOARD
 		//////////////////////////////////////
 		if(Mode1Menu.isButtonSelected("m1")) {
-			for (std::vector<Button>::iterator it = DASHBOARD_HotButtons.begin(); it != DASHBOARD_HotButtons.end(); it++) (it)->touchEnable();
+			for (std::vector<Button>::iterator it = DASHBOARD_HotButtons.begin(); it != DASHBOARD_HotButtons.end(); it++)
+				(it)->touchEnable();
+
+
+			// Set up iterator for PID vector
+			bool waitingOnData = false;
+			std::vector<PID>::iterator p = DASHBOARD_PIDs.begin();
+
 			bool menuVisible = false;
+		
+
 			ELMSerial.serialWrite("ATZ");
 			string serialData = "";
+			int gaugeCenterX = width/2;
+			int gaugeCenterY = height/2;
+			int gaugeRadius = height/2 - 60;
+
 			while(1) {
 				loopTime = bcm2835_st_read();
 				loopTouch = threadTouch;
 
-				serialData = ELMSerial.serialReadUntil();
-				if(!serialData.empty()) {
-					TestPID.update(serialData, loopTime);
-					ELMSerial.serialWrite("010C");
-				}
 
+
+
+				serialData = ELMSerial.serialReadUntil();
+
+
+				// Request data if: no pending request
+				if(!waitingOnData && DASHBOARD_PIDs.size()>0) {
+					ELMSerial.serialWrite((p)->getCommand());
+					waitingOnData = true;
+
+				}
+				else if(waitingOnData && !serialData.empty() && DASHBOARD_PIDs.size()>0) {
+					waitingOnData = false;
+					(p)->update(serialData, loopTime);
+
+					if(p<DASHBOARD_PIDs.end()) p++;
+					if(p == DASHBOARD_PIDs.end()) p = DASHBOARD_PIDs.begin();
+				}
+		
 
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 				Mode1Menu.update(loopTouch);
@@ -144,9 +171,11 @@ int main() {
 				for (std::vector<Button>::iterator it = DASHBOARD_HotButtons.begin(); it != DASHBOARD_HotButtons.end(); it++) {
 					(it)->updateTouch(loopTouch);
 					(it)->update();
+					if((it)->isPressed()) (it)->select();
 
 					// if hot button pressed, draw the menu
 					if((it)->isReleased() && !menuVisible) {
+							(it)->deselect();
 							menuVisible = true;
 							for(std::vector<Button>::iterator btn = DASHBOARD_HotButtons.begin(); btn != DASHBOARD_HotButtons.end(); btn++)
 								(btn)->touchDisable();					
@@ -199,14 +228,35 @@ int main() {
 								(btn)->touchEnable();
 						HOTBUTTON_ParameterMenus[0].deselectButton(selParamName);
 						HOTBUTTON_DisplayObjectMenu.deselectButton(selDispObjName);
-						DASHBOARD_Gauges.emplace_back(width/2, height/2-30, (height-30)/2, "RPMGauge");
-						DASHBOARD_Gauges.back().draw();	
+
+						// Add PID to PID vector
+						DASHBOARD_PIDs.emplace_back(selParamName);
+						p = DASHBOARD_PIDs.begin();
+
+						if(selDispObjName.compare("Gauge") == 0) {
+							DASHBOARD_Gauges.emplace_back(gaugeCenterX, gaugeCenterY, gaugeRadius, selParamName.append("Gauge"));
+							DASHBOARD_Gauges.back().draw();
+							DASHBOARD_Gauges.back().touchEnable();
+						}
+				
 					}
 				}
 
-				for(std::vector<Gauge>::iterator gauge = DASHBOARD_Gauges.begin(); gauge != DASHBOARD_Gauges.end(); gauge++) {
-					(gauge)->update(TestPID.getRawDatum(), "RPM");
+				if(DASHBOARD_Gauges.size()>0) {
+					std::vector<PID>::iterator currentPID = DASHBOARD_PIDs.begin();
+					for(std::vector<Gauge>::iterator currentGauge = DASHBOARD_Gauges.begin(); currentGauge != DASHBOARD_Gauges.end(); currentGauge++) {
+						(currentGauge)->update((currentPID)->getRawDatum(), "RPM");
+						(currentGauge)->updateTouch(loopTouch);
+						if((currentGauge)->isPressed()) {
+							DASHBOARD_Gauges.erase(currentGauge);
+							DASHBOARD_PIDs.erase(currentPID);
+							break;
+						}
+
+						currentPID++;
+					}
 				}
+				
 
 				if(Mode1Menu.isButtonPressed("m2")) {
 					Mode1Menu.selectButton("m2");
@@ -246,8 +296,7 @@ int main() {
 				loopTouch = threadTouch;
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 				
-				TestPID.update("010541 05 26", loopTime);
-				cout << "TestPID value" << TestPID.getRawDatum() << endl;
+
 
 
 

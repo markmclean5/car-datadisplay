@@ -47,7 +47,7 @@ private:
 	float textColorAlpha;
 	float selectedTextColor[4];
 	float selectedTextColorAlpha;
-	int textFontSize;
+	float textFontSize;
 	char textVertAlign;
 	string text;
 	bool containsText;

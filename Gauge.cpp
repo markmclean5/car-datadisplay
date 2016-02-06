@@ -7,8 +7,10 @@
 #include "fontinfo.h"		// OpenVG
 #include "shapes.h"			//
 #include <cmath>			// Math (float remainder operation)
-#include "TouchableObject.h"
+
 #include "EGL/egl.h"		// EGL for pbuffers
+#include "TouchableObject.h"
+#include "DisplayableObject.h"
 #include "Gauge.h"			// Gauge 
 #include <stdio.h>
 #include <fstream>
@@ -105,42 +107,9 @@ void Gauge::configure(string ident) {
 // Gauge Draw Method
 void Gauge::draw(void)
 {
+	EGLSurface bufferSurface = createBufferSurface(2*radius, 2*radius, &GaugeBuffer);
 
-	GaugeBuffer = vgCreateImage(VG_sABGR_8888, 2*radius, 2*radius, VG_IMAGE_QUALITY_BETTER);
-
-	realDisplay = eglGetCurrentDisplay();
-	if(realDisplay == EGL_NO_DISPLAY) cout << "Failed to get current display" << endl;
-
-	static const EGLint attribute_list[] = {
-		EGL_RED_SIZE, 8,
-		EGL_GREEN_SIZE, 8,
-		EGL_BLUE_SIZE, 8,
-		EGL_ALPHA_SIZE, 8,
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_NONE
-	};
-	result = eglChooseConfig(realDisplay, attribute_list, &config, 1, &num_config);
-	if(result == EGL_FALSE) cout << "Failed to choose config" << endl;
-	realSurface = eglGetCurrentSurface(EGL_DRAW);
-	if(realSurface == EGL_NO_SURFACE) cout << "Failed to get current surface" << endl;
-	realContext = eglGetCurrentContext();
-	if(realContext == EGL_NO_CONTEXT) cout << "Failed to get current context" << endl;
-	static const EGLint surfAttr[] = {
-		EGL_HEIGHT, radius*2,
-		EGL_WIDTH, radius*2,
-		EGL_NONE
-	};
-	mySurface = eglCreatePbufferFromClientBuffer (realDisplay, EGL_OPENVG_IMAGE, (EGLClientBuffer)GaugeBuffer, config, surfAttr);
-	if(mySurface == EGL_NO_SURFACE) cout << "Failed to create pbuffer surface" << endl;
-
-	// Switch to pbuffer surface
-	result = eglMakeCurrent(realDisplay, mySurface, mySurface, realContext);
-	if(result == EGL_FALSE) cout << "Failed to make new display current" << endl;
-	
-	float surfaceBackgroundColor[4];
-	RGBA(0, 0, 0, 0, surfaceBackgroundColor);
-	vgSetfv(VG_CLEAR_COLOR, 4, surfaceBackgroundColor);
-	vgClear(0, 0, radius*2, radius*2);
+	switchToBufferSurface(bufferSurface);
 
 	vgTranslate(radius-centerX, radius-centerY);
 
@@ -183,11 +152,7 @@ void Gauge::draw(void)
 
 	vgTranslate(centerX-radius, centerY-radius);
 
-	// Switch back to original surface
-	eglMakeCurrent(realDisplay, realSurface, realSurface, realContext);
-	if(result == EGL_FALSE) cout << "Failed to make original display current" << endl;
-
-	
+	switchToDisplaySurface();	
 }
 
 void Gauge::update(float value, std::string units)

@@ -39,6 +39,13 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	configureButtons = false;
 	timedSelectionStart = bcm2835_st_read();
 	timedSelectionEnd = 0;
+	prevBtnSelectionStart = timedSelectionStart;
+	prevBtnSelectionEnd = 0;
+	nextBtnSelectionStart = timedSelectionStart;
+	nextBtnSelectionEnd = 0;
+
+	timedSelectDuration = 250;
+
 	bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
 	bufferSaved = false;
 	titled = false;
@@ -75,8 +82,9 @@ void Menu::update(touch_t menuTouch) {
 		if((menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && menuButtons[idx].isSelected()) {
 			menuButtons[idx].deselect();
 			bufferSaved = false;
+			//buttonSelectStates[idx] = false;
 		}
-		buttonSelectStates[idx] = menuButtons[idx].isSelected();		
+	
 	}
 	
 
@@ -84,8 +92,8 @@ void Menu::update(touch_t menuTouch) {
 	if(scrollable && prevButton && previousBtn->isPressed()) {
 		cout << "prev btn pressed" << endl;
 		uint64_t currentTime = bcm2835_st_read();
-		timedSelectionStart = currentTime;
-		timedSelectionEnd = timedSelectionStart + (1000*timedSelectDuration);
+		prevBtnSelectionStart = currentTime;
+		prevBtnSelectionEnd = prevBtnSelectionStart + (1000*timedSelectDuration);
 		previousBtn->select();
 
 		if(menuItemsRemaining < totalItems){
@@ -97,6 +105,11 @@ void Menu::update(touch_t menuTouch) {
 		for(;currentButton<=activeButtons;currentButton++) {
 			menuButtons[currentButton-1].setName(buttonNames[topMenuItemIndex+currentButton-1]);
 			menuButtons[currentButton-1].setText(buttonCfgText[topMenuItemIndex+currentButton-1]);
+			// Fix for selection between pages??
+
+			if(buttonSelectStates[topMenuItemIndex+currentButton-1]) menuButtons[currentButton-1].select();
+			else menuButtons[currentButton-1].deselect();
+
 		}
 		bufferSaved = false;
 	}
@@ -104,8 +117,8 @@ void Menu::update(touch_t menuTouch) {
 	// Next button pressed
 	if(scrollable && nextButton && nextBtn->isPressed()) {
 		uint64_t currentTime = bcm2835_st_read();
-		timedSelectionStart = currentTime;
-		timedSelectionEnd = timedSelectionStart + (1000*timedSelectDuration);
+		nextBtnSelectionStart = currentTime;
+		nextBtnSelectionEnd = nextBtnSelectionStart + (1000*timedSelectDuration);
 		nextBtn->select();
 		if(menuItemsRemaining >= scrollItems){
 			topMenuItemIndex += scrollItems;
@@ -116,16 +129,19 @@ void Menu::update(touch_t menuTouch) {
 		for(;currentButton<=activeButtons;currentButton++) {
 			menuButtons[currentButton-1].setName(buttonNames[topMenuItemIndex+currentButton-1]);
 			menuButtons[currentButton-1].setText(buttonCfgText[topMenuItemIndex+currentButton-1]);
+			if(buttonSelectStates[topMenuItemIndex+currentButton-1]) menuButtons[currentButton-1].select();
+			else menuButtons[currentButton-1].deselect();
+
 		}
 		bufferSaved = false;
 	}
 
 
-	if(scrollable && prevButton && (menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && previousBtn->isSelected()) {
+	if(scrollable && prevButton && (currentTime >= prevBtnSelectionEnd) && previousBtn->isSelected()) {
 			previousBtn->deselect();
 			bufferSaved = false;
 	}
-	if(scrollable && nextButton && (menuSelectMode.compare("timed") == 0) && (currentTime >= timedSelectionEnd) && nextBtn->isSelected()) {
+	if(scrollable && nextButton && (currentTime >= nextBtnSelectionEnd) && nextBtn->isSelected()) {
 			nextBtn->deselect();
 			bufferSaved = false;
 	}
@@ -227,6 +243,8 @@ void Menu::configure(string ident) {
 		buttonNames = new string[totalItems];
 		buttonCfgText = new string[totalItems];
 		buttonSelectStates = new bool[totalItems];
+		for(int b = 0; b<totalItems; b++)
+			buttonSelectStates[b]= false;
 		activeButtons = numButtons;
 		menuButtons.reserve(numButtons);
 		buttonPadding = parseInt(cfg, menuName, "buttonPadding");
@@ -311,7 +329,7 @@ void Menu::configure(string ident) {
 				menuButtons[b].setPressDebounce(pressDebounce);
 				menuButtons[b].touchEnable();
 				menuButtons[b].deselect();
-				buttonSelectStates[b] = false;
+				
 			}
 			else
 				menuButtons.emplace_back(buttonCenterX, buttonCenterY, buttonWidth, buttonHeight, menuName+"."+ buttonScope + std::to_string(currentButton));
@@ -391,6 +409,8 @@ void Menu::selectButton(string name) {
 				cout << "Deselecting: " << idx << endl; 
 			}
 		}
+		for(int b = 0; b<totalItems;b++)
+			buttonSelectStates[b] = false;
 		menuButtons[getVectorIndex(name)].select();
 	}
 	else if(menuSelectMode.compare("timed") == 0) {
@@ -402,6 +422,7 @@ void Menu::selectButton(string name) {
 		}
 		
 	}
+	buttonSelectStates[getVectorIndex(name)+topMenuItemIndex] = true;
 	bufferSaved = false;
 
 }
@@ -409,6 +430,7 @@ void Menu::selectButton(string name) {
 /* Deselects the first button which matches the provided name */
 void Menu::deselectButton(string name) {
 	menuButtons[getVectorIndex(name)].deselect();
+	buttonSelectStates[getVectorIndex(name)+topMenuItemIndex] = true;
 	bufferSaved = false;
 }
 

@@ -2,8 +2,9 @@
 #define GAUGE_H
 
 #include "TouchableObject.h"
+#include "DisplayableObject.h"
 
-class Gauge: public TouchableObject{
+class Gauge: public TouchableObject, DisplayableObject{
 private:
 	// Gauge itself
 	VGImage GaugeBuffer;		// Now going to be the VGImage buffer for "off-screen surface"
