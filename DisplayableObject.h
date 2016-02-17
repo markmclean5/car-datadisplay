@@ -24,6 +24,13 @@ private:
 	EGLBoolean result;				// Boolean used to store result of EGL calls
 	EGLConfig config;				// Frame buffer configuration (eglChooseConfig)
 
+	
+
+
+	// DisplayableObject position on screen
+	int centerX;
+	int centerY;
+
 public:
 	DisplayableObject(void);			// DisplayableObject constructor
 
@@ -35,6 +42,17 @@ public:
 
 	void drawBuffer(int, int, int, int, VGImage);
 
+	int getDOPosX(void);
+	int getDOPosY(void);
+
+	void setVisible(void);
+	void setInvisible(void);
+
+	bool isVisible(void);
+
+protected:
+	void setDOPos(int, int);
+	bool visible;
 
 	
 };

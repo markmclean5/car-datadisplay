@@ -26,6 +26,8 @@ using namespace std;
 #include "Menu.h"
 #include "Serial.h"
 #include "PID.h"
+#include <algorithm>
+
 
 
 // Loop time
@@ -38,10 +40,17 @@ VGImage BackgroundImage;
 // Prototypes
 void setupGraphics(int*,int*);
 
+void DisplayObjectManager(std::vector<Button>&, std::vector<Gauge>&, std::vector<PID>&, std::vector<Menu>&);
+
+
 //Dashboard mode vectors
 vector<Button> DASHBOARD_HotButtons;
 vector<Gauge> DASHBOARD_Gauges;
 vector<PID> DASHBOARD_PIDs;
+vector<Menu> DASHBOARD_Menus;
+
+
+
 
 // Color definitions (float r, float g, float b, float alpha)
 float black[] = {0,0,0,1};
@@ -66,6 +75,11 @@ int main() {
 		exit(1);
 	}
 
+	DASHBOARD_Menus.reserve(4);
+	DASHBOARD_HotButtons.reserve(4);
+	DASHBOARD_PIDs.reserve(4);
+	DASHBOARD_Gauges.reserve(4);
+
 	// Draw background
 	Image(0, 0, 800, 480, "/home/pi/openvg/client/wallpaper.jpg");
 	BackgroundImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
@@ -81,25 +95,6 @@ int main() {
 	ELMSerial.serialWrite("ATZ");
 	ELMSerial.setEndChar('>');
 	ELMSerial.setReadTimeout(5000);
-
-
-
-	///////////////////////////////////////
-	// Dashboard Objects
-	///////////////////////////////////////
-	// Hot Buttons
-	DASHBOARD_HotButtons.emplace_back(width/6, (height/2) - 30, 80, 80, "hotBtn1");
-	DASHBOARD_HotButtons.emplace_back(width/2, (height/2) - 30, 80, 80, "hotBtn2");
-	DASHBOARD_HotButtons.emplace_back(width - width/6, (height/2) - 30, 80, 80, "hotBtn3");
-	// Group Menu - Select group of parameters
-	Menu HOTBUTTON_GroupMenu(width/6, (height/2)-30, (width/3) - 10, height-70, "HOTBUTTON_GroupMenu");
-	string groupName = "g1";
-	HOTBUTTON_GroupMenu.selectButton(groupName);
-	// Menu vector for Parameter Menu (of current selected group)
-	vector<Menu> HOTBUTTON_ParameterMenus;
-	HOTBUTTON_ParameterMenus.emplace_back(width/2, (height/2)-30, (width/3)- 10, height-70, groupName);
-	// Display Object Menu (choose display method)
-	Menu HOTBUTTON_DisplayObjectMenu(width-width/6, (height/2)-30, (width/3)- 10, height-70, "HOTBUTTON_DisplayObjectMenu");
 
 	//////////////////////////////////////
 	// Main Execution Loop
@@ -122,9 +117,9 @@ int main() {
 		// Mode 1 - DASHBOARD
 		//////////////////////////////////////
 		if(Mode1Menu.isButtonSelected("m1")) {
-			for (std::vector<Button>::iterator it = DASHBOARD_HotButtons.begin(); it != DASHBOARD_HotButtons.end(); it++)
-				(it)->touchEnable();
-
+			
+			TextView SerialViewer(width/3 - width/6, height/2, width/3, 360, "SerialViewer");
+			int numPIDs = 0;
 
 			// Set up iterator for PID vector
 			bool waitingOnData = false;
@@ -135,20 +130,26 @@ int main() {
 
 			ELMSerial.serialWrite("ATZ");
 			string serialData = "";
+
+			int newObjectCenterX = width/2;
+			int newObjectCenterY = height/2;
+
+
 			int gaugeCenterX = width/2;
-			int gaugeCenterY = height/2;
-			int gaugeRadius = height/2 - 60;
+			int gaugeCenterY = height/2-30;
+			int gaugeRadius = height/2 - 80;
 
 			while(1) {
+
+
+				if(DASHBOARD_PIDs.size() != numPIDs) {
+					numPIDs = DASHBOARD_PIDs.size();
+					p = DASHBOARD_PIDs.begin();
+				}
+				
 				loopTime = bcm2835_st_read();
 				loopTouch = threadTouch;
-
-
-
-
 				serialData = ELMSerial.serialReadUntil();
-
-
 				// Request data if: no pending request
 				if(!waitingOnData && DASHBOARD_PIDs.size()>0) {
 					ELMSerial.serialWrite((p)->getCommand());
@@ -158,6 +159,7 @@ int main() {
 				else if(waitingOnData && !serialData.empty() && DASHBOARD_PIDs.size()>0) {
 					waitingOnData = false;
 					(p)->update(serialData, loopTime);
+					SerialViewer.addNewLine((p)->getCommand() + " - " + to_string((p)->getRawUpdateRate()) + " Hz");
 
 					if(p<DASHBOARD_PIDs.end()) p++;
 					if(p == DASHBOARD_PIDs.end()) p = DASHBOARD_PIDs.begin();
@@ -167,96 +169,42 @@ int main() {
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 				Mode1Menu.update(loopTouch);
 
-				// Manage hot buttons
+
+				// Update all hot buttons
 				for (std::vector<Button>::iterator it = DASHBOARD_HotButtons.begin(); it != DASHBOARD_HotButtons.end(); it++) {
 					(it)->updateTouch(loopTouch);
 					(it)->update();
-					if((it)->isPressed()) (it)->select();
-
-					// if hot button pressed, draw the menu
-					if((it)->isReleased() && !menuVisible) {
-							(it)->deselect();
-							menuVisible = true;
-							for(std::vector<Button>::iterator btn = DASHBOARD_HotButtons.begin(); btn != DASHBOARD_HotButtons.end(); btn++)
-								(btn)->touchDisable();					
-					}
 				}
 
-				if(menuVisible) {
-					HOTBUTTON_GroupMenu.update(loopTouch);
-					string groupNamePressed = "";
-					groupNamePressed= HOTBUTTON_GroupMenu.getPressedButtonName();
-					if(!groupNamePressed.empty()) {
-						HOTBUTTON_GroupMenu.selectButton(groupNamePressed);
-						if(groupNamePressed.compare(groupName) != 0) {
-							groupName = groupNamePressed;
-
-							if(HOTBUTTON_ParameterMenus.size()>0)
-								HOTBUTTON_ParameterMenus.erase(HOTBUTTON_ParameterMenus.end());
-							HOTBUTTON_ParameterMenus.emplace_back(width/2, (height/2)-30, (width/3)- 10, height-70, groupName);
-						}
-					}
-					if(HOTBUTTON_ParameterMenus.size()>0) {
-						for(std::vector<Menu>::iterator m = HOTBUTTON_ParameterMenus.begin(); m != HOTBUTTON_ParameterMenus.end(); m++) {
-							(m)->update(loopTouch);
-							string parameterPressed = "";
-							parameterPressed = (m)->getPressedButtonName();
-							if(!parameterPressed.empty()) {
-								(m)->selectButton(parameterPressed);
-							}
-						}
-					}
-					HOTBUTTON_DisplayObjectMenu.update(loopTouch);
-					string buttonName = HOTBUTTON_DisplayObjectMenu.getPressedButtonName();
-					if(!buttonName.empty()) HOTBUTTON_DisplayObjectMenu.selectButton(buttonName);
-
-
-
-					string selGroupName = HOTBUTTON_GroupMenu.getSelectedButtonName();
-					string selParamName = HOTBUTTON_ParameterMenus[0].getSelectedButtonName();
-					string selDispObjName = HOTBUTTON_DisplayObjectMenu.getSelectedButtonName();
-
-					if(!selGroupName.empty() && !selParamName.empty() && !selDispObjName.empty()) {
-						cout << "Selection complete!" << endl;
-						cout << "Group: " << selGroupName << endl;
-						cout << "Parameter: " << selParamName << endl;
-						cout << "Display Object: " << selDispObjName << endl;
-
-
-						menuVisible = false;
-						for(std::vector<Button>::iterator btn = DASHBOARD_HotButtons.begin(); btn != DASHBOARD_HotButtons.end(); btn++)
-								(btn)->touchEnable();
-						HOTBUTTON_ParameterMenus[0].deselectButton(selParamName);
-						HOTBUTTON_DisplayObjectMenu.deselectButton(selDispObjName);
-
-						// Add PID to PID vector
-						DASHBOARD_PIDs.emplace_back(selParamName);
-						p = DASHBOARD_PIDs.begin();
-
-						if(selDispObjName.compare("Gauge") == 0) {
-							DASHBOARD_Gauges.emplace_back(gaugeCenterX, gaugeCenterY, gaugeRadius, selParamName.append("Gauge"));
-							DASHBOARD_Gauges.back().draw();
-							DASHBOARD_Gauges.back().touchEnable();
-						}
 				
+
+				// Update all gauges
+				for (std::vector<Gauge>::iterator it = DASHBOARD_Gauges.begin(); it != DASHBOARD_Gauges.end(); it++) {
+					(it)->updateTouch(loopTouch);
+					string name = (it)->getPIDLink();
+					cout << "Current Gauge PID Link: " << name << endl;
+					auto CurrentGaugePID_It = find_if(DASHBOARD_PIDs.begin(), DASHBOARD_PIDs.end(), [&name](PID& obj) {return obj.getCommand().compare(name) == 0;});
+					if(CurrentGaugePID_It == DASHBOARD_PIDs.end()) {
+						cout << "PID Not found" << endl;
+						(it)->update(0,"RPM");
+					} 
+					else {			
+						(it)->update((CurrentGaugePID_It)->getRawDatum(), (CurrentGaugePID_It)->getEngUnits());
 					}
+					
+					
 				}
 
-				if(DASHBOARD_Gauges.size()>0) {
-					std::vector<PID>::iterator currentPID = DASHBOARD_PIDs.begin();
-					for(std::vector<Gauge>::iterator currentGauge = DASHBOARD_Gauges.begin(); currentGauge != DASHBOARD_Gauges.end(); currentGauge++) {
-						(currentGauge)->update((currentPID)->getRawDatum(), "RPM");
-						(currentGauge)->updateTouch(loopTouch);
-						if((currentGauge)->isPressed()) {
-							DASHBOARD_Gauges.erase(currentGauge);
-							DASHBOARD_PIDs.erase(currentPID);
-							break;
-						}
+				SerialViewer.update();
 
-						currentPID++;
-					}
+
+				// Update all menus
+				for (std::vector<Menu>::iterator it = DASHBOARD_Menus.begin(); it != DASHBOARD_Menus.end(); it++) {
+					(it)->update(loopTouch);
 				}
-				
+
+				DisplayObjectManager(DASHBOARD_HotButtons, DASHBOARD_Gauges, DASHBOARD_PIDs, DASHBOARD_Menus);
+
 
 				if(Mode1Menu.isButtonPressed("m2")) {
 					Mode1Menu.selectButton("m2");
@@ -274,6 +222,9 @@ int main() {
 					Mode1Menu.selectButton("m5");
 					break;
 				}
+
+				//VGErrorCode error = vgGetError();
+				//if(error != VG_NO_ERROR) cout << "************************************* Error!!! : " << error << endl;
 				End();
 			}
 
@@ -283,6 +234,7 @@ int main() {
 		// Mode 5 - COMM
 		//////////////////////////////////////
 		if(Mode1Menu.isButtonSelected("m5")) {
+			/*
 			TextView SerialViewer(width/4, height/2, width/2-20, 360, "SerialViewer");
 			Menu SerialViewerMenu(width/4, 30, width/2-20, 50, "SerialViewerMenu");
 			Menu PIDMenu = Menu(width-width/4, height/2, width/2-20, 360, "PIDMenu1");
@@ -291,16 +243,16 @@ int main() {
 			SerialViewerMenu.touchEnable();
 			PIDMenu.touchEnable();
 
+			*/
 			while(1) {
 				loopTime = bcm2835_st_read();
 				loopTouch = threadTouch;
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
+
 				
-
-
-
-
 				Mode1Menu.update(loopTouch);
+
+				/*
 				SerialViewerMenu.update(loopTouch);
 				PIDMenu.update(loopTouch);
 
@@ -344,6 +296,8 @@ int main() {
 					cout << endl;
 					SerialViewer.addNewLine(data, receivecolor);
 				}
+
+				*/
 				if(Mode1Menu.isButtonPressed("m1")) {
 					Mode1Menu.selectButton("m1");
 					break;
@@ -369,6 +323,142 @@ int main() {
 	}
 }
 
+
+
+
+void DisplayObjectManager(std::vector<Button>& HotButtons, std::vector<Gauge>& Gauges, std::vector<PID>& PIDs, std::vector<Menu>& Menus){
+
+	int width = 800;
+	int height = 480;
+	// Create & touch enable hotbuttons if no buttons or gauges exist
+	if(HotButtons.size() == 0 && Gauges.size() == 0) {
+		HotButtons.emplace_back(800/6, (480/2) - 30, 80, 80, "hotBtn1");
+		HotButtons.back().touchEnable();
+		HotButtons.emplace_back(800/2, (480/2) - 30, 80, 80, "hotBtn2");
+		HotButtons.back().touchEnable();
+		HotButtons.emplace_back(800 - 800/6, (480/2) - 30, 80, 80, "hotBtn3");
+		HotButtons.back().touchEnable();
+	}
+
+
+	std::vector<Button>::iterator selectedHotbutton_It = HotButtons.end();
+
+	// Handle all hot button logic here
+	for (std::vector<Button>::iterator currentHotButton = HotButtons.begin(); currentHotButton != HotButtons.end(); currentHotButton++) {
+		if(currentHotButton->isPressed()) currentHotButton->select();
+
+		// When hotbutton is released, disable touch on hotbuttons & display objects
+		// Also create parameter selection menus
+		if(currentHotButton->isReleased()) {
+			for (std::vector<Button>::iterator hb = HotButtons.begin(); hb != HotButtons.end(); hb++)
+				hb->touchDisable();
+			for (std::vector<Gauge>::iterator g = Gauges.begin(); g != Gauges.end(); g++)
+				g->touchDisable();
+			Menus.emplace_back(width/6, (height/2)-30, (width/3) - 10, height-70, "HOTBUTTON_GroupMenu");
+			string defaultGroup = "g1";
+			Menus.back().selectButton(defaultGroup);
+			Menus.emplace_back(width-width/6, (height/2)-30, (width/3)- 10, height-70, "HOTBUTTON_DisplayObjectMenu");
+			cout << "default group: " << defaultGroup << endl;
+			Menus.emplace_back(width/2, (height/2)-30, (width/3)- 10, height-70, defaultGroup);
+		}
+
+		// If hotbutton is selected - set selected button iterator
+		if(currentHotButton->isSelected()) selectedHotbutton_It = currentHotButton;
+	}
+
+	// Create menus if menus are not present
+	if(Menus.size() != 0) {
+
+		string name = "HOTBUTTON_GroupMenu";
+		auto HOTBUTTON_GroupMenu_It = find_if(Menus.begin(), Menus.end(), [&name](const Menu& obj) {return obj.menuIdentifier.compare(name) == 0;});
+		name = "HOTBUTTON_DisplayObjectMenu";
+		auto HOTBUTTON_DisplayObjectMenu_It = find_if(Menus.begin(), Menus.end(), [&name](const Menu& obj) {return obj.menuIdentifier.compare(name) == 0;});
+		string type = "ParameterMenu";
+		auto HOTBUTTON_ParameterMenu_It = find_if(Menus.begin(), Menus.end(), [&type](const Menu& obj) {return obj.menuType.compare(type) == 0;});
+
+
+		for (std::vector<Menu>::iterator currentMenu = Menus.begin(); currentMenu != Menus.end(); currentMenu++) {
+			string pressedButtonName = currentMenu->getPressedButtonName();
+			if(!pressedButtonName.empty()) currentMenu->selectButton(pressedButtonName);
+		}
+		
+		if(HOTBUTTON_GroupMenu_It->getSelectedButtonName().compare(HOTBUTTON_ParameterMenu_It->menuIdentifier) != 0) {
+			cout << "changing parameter menu to: "<<  HOTBUTTON_GroupMenu_It->getSelectedButtonName() << endl; 
+			Menus.erase(HOTBUTTON_ParameterMenu_It);
+			Menus.emplace_back(width/2, (height/2)-30, (width/3)- 10, height-70, HOTBUTTON_GroupMenu_It->getSelectedButtonName());
+			type = HOTBUTTON_GroupMenu_It->getSelectedButtonName();
+			HOTBUTTON_ParameterMenu_It = find_if(Menus.begin(), Menus.end(), [&type](const Menu& obj) {return obj.menuType.compare(type) == 0;});
+		}
+
+		
+
+
+		// All selections made, add item and PID
+		if(	!HOTBUTTON_GroupMenu_It->getSelectedButtonName().empty()
+			&& !HOTBUTTON_ParameterMenu_It->getSelectedButtonName().empty()
+			&& !HOTBUTTON_DisplayObjectMenu_It->getSelectedButtonName().empty()) {
+
+			cout << "selected group: " << HOTBUTTON_GroupMenu_It->getSelectedButtonName() << endl;
+			cout << "selected parameter: " << HOTBUTTON_ParameterMenu_It->getSelectedButtonName() << endl;
+			cout << "selected display type:" << HOTBUTTON_DisplayObjectMenu_It->getSelectedButtonName() << endl;
+
+			if(HOTBUTTON_DisplayObjectMenu_It->getSelectedButtonName().compare("Gauge") == 0) {
+				cout << "creating a gauge!!" << endl;
+
+				PIDs.emplace_back(HOTBUTTON_ParameterMenu_It->getSelectedButtonName());
+
+				Gauges.emplace_back(selectedHotbutton_It->getDOPosX(), selectedHotbutton_It->getDOPosY(), width/6, HOTBUTTON_ParameterMenu_It->getSelectedButtonName().append("Gauge"));
+				Gauges.back().draw();
+				Gauges.back().touchEnable();
+				// Erase menus in reverse creation order to prevent invalid iterators		
+				Menus.erase(HOTBUTTON_ParameterMenu_It);
+				Menus.erase(HOTBUTTON_DisplayObjectMenu_It);
+				Menus.erase(HOTBUTTON_GroupMenu_It);
+				
+				// Hide the selected hot button and re-enable touch on all other visible buttons
+				for (std::vector<Button>::iterator currentHotButton = HotButtons.begin(); currentHotButton != HotButtons.end(); currentHotButton++) {
+					if(currentHotButton == selectedHotbutton_It) {
+						currentHotButton->deselect();
+						currentHotButton->setInvisible();
+					}
+					else
+						if(currentHotButton->isVisible())
+							currentHotButton->touchEnable();
+				}
+				// Re-enable touch on other display objects
+				for (std::vector<Gauge>::iterator g = Gauges.begin(); g != Gauges.end(); g++)
+					g->touchEnable();
+
+			}
+		}
+	}
+
+
+	// Delete a gauge & corresponding PID when it is pressed and released
+	for (std::vector<Gauge>::iterator currentGauge = Gauges.begin(); currentGauge != Gauges.end(); currentGauge++) {
+		if(currentGauge->isReleased()) {
+			int gX = currentGauge->getDOPosX();
+			int gY = currentGauge->getDOPosY();
+			string PIDLink = currentGauge->getPIDLink();
+			Gauges.erase(currentGauge);
+			for (std::vector<Button>::iterator currentHotButton = HotButtons.begin(); currentHotButton != HotButtons.end(); currentHotButton++) {
+				if(currentHotButton->getDOPosX() == gX && currentHotButton->getDOPosY() == gY) {
+					currentHotButton->setVisible();
+					currentHotButton->touchEnable();
+				}
+			}
+			// Erase corresponding PID
+			auto PID_It = find_if(PIDs.begin(), PIDs.end(), [&PIDLink](const PID& obj) {return obj.command.compare(PIDLink) == 0;});
+			if(PID_It != PIDs.end())
+			PIDs.erase(PID_It);
+			break;
+		}
+	}
+
+}
+
+
+
 // setupGraphics()
 void setupGraphics(int* widthPtr, int* heightPtr) {	
 	init(widthPtr,heightPtr);
@@ -376,9 +466,3 @@ void setupGraphics(int* widthPtr, int* heightPtr) {
 	Background(0,0,0);
 }
 
-
-
-EGLSurface createBufferSurface(int surfaceWidth, int surfaceHeight, VGImage* colorBuffer) {
-
-
-}

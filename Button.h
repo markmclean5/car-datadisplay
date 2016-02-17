@@ -2,13 +2,14 @@
 #define BUTTON_H
 
 #include "TouchableObject.h"
+#include "DisplayableObject.h"
 
 /********************************/
 /*		Button Class			*/
 /********************************/
 using namespace std;
 
-class Button : public TouchableObject {
+class Button : public TouchableObject, public DisplayableObject {
 private:
 
 	VGImage bufferImage;

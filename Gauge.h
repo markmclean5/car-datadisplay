@@ -4,7 +4,7 @@
 #include "TouchableObject.h"
 #include "DisplayableObject.h"
 
-class Gauge: public TouchableObject, DisplayableObject{
+class Gauge: public TouchableObject, public DisplayableObject{
 private:
 	// Gauge itself
 	VGImage GaugeBuffer;		// Now going to be the VGImage buffer for "off-screen surface"
@@ -19,7 +19,7 @@ private:
 
 
 	string gaugeIdentifier;
-	string gaugeGroup;
+	string PIDLink;
 
 	int centerX;
 	int centerY;
@@ -96,7 +96,8 @@ public:
 	void update(float, std::string);			// Update gauge with value		(value, engineering units string)
 
 	string getIdentifier(void);
-	string getGroup(void);
+	string getPIDLink(void);
+
 private:
 	// Internally accessed methods (called within draw / update functions)
 	void drawTickSet(float, float, float, float, float*, bool);			// Draw tick set(s): 

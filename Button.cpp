@@ -35,7 +35,8 @@ Button::Button(string identifier) {
 	configure(buttonIdentifier);
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
-	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner'
+	setDOPos(centerX, centerY);
 	bufferSaved = false;
 }
 
@@ -61,6 +62,7 @@ Button::Button(int cX, int cY, int w, int h, string identifier) {
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+	setDOPos(centerX, centerY);
 }
 
 /* Button Constructor: Use given location and size, call setters for everything else*/
@@ -84,6 +86,7 @@ Button::Button(int cX, int cY, int w, int h) {
 	setRectangular();
 	setRectWidthHeight(readoutWidth, readoutHeight);	// Called by derived class to set rectangular touch area size
 	setRectCenter(centerX, centerY);					// Called by derived class to set rectangular touch area bottom left corner
+	setDOPos(centerX, centerY);
 	
 	//bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
 }
@@ -154,64 +157,60 @@ void Button::configure(string ident) {
 
 /* Button update */
 void Button::update(void) {
-	//cout << "Button update called for : " << buttonIdentifier << endl;
-	updateVisuals();
-	// Handle movement: current position is not desired position
-	if(centerX != getDesiredPosX() || centerY != getDesiredPosY()) {
-		bufferSaved = false;
-		centerX = getDesiredPosX();
-		centerY = getDesiredPosY();
-		bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
-		bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
-	}
-
-
-	if(selected) {
-		setfill(selectedBackgroundColor);
-		StrokeWidth(selectedBorderWidth);
-		setstroke(selectedBorderColor);
-	}
-	else {
-		setfill(backgroundColor);
-		StrokeWidth(borderWidth);
-		setstroke(borderColor);
-	}
-	if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
-	else {
-		float cornerHeight = 0.01 * cornerRadius * rectWidth;
-		Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
-	}
-	if(containsText) {
-		if(selected) setfill(selectedTextColor);
-		else setfill(textColor);
-		StrokeWidth(0);
-		textFontSize = (rectHeight-borderWidth)/2;
-		int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
-		while(textWidth > 0.9*rectWidth) {
-			textFontSize-=0.25;
-			textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+	if(visible) {
+		//cout << "Button update called for : " << buttonIdentifier << endl;
+		updateVisuals();
+		// Handle movement: current position is not desired position
+		if(centerX != getDesiredPosX() || centerY != getDesiredPosY()) {
+			bufferSaved = false;
+			centerX = getDesiredPosX();
+			centerY = getDesiredPosY();
+			bottomLeftX = centerX - (rectWidth+borderWidth/2) / 2;
+			bottomLeftY = centerY - (rectHeight+borderWidth/2) / 2;
 		}
-		if(textVertAlign == 'T')
-		TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize);
-		if(textVertAlign == 'C')
-			TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize);
-		if(textVertAlign == 'B')
-			TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize);
+		if(selected) {
+			setfill(selectedBackgroundColor);
+			StrokeWidth(selectedBorderWidth);
+			setstroke(selectedBorderColor);
+		}
+		else {
+			setfill(backgroundColor);
+			StrokeWidth(borderWidth);
+			setstroke(borderColor);
+		}
+		if(cornerRadius == 0) Rect(bottomLeftX, bottomLeftY, rectWidth, rectHeight);
+		else {
+			float cornerHeight = 0.01 * cornerRadius * rectWidth;
+			Roundrect(bottomLeftX, bottomLeftY, rectWidth, rectHeight, cornerRadius, cornerRadius);
+		}
+		if(containsText) {
+			if(selected) setfill(selectedTextColor);
+			else setfill(textColor);
+			StrokeWidth(0);
+			textFontSize = (rectHeight-borderWidth)/2;
+			int textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+			while(textWidth > 0.9*rectWidth) {
+				textFontSize-=0.25;
+				textWidth = TextWidth((char*)text.c_str(), SansTypeface, textFontSize);
+			}
+			if(textVertAlign == 'T')
+			TextMid(centerX, bottomLeftY+rectHeight-textFontSize, (char*)text.c_str(), SansTypeface, textFontSize);
+			if(textVertAlign == 'C')
+				TextMid(centerX, centerY-textFontSize/2, (char*)text.c_str(), SansTypeface, textFontSize);
+			if(textVertAlign == 'B')
+				TextMid(centerX, bottomLeftY+borderWidth, (char*)text.c_str(), SansTypeface, textFontSize);
+		}
+		if(containsValue) {
+			if(selected) setfill(selectedValueColor);
+			else setfill(valueColor);
+			if(valueVertAlign == 'T')
+				TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			if(valueVertAlign == 'C')
+				TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+			if(valueVertAlign == 'B')
+				TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
+		}
 	}
-	if(containsValue) {
-		if(selected) setfill(selectedValueColor);
-		else setfill(valueColor);
-		if(valueVertAlign == 'T')
-			TextMid(centerX, bottomLeftY+rectHeight-valueFontSize, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-		if(valueVertAlign == 'C')
-			TextMid(centerX, centerY-valueFontSize/2, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-		if(valueVertAlign == 'B')
-			TextMid(centerX, bottomLeftY+borderWidth, (char*)valueString.c_str(), SansTypeface, valueFontSize-2);
-	}
-	
-
-
-
 }
 
 void Button::setCornerRadius(int rad)

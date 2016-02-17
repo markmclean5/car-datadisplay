@@ -22,6 +22,7 @@ using namespace config4cpp;
 
 
 PID::PID(string PIDid) {
+	cout << "PID created: " << PIDid << endl; 
 
 	id = PIDid;
 	debug = false;
@@ -112,6 +113,8 @@ void PID::configure(string ident) {
 		cout << ex.c_str() << endl;
 	}
 	cfg->destroy();
+
+	cout << "Current range at end of configure: " << currentRange << endl;
 }
 
 
@@ -121,13 +124,12 @@ string PID::getCommand(void) {
 
 
 // Getters: DataStream outputs
-string PID::getEngUnits(void)
-{
+string PID::getEngUnits(void) {
 	return EngUnits[currentRange-1];
 }
 
-float PID::getRawDatum(void)
-{
+float PID::getRawDatum(void) {
+	cout << "get raw datum called for "<< getCommand() <<"  - range: " << currentRange << endl;
 	float* currentSimpleMAData = simpleMAData[currentRange-1];
 	return currentSimpleMAData[simpleMALag[currentRange-1]-1];			// returns most recent value
 }
@@ -177,6 +179,7 @@ float PID::getReadoutUpdateRate(void)
 }
 
 void PID::update (string serialData, uint64_t updateTime) {
+	cout << "PID update called for: " << getCommand() << endl;
 	currentTime = updateTime;
 	uint64_t timeDelta = currentTime - lastTime;
 	lastTime = currentTime;
@@ -185,85 +188,85 @@ void PID::update (string serialData, uint64_t updateTime) {
 	responseID[0] = '4';
 	if(!serialData.empty()){
 		// Remove spaces from serial data string (this might not work)
-	std::string::iterator end_pos = std::remove(serialData.begin(), serialData.end(), ' ');
-	serialData.erase(end_pos, serialData.end());
-
-
+		std::string::iterator end_pos = std::remove(serialData.begin(), serialData.end(), ' ');
+		serialData.erase(end_pos, serialData.end());
 		size_t found = serialData.find(responseID);
 		if(found != std::string::npos) {
 			float value = 0;
 			string dataByteString = serialData.substr(found+4, numDataBytes*2);
 			cout << "Data Byte String - " << dataByteString << endl;
-			
 			cout << "num data bytes: " << numDataBytes << endl;
 			for(int i=0;i<numDataBytes;i++) {
-			
 				cout << "byte gain " << byteGain[i] << endl;
 				cout << "byte offset " << byteOffset[i] << endl;
 				cout << " substring " <<  dataByteString.substr(2*i, 2).c_str() << endl;
 				cout << "stroutl " << strtoul(dataByteString.substr(2*i, 2).c_str(), NULL, 16) << endl;
-
 				value += (byteGain[i]*strtoul(dataByteString.substr(2*i, 2).c_str(), NULL, 16) + byteOffset[i]);
-
 				cout << "value before total " << value << endl;
 			}
-
 			cout << "TotalGain " << TotalGain << endl;
 			cout << "TotalOffset " << TotalOffset << endl;
 			value = (value*TotalGain) + TotalOffset;
-			
 			cout << " Value calculated to be: " << value <<endl;
-
-					// Now find out which range the  value belongs to
-		int range = 0;
-		bool rangeFound = false;
-		while(!rangeFound) {
-			if(range==numRanges) break;
-			if(debug) {
-				cout << "Checking if data fits within range # " << range+1 << endl;
-				cout << "Range start: " << rangeStart[range] << endl;
-				cout << "Range stop: " << rangeStop[range] << endl;
-			}	
-			if(((value>=rangeStart[range]) && (value<rangeStop[range])) ||
-				((value>=rangeStop[range]) && (value<rangeStart[range]))) {
-				if(debug) cout << "Data found in range # " << range+1 << endl;
-				lastRange = currentRange;
-				currentRange = range+1;
-				rangeFound = true;
+			// Now find out which range the  value belongs to
+			int range = 0;
+			bool rangeFound = false;
+			while(!rangeFound) {
+				if(range==numRanges) break;
+				if(debug) {
+					cout << "Checking if data fits within range # " << range+1 << endl;
+					cout << "Range start: " << rangeStart[range] << endl;
+					cout << "Range stop: " << rangeStop[range] << endl;
+				}	
+				if(((value>=rangeStart[range]) && (value<rangeStop[range])) ||
+					((value>=rangeStop[range]) && (value<rangeStart[range]))) {
+					if(debug) cout << "Data found in range # " << range+1 << endl;
+					lastRange = currentRange;
+					currentRange = range+1;
+					rangeFound = true;
+				}
+				range++;
 			}
-			range++;
-		}
-		if(rangeFound==true) {
-			value = value * rangeScaling[currentRange-1];	// Apply scaling of current range
-			if(debug) cout << "Value scaled to range: " << value <<endl;
-			if(debug) cout << "Renge units: " << EngUnits[currentRange-1] << endl;
-			float* currentSimpleMAData = simpleMAData[currentRange-1];
-			float* currentWeightedMAData = weightedMAData[currentRange-1];
-			// If the range has changed this time around, reset MA data to current value
-			int idx;
-			if(currentRange!=lastRange) {
-				idx = 0;
-				for(;idx<simpleMALag[currentRange-1];idx++) currentSimpleMAData[idx] = value;
-				idx = 0;
-				for(;idx<weightedMALag[currentRange-1];idx++) currentWeightedMAData[idx] = value;
+			if(rangeFound==true) {
+				value = value * rangeScaling[currentRange-1];	// Apply scaling of current range
+				if(debug) cout << "Value scaled to range: " << value <<endl;
+				if(debug) cout << "Renge units: " << EngUnits[currentRange-1] << endl;
+				float* currentSimpleMAData = simpleMAData[currentRange-1];
+				float* currentWeightedMAData = weightedMAData[currentRange-1];
+				// If the range has changed this time around, reset MA data to current value
+				int idx;
+				if(currentRange!=lastRange) {
+					idx = 0;
+					for(;idx<simpleMALag[currentRange-1];idx++) currentSimpleMAData[idx] = value;
+					idx = 0;
+					for(;idx<weightedMALag[currentRange-1];idx++) currentWeightedMAData[idx] = value;
+				}
+				// Shift all simple MA data values down one, put current value in last position
+				idx = 1;							
+				for(;idx<simpleMALag[currentRange-1];idx++)
+					currentSimpleMAData[idx-1] = currentSimpleMAData[idx];	// Shift data, overwrite oldest
+				currentSimpleMAData[simpleMALag[currentRange-1]-1] = value;	// Add latest value to array
+				// Shift all weighted MA data values down one, put current value in last position
+				idx = 1;
+				for(;idx<weightedMALag[currentRange-1];idx++)	
+					currentWeightedMAData[idx-1] = currentWeightedMAData[idx];	// Shift data, overwrite oldest
+				currentWeightedMAData[weightedMALag[currentRange-1]-1] = value;	// Add latest value to array
 			}
-			// Shift all simple MA data values down one, put current value in last position
-			idx = 1;							
-			for(;idx<simpleMALag[currentRange-1];idx++)
-				currentSimpleMAData[idx-1] = currentSimpleMAData[idx];	// Shift data, overwrite oldest
-			currentSimpleMAData[simpleMALag[currentRange-1]-1] = value;	// Add latest value to array
-			// Shift all weighted MA data values down one, put current value in last position
-			idx = 1;
-			for(;idx<weightedMALag[currentRange-1];idx++)	
-				currentWeightedMAData[idx-1] = currentWeightedMAData[idx];	// Shift data, overwrite oldest
-			currentWeightedMAData[weightedMALag[currentRange-1]-1] = value;	// Add latest value to array
-
-		}
-		else cout << "Error: Data not inside any range. " << endl;
+			else {
+				cout << "Error: Data not inside any range. " << endl;
+				currentRange=1;
+			}
 		}
 
 
 	}
+
+	else {
+		currentRange = 1;
+		cout << "PID updated without data" << endl;
+	}
+
+	cout << "At end of PID update: current range: " << currentRange << endl;
 }
 
 

@@ -13,7 +13,6 @@ using namespace std;
 
 class Menu : public TouchableObject {
 private:
-	string menuIdentifier;
 	VGImage bufferImage;
 	bool bufferSaved;
 	int width, height, borderWidth, centerX, centerY;
@@ -88,15 +87,13 @@ private:
 	uint64_t nextBtnSelectionStart;
 	uint64_t nextBtnSelectionEnd;
 
-
-
-
-
 	void configure(string);					// Menu configuration
 	int getVectorIndex(string);
 	vector<Button> menuButtons;
 
 public:
+	string menuIdentifier;
+	string menuType;
 	Menu(int, int, int, int, string);		// Menu Constructor: center X, center Y, width, height, identifier
 	
 	void update(touch_t);					// Menu update function: draws menu & updates buttons with provided touch data
@@ -111,6 +108,8 @@ public:
 	void hide(void);						// Hide (and or fade) the menu
 	void unhide(void);						// Un-hide (and or un-fade) the menu
 	bool isHidden(void);					// Get menu hide state
+	~Menu(void);							// Menu destructor (destroys vgImage)
+	//Menu(const Menu &);
 
 };
 

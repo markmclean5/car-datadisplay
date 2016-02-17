@@ -21,6 +21,7 @@ using namespace config4cpp;
 /*	Menu constructor: creates menu about provided center coordinate with provided size
 	and configures menu using identifier string. */
 Menu::Menu(int cx, int cy, int w, int h, string identifier) {
+	cout << "Menu constructor called on " << identifier << endl;
 	menuIdentifier = identifier;
 	centerX = cx;
 	centerY = cy;
@@ -43,10 +44,9 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	prevBtnSelectionEnd = 0;
 	nextBtnSelectionStart = timedSelectionStart;
 	nextBtnSelectionEnd = 0;
-
 	timedSelectDuration = 250;
-
 	bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
+	vgFinish();
 	bufferSaved = false;
 	titled = false;
 	scrollable = false;
@@ -54,6 +54,45 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	topMenuItemIndex = 0;
 	configure(menuIdentifier);		// Configure the menu
 }
+
+Menu::~Menu(void) {
+	cout << "Menu destructor called on :" << menuIdentifier << endl;
+	vgDestroyImage(bufferImage);
+	vgFinish();
+	VGErrorCode error = vgGetError();
+	if(error != VG_NO_ERROR) cout << "************************************* Error!!! : " << error << endl;
+	cout << "Menu destructor finish on :" << menuIdentifier << endl;
+}
+
+/*
+Menu::Menu(const Menu &m) {
+	cout << "Menu copy constructor called to copy " << m.menuIdentifier << endl;
+
+	bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
+	vgCopyImage(bufferImage, 0, 0, m.bufferImage, 0, 0, 800, 480, VG_FALSE);
+	vgFinish();
+
+	cout << "done copying image" << endl;
+
+	totalItems = m.totalItems;
+	buttonNames = new string[totalItems];
+	buttonCfgText = new string[totalItems];
+	buttonSelectStates = new bool[totalItems];
+
+
+	cout << "total items:" << totalItems << endl;
+
+	for(int i=1; i<=totalItems; i++) {
+		buttonSelectStates[i-1] = m.buttonSelectStates[i-1];
+		buttonNames[i-1] = m.buttonNames[i-1];
+		buttonCfgText[i-1] = m.buttonCfgText[i-1];
+	}
+
+
+	cout << "Menu copy constructor finish" << endl;
+
+}
+*/
 
 /* Menu update function: updates buttons, states, and draws menu */
 void Menu::update(touch_t menuTouch) {
@@ -177,6 +216,7 @@ void Menu::update(touch_t menuTouch) {
 		if(scrollable && nextButton) nextBtn->update();
 		// Save buffer image
 		vgGetPixels(bufferImage, centerX-width/2, centerY-height/2, centerX - width/2, centerY - height/2, width, height);
+		vgFinish();
 		bufferSaved = true;
 	}
 	else vgDrawImage(bufferImage);
@@ -199,6 +239,7 @@ void Menu::configure(string ident) {
 	try {
 		cfg->parse("/home/pi/openvg/client/testConfig");
 		string menuName = ident;
+		menuType = parseString(cfg, menuName, "type");
 		cornerRadius = parseInt(cfg, menuName, "cornerRadius");
 		borderWidth = parseInt(cfg, menuName, "borderWidth");
 		// Given position and border, determine size and start coordinate of menu rectangle

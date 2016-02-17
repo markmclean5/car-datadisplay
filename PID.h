@@ -24,7 +24,7 @@ private:	// Class Private properties
 	std::string id;
 	int numRanges;
 
-	std::string command;
+	
 
 	float supportedMinVal, supportedMaxVal;
 	int numDataBytes;
@@ -101,6 +101,7 @@ public:		// Class members
 	// Update function
 	void update(std::string, uint64_t);				// Update method									(serial stream, time)
 	std::string getCommand(void);
+	std::string command;
 
 
 private:	// Class private members

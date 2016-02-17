@@ -12,7 +12,6 @@ using namespace std;
  * TouchableObject Class
  * Parent class for all display objects to process:
  *		- Touchscreen processing:	Allows object to return touch state and touch data
- *		- Display visibility: 		Allows object to be set visible and visible
  *		- Movement on screen:		Provides command set for moving object on display
  *
  * Derived class configures TouchableObject using protected methods
@@ -63,10 +62,6 @@ private:
 	bool inPressDebounce;
 	bool inPressOutsideDebounce;
 
-	/* Visibility properties */
-	bool visible;		// Current visibility state
-	bool lpVisible;		// Previous visibility state
-
 	/* Movement Properties */
 	bool moving;
 
@@ -114,8 +109,6 @@ protected:
 	TouchableObject(void);				// Sets up TouchableObject, sets properties to safe state
 
 	/* Methods called by derived classes */
-	bool getVisibility(void);			// Called by derived classes to determine visibility state
-	bool getLPVisibility(void);			// Called by derived classes to determine previous visiblity state
 	int getDesiredPosX(void);			// Called by derived classes to determine X position for TouchableObject
 	int getDesiredPosY(void); 			// Called by derived classes to determine Y position for TouchableObject
 	int getDesiredFadePercentage(void);	// Called by derived classes to determine fade percentage to apply to alpha values
@@ -134,8 +127,6 @@ public:
 	/* Control methods */
 	void touchEnable(void);				// Enables touch functionality
 	void touchDisable(void);			// Disables touch functionality
-	void setVisible(void);				// Sets display object visible
-	void setInvisible(void);			// Sets display object invisible
 
 	/* Movement methods */
 	void updateVisuals(void);			// Called to update object visuals (handles moves and fades)

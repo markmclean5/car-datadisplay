@@ -1,32 +1,51 @@
 # PID Configuration file
 
+0104 {
+	fullName = "Calculated Engine Load";
+	shortName = "Calc Load";
+	command = "0104";
+	supportedMinVal = "0";
+	supportedMaxVal = "100";
+	numDataBytes = "1";
+	AGain = "0.39215";
+	AOffset = "0";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "1";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "100";
+		engUnits = "pct";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
 0105 {
 	fullName = "Engine Coolant Temperature";
 	shortName = "ECT";
-
 	command = "0105";
-
 	supportedMinVal = "-40";
 	supportedMaxVal = "215";
 	numDataBytes = "1";
-
 	AGain = "1";
 	AOffset = "-40";
-
 	BGain = "1";
 	BOffset = "0";
-
 	CGain = "1";
 	COffset = "0";
-
 	DGain = "1";
 	DOffset = "0";
-
 	TotalGain = "1";
 	TotalOffset = "0";
-
 	numRanges = "1";
-
 	range1{
 		scaling = "1";
 		rangeStart = "-40";
@@ -35,38 +54,201 @@
 		simpleMALag = "1";
 		weightedMALag = "5";
 		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
-
 	}
-
 }
 
-RPM {
+0106 {
+	fullName = "Short Term Fuel Pct Trim - Bank 1";
+	shortName = "Bank1 STFT pct";
+	command = "0106";
+	supportedMinVal = "-100";
+	supportedMaxVal = "99.92";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "-128";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.78125";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "-100";
+		rangeStop = "99.92";
+		engUnits = "pct";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+0107 {
+	fullName = "Long Term Fuel Pct Trim - Bank 1";
+	shortName = "Bank1 LTFT pct";
+	command = "0107";
+	supportedMinVal = "-100";
+	supportedMaxVal = "99.92";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "-128";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.78125";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "-100";
+		rangeStop = "99.92";
+		engUnits = "pct";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+0108 {
+	fullName = "Short Term Fuel Pct Trim - Bank 2";
+	shortName = "Bank2 STFT pct";
+	command = "0108";
+	supportedMinVal = "-100";
+	supportedMaxVal = "99.92";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "-128";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.78125";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "-100";
+		rangeStop = "99.92";
+		engUnits = "pct";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+0109 {
+	fullName = "Long Term Fuel Pct Trim - Bank 2";
+	shortName = "Bank2 LTFT pct";
+	command = "0109";
+	supportedMinVal = "-100";
+	supportedMaxVal = "99.92";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "-128";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.78125";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "-100";
+		rangeStop = "99.92";
+		engUnits = "pct";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+010A {
+	fullName = "Fuel Pressure";
+	shortName = "Fuel Press";
+	command = "010A";
+	supportedMinVal = "0";
+	supportedMaxVal = "765";
+	numDataBytes = "1";
+	AGain = "3";
+	AOffset = "0";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "1";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "765";
+		engUnits = "kPa";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+010B {
+	fullName = "Intake Manifold Absolute Pressure";
+	shortName = "IMAP";
+	command = "010B";
+	supportedMinVal = "0";
+	supportedMaxVal = "255";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "0";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "1";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "255";
+		engUnits = "kPa";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+010C {
 	fullName = "Engine RPM";
 	shortName = "RPM";
-
 	command = "010C";
-
 	supportedMinVal = "0";
 	supportedMaxVal = "16383.75";
 	numDataBytes = "2";
-
 	AGain = "256";
 	AOffset = "0";
-
 	BGain = "1";
 	BOffset = "0";
-
 	CGain = "1";
 	COffset = "0";
-
 	DGain = "1";
 	DOffset = "0";
-
 	TotalGain = "0.25";
 	TotalOffset = "0";
-
 	numRanges = "1";
-
 	range1{
 		scaling = "1";
 		rangeStart = "0";
@@ -75,7 +257,151 @@ RPM {
 		simpleMALag = "1";
 		weightedMALag = "5";
 		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
-
 	}
-
 }
+
+010D {
+	fullName = "Vehicle Speed";
+	shortName = "Speed";
+	command = "010D";
+	supportedMinVal = "0";
+	supportedMaxVal = "255";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "0";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "1";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "255";
+		engUnits = "km/h";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+010E {
+	fullName = "Timing Advance";
+	shortName = "Timing Adv";
+	command = "010E";
+	supportedMinVal = "-64";
+	supportedMaxVal = "63.5";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "-128";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.5";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "-64";
+		rangeStop = "63.5";
+		engUnits = "deg";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+010F {
+	fullName = "Intake Air Temperature";
+	shortName = "IAT";
+	command = "010F";
+	supportedMinVal = "-40";
+	supportedMaxVal = "215";
+	numDataBytes = "1";
+	AGain = "1";
+	AOffset = "-40";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "1";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "-40";
+		rangeStop = "215";
+		engUnits = "degC";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+0110 {
+	fullName = "MAF Air Flow Rate";
+	shortName = "MAF Rate";
+	command = "0110";
+	supportedMinVal = "0";
+	supportedMaxVal = "655.35";
+	numDataBytes = "2";
+	AGain = "256";
+	AOffset = "0";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.01";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "655.35";
+		engUnits = "g/s";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+
+0111 {
+	fullName = "Throttle Position";
+	shortName = "TPosn";
+	command = "0111";
+	supportedMinVal = "0";
+	supportedMaxVal = "100";
+	numDataBytes = "1";
+	AGain = "0.39215";
+	AOffset = "0";
+	BGain = "1";
+	BOffset = "0";
+	CGain = "1";
+	COffset = "0";
+	DGain = "1";
+	DOffset = "0";
+	TotalGain = "0.01";
+	TotalOffset = "0";
+	numRanges = "1";
+	range1{
+		scaling = "1";
+		rangeStart = "0";
+		rangeStop = "100";
+		engUnits = "pct";
+		simpleMALag = "1";
+		weightedMALag = "5";
+		weightedMACoeffs = ["0.2", "0.2", "0.2", "0.2", "0.2"];
+	}
+}
+

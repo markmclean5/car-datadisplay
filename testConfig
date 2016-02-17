@@ -1,5 +1,6 @@
 HOTBUTTON_GroupMenu {
 	name = "HOTBUTTON_GroupMenu";
+	type = "...";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Group";
@@ -40,6 +41,7 @@ HOTBUTTON_GroupMenu {
 
 HOTBUTTON_DisplayObjectMenu {
 	name = "HOTBUTTON_DisplayObjectMenu";
+	type = "...";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Display Object";
@@ -79,6 +81,7 @@ HOTBUTTON_DisplayObjectMenu {
 };
 
 g1 {
+	type = "ParameterMenu";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Parameters";
@@ -137,7 +140,7 @@ g1 {
 	buttonText11 = "010A Fuel Press";
 	buttonName12 = "010B";
 	buttonText12 = "010B Man Abs Press";
-	buttonName13 = "RPM";
+	buttonName13 = "010C";
 	buttonText13 = "010C Eng RPM";
 	buttonName14 = "010D";
 	buttonText14 = "010D Veh Speed";
@@ -251,6 +254,7 @@ g1 {
 
 g2 {
 	name = "g2";
+	type = "ParameterMenu";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Group 2";
@@ -290,6 +294,7 @@ g2 {
 };
 g3 {
 	name = "g3";
+	type = "ParameterMenu";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Group 3";
@@ -329,6 +334,7 @@ g3 {
 };
 g4 {
 	name = "g4";
+	type = "ParameterMenu";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Group 4";
@@ -368,6 +374,7 @@ g4 {
 };
 g5 {
 	name = "g5";
+	type = "ParameterMenu";
 	titled = "true";
 	titlePercentHeight = "9";
 	titleText = "Group 5";
@@ -534,9 +541,37 @@ BoostGauge {
 	};
 };
 
+0104Gauge {
+	PIDLink = "0104";
+	numRanges = "1";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.5"];
+	needleColor = ["1.0", "0.0", "0.0", "1.0"];
+	pressDebounce = "500";
+	range1 {
+		engUnits = "pct";
+		dataRangeStart	=	"0";
+		dataRangeStop	= "100";
+		angleRangeStart = "0";
+		angleRangeStop = "-180";
+		majorTickInterval = "10";
+		minorTickInterval = "20";
+		labelValueStart = "0";
+		labelValueStop = "100";
+		labelAngleStart = "0";
+		labelAngleStop = "180";
+		labelIncrement = "20";
+		labelDecPlaces = "0";
+		majorTickColor = ["1.0", "0.0", "0.0", "1.0"];
+		minorTickColor = ["1.0", "1.0", "1.0", "1.0"];
+		labelColor = ["1.0", "0.0", "0.0", "1.0"];
+	};
+};
 
-RPMGauge {
-	gaugeGroup = "gauges";
+
+
+010CGauge {
+	PIDLink = "010C";
 	numRanges = "1";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
 	backgroundColor = ["0.0", "0.0", "0.0", "0.5"];
@@ -567,6 +602,7 @@ RPMGauge {
 
 Mode1Menu {
 	titled = "false";
+	type = "...";
 	scrollable = "false";
 	numButtons = "5";
 	buttonPadding = "7";
@@ -608,6 +644,7 @@ Mode1Menu {
 
 
 SerialViewerMenu {
+	type = "...";
 	titled = "false";
 	scrollable = "false";
 	numButtons = "4";

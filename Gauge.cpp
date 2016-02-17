@@ -44,7 +44,7 @@ void Gauge::configure(string ident) {
 	try {
 		cfg->parse("/home/pi/openvg/client/testConfig");
 		// Gauge attributes
-		gaugeGroup = parseString(cfg, gaugeIdentifier, "gaugeGroup");
+		PIDLink = parseString(cfg, gaugeIdentifier, "PIDLink");
 		numRanges = parseInt(cfg, gaugeIdentifier, "numRanges");
 		parseColor(cfg, gaugeIdentifier, borderColor, "borderColor");
 		parseColor(cfg, gaugeIdentifier, backgroundColor, "backgroundColor");
@@ -351,6 +351,7 @@ Gauge::Gauge(int x, int y, int rad, string name)		// Constructor
 	radius = rad;
 
 	configure(name);
+	setDOPos(centerX, centerY);
 }
 
 void Gauge::setNumRanges(int ranges)
@@ -445,6 +446,7 @@ float Gauge::degToRad(float degrees)
 string Gauge::getIdentifier(void) {
 	return gaugeIdentifier;
 }
-string Gauge::getGroup(void) {
-	return gaugeGroup;
+
+string Gauge::getPIDLink(void) {
+	return PIDLink;
 }

@@ -33,6 +33,7 @@ DisplayableObject::DisplayableObject(void) {
 	if(displaySurface == EGL_NO_SURFACE) cout << "Failed to get current surface" << endl;
 	renderingContext = eglGetCurrentContext();
 	if(renderingContext == EGL_NO_CONTEXT) cout << "Failed to get current context" << endl;
+	visible = true;
 }
 
 
@@ -65,6 +66,37 @@ void DisplayableObject::switchToBufferSurface(EGLSurface bufferSurface) {
 void DisplayableObject::switchToDisplaySurface(void) {
 	result = eglMakeCurrent(display, displaySurface, displaySurface, renderingContext);
 	if(result == EGL_FALSE) cout << "Failed to make display surface current" << endl;
+}
+
+/* Set DisplayableObject position on screen */
+void DisplayableObject::setDOPos(int x, int y) {
+	centerX = x;
+	centerY = y;
+}
+
+/* Get DisplayableObject center X position */
+int DisplayableObject::getDOPosX(void) {
+	return centerX;
+}
+
+/* Get DisplayableObject center Y position */
+int DisplayableObject::getDOPosY(void) {
+	return centerY;
+}
+
+/* Sets DisplayableObject visible */
+void DisplayableObject::setVisible(void) {
+	visible = true;
+}
+
+/* Sets DisplayableObject invisible */
+void DisplayableObject::setInvisible(void) {
+	visible = false;
+}
+
+/* Returns DisplayableObject visible state */
+bool DisplayableObject::isVisible(void) {
+	return visible;
 }
 
 

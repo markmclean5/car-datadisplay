@@ -235,8 +235,6 @@ TouchableObject::TouchableObject(void) {
 	rH = 0;
 
 	touchEnabled = false;
-	visible = false;
-	lpVisible = false;
 	touched = false;
 	touchedOutside = false;
 	finalPosX = -1;
@@ -255,14 +253,6 @@ TouchableObject::TouchableObject(void) {
 
 	fadePercentage = 0;
 	finalFadePercentage = 0;
-}
-
-/* Visibility getters */
-bool TouchableObject::getVisibility(void) {
-	return visible;
-}
-bool TouchableObject::getLPVisibility(void) {
-	return lpVisible;
 }
 
 /* Rectangular setters */
@@ -303,13 +293,3 @@ void TouchableObject::touchDisable(void) {
 	touchEnabled = false;
 }
 
-/* Visibility control */
-void TouchableObject::setVisible(void) {
-	lpVisible = visible;
-	visible = true;
-	alpha = 1.0;
-}
-void TouchableObject::setInvisible(void) {
-	lpVisible = visible;
-	visible = false;
-}
