@@ -126,7 +126,6 @@ int main() {
 			std::vector<PID>::iterator p = DASHBOARD_PIDs.begin();
 
 			bool menuVisible = false;
-		
 
 			ELMSerial.serialWrite("ATZ");
 			string serialData = "";
@@ -196,13 +195,11 @@ int main() {
 				}
 
 				SerialViewer.update();
-
-
 				// Update all menus
 				for (std::vector<Menu>::iterator it = DASHBOARD_Menus.begin(); it != DASHBOARD_Menus.end(); it++) {
 					(it)->update(loopTouch);
 				}
-
+				// Run DisplayObjectManager (current page dashboard hotbuttons, display objects, and PIDs)
 				DisplayObjectManager(DASHBOARD_HotButtons, DASHBOARD_Gauges, DASHBOARD_PIDs, DASHBOARD_Menus);
 
 
@@ -223,81 +220,51 @@ int main() {
 					break;
 				}
 
-				//VGErrorCode error = vgGetError();
-				//if(error != VG_NO_ERROR) cout << "************************************* Error!!! : " << error << endl;
 				End();
 			}
 
 		}
 
 		//////////////////////////////////////
-		// Mode 5 - COMM
+		// Mode 5 - PID Support Check
 		//////////////////////////////////////
 		if(Mode1Menu.isButtonSelected("m5")) {
-			/*
-			TextView SerialViewer(width/4, height/2, width/2-20, 360, "SerialViewer");
-			Menu SerialViewerMenu(width/4, 30, width/2-20, 50, "SerialViewerMenu");
-			Menu PIDMenu = Menu(width-width/4, height/2, width/2-20, 360, "PIDMenu1");
+			Menu PIDSupportMenu(width/6, height/2, width/3 - 20, 360, "PIDSupport");
+			TextView PIDList(width/2, height/2, width/3-20, 360, "PIDList");
 			
-			
-			SerialViewerMenu.touchEnable();
-			PIDMenu.touchEnable();
+			vector<PID> SupportPIDs;
 
-			*/
+			
+			
 			while(1) {
 				loopTime = bcm2835_st_read();
 				loopTouch = threadTouch;
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
-
-				
 				Mode1Menu.update(loopTouch);
 
-				/*
-				SerialViewerMenu.update(loopTouch);
-				PIDMenu.update(loopTouch);
-
-				string serialViewerCommand = SerialViewerMenu.getPressedButtonName();
-				if(!serialViewerCommand.empty()) {
-					SerialViewerMenu.selectButton(serialViewerCommand);
-					if(serialViewerCommand.compare("Reset") == 0) {
-						SerialViewer.addNewLine("ATZ", sendcolor);
-						ELMSerial.serialWrite("ATZ");
-					}
-					if(serialViewerCommand.compare("Auto") == 0) {
-						SerialViewer.addNewLine("ATSP0", sendcolor);
-						ELMSerial.serialWrite("ATSP0");
-					}
-					if(serialViewerCommand.compare("Disp") == 0) {
-						SerialViewer.addNewLine("ATDP", sendcolor);
-						ELMSerial.serialWrite("ATDP");
-					}
-					if(serialViewerCommand.compare("Clear") == 0) {
-						SerialViewer.clear();
-					}
+				PIDSupportMenu.update(loopTouch);
+				string menuButton = PIDSupportMenu.getPressedButtonName();
+				if(!menuButton.empty()) {
+					PIDSupportMenu.selectButton(menuButton);
 				}
 
+				if(!PIDSupportMenu.getSelectedButtonName().empty() && SupportPIDs.size() == 0) {
+					cout << "requesting supported pids - " << PIDSupportMenu.getSelectedButtonName() << endl;
+					SupportPIDs.emplace_back(PIDSupportMenu.getSelectedButtonName());
 
-				string commandString = PIDMenu.getPressedButtonName();
-				if(!commandString.empty()) {
-					PIDMenu.selectButton(commandString);
-					SerialViewer.addNewLine(commandString, sendcolor);
-					ELMSerial.serialWrite(commandString);
+					SupportPIDs.back().update("41 00 00 00 00 FF", loopTime);
+
+					for(int i = 0; i < SupportPIDs.back().getNumBits(); i++) {
+						cout << i << " - Name "<< SupportPIDs.back().getBitPositionName(i) << " - State " << SupportPIDs.back().getBitPositionState(i) << endl;
+
+					}
 				}
+					
+				PIDList.update();
+
+
+
 				
-				SerialViewer.update();
-				string data = ELMSerial.serialReadUntil();
-
-
-				if(!data.empty()) {
-					cout << "Data: " << endl << data << endl;
-					cout << "Data characters: " << endl;
-					for(int idx=0; idx<data.size(); idx++)
-						cout << (int)data[idx] << " ";
-					cout << endl;
-					SerialViewer.addNewLine(data, receivecolor);
-				}
-
-				*/
 				if(Mode1Menu.isButtonPressed("m1")) {
 					Mode1Menu.selectButton("m1");
 					break;
@@ -404,9 +371,7 @@ void DisplayObjectManager(std::vector<Button>& HotButtons, std::vector<Gauge>& G
 
 			if(HOTBUTTON_DisplayObjectMenu_It->getSelectedButtonName().compare("Gauge") == 0) {
 				cout << "creating a gauge!!" << endl;
-
 				PIDs.emplace_back(HOTBUTTON_ParameterMenu_It->getSelectedButtonName());
-
 				Gauges.emplace_back(selectedHotbutton_It->getDOPosX(), selectedHotbutton_It->getDOPosY(), width/6, HOTBUTTON_ParameterMenu_It->getSelectedButtonName().append("Gauge"));
 				Gauges.back().draw();
 				Gauges.back().touchEnable();

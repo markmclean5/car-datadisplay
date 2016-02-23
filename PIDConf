@@ -1,8 +1,119 @@
 # PID Configuration file
 
+0100 {
+	fullName = "Supported PIDs 0101 - 0120";
+	shortName = "PIDs 0101-0120";
+	type = "bit-encoded";
+	numDataBytes = "4";
+	command = "0100";
+	A7_name = "0101";
+	A7_0state = "false";
+	A7_1state = "true";
+	A6_name = "0102";
+	A6_0state = "false";
+	A6_1state = "true";
+	A5_name = "0103";
+	A5_0state = "false";
+	A5_1state = "true";
+	A4_name = "0104";
+	A4_0state = "false";
+	A4_1state = "true";
+	A3_name = "0105";
+	A3_0state = "false";
+	A3_1state = "true";
+	A2_name = "0106";
+	A2_0state = "false";
+	A2_1state = "true";
+	A1_name = "0107";
+	A1_0state = "false";
+	A1_1state = "true";
+	A0_name = "0108";
+	A0_0state = "false";
+	A0_1state = "true";
+
+	B7_name = "0109";
+	B7_0state = "false";
+	B7_1state = "true";
+	B6_name = "010A";
+	B6_0state = "false";
+	B6_1state = "true";
+	B5_name = "010B";
+	B5_0state = "false";
+	B5_1state = "true";
+	B4_name = "010C";
+	B4_0state = "false";
+	B4_1state = "true";
+	B3_name = "010D";
+	B3_0state = "false";
+	B3_1state = "true";
+	B2_name = "010E";
+	B2_0state = "false";
+	B2_1state = "true";
+	B1_name = "010F";
+	B1_0state = "false";
+	B1_1state = "true";
+	B0_name = "0110";
+	B0_0state = "false";
+	B0_1state = "true";
+
+	C7_name = "0111";
+	C7_0state = "false";
+	C7_1state = "true";
+	C6_name = "0112";
+	C6_0state = "false";
+	C6_1state = "true";
+	C5_name = "0113";
+	C5_0state = "false";
+	C5_1state = "true";
+	C4_name = "0114";
+	C4_0state = "false";
+	C4_1state = "true";
+	C3_name = "0115";
+	C3_0state = "false";
+	C3_1state = "true";
+	C2_name = "0116";
+	C2_0state = "false";
+	C2_1state = "true";
+	C1_name = "0117";
+	C1_0state = "false";
+	C1_1state = "true";
+	C0_name = "0118";
+	C0_0state = "false";
+	C0_1state = "true";
+
+	D7_name = "0119";
+	D7_0state = "false";
+	D7_1state = "true";
+	D6_name = "011A";
+	D6_0state = "false";
+	D6_1state = "true";
+	D5_name = "011B";
+	D5_0state = "false";
+	D5_1state = "true";
+	D4_name = "011C";
+	D4_0state = "false";
+	D4_1state = "true";
+	D3_name = "011D";
+	D3_0state = "false";
+	D3_1state = "true";
+	D2_name = "011E";
+	D2_0state = "false";
+	D2_1state = "true";
+	D1_name = "011F";
+	D1_0state = "false";
+	D1_1state = "true";
+	D0_name = "0120";
+	D0_0state = "false";
+	D0_1state = "true";
+
+}
+
+
+
 0104 {
 	fullName = "Calculated Engine Load";
 	shortName = "Calc Load";
+	type = "value";
 	command = "0104";
 	supportedMinVal = "0";
 	supportedMaxVal = "100";
@@ -31,6 +142,7 @@
 0105 {
 	fullName = "Engine Coolant Temperature";
 	shortName = "ECT";
+	type = "value";
 	command = "0105";
 	supportedMinVal = "-40";
 	supportedMaxVal = "215";
@@ -60,6 +172,7 @@
 0106 {
 	fullName = "Short Term Fuel Pct Trim - Bank 1";
 	shortName = "Bank1 STFT pct";
+	type = "value";
 	command = "0106";
 	supportedMinVal = "-100";
 	supportedMaxVal = "99.92";
@@ -89,6 +202,7 @@
 0107 {
 	fullName = "Long Term Fuel Pct Trim - Bank 1";
 	shortName = "Bank1 LTFT pct";
+	type = "value";
 	command = "0107";
 	supportedMinVal = "-100";
 	supportedMaxVal = "99.92";
@@ -118,6 +232,7 @@
 0108 {
 	fullName = "Short Term Fuel Pct Trim - Bank 2";
 	shortName = "Bank2 STFT pct";
+	type = "value";
 	command = "0108";
 	supportedMinVal = "-100";
 	supportedMaxVal = "99.92";
@@ -147,6 +262,7 @@
 0109 {
 	fullName = "Long Term Fuel Pct Trim - Bank 2";
 	shortName = "Bank2 LTFT pct";
+	type = "value";
 	command = "0109";
 	supportedMinVal = "-100";
 	supportedMaxVal = "99.92";
@@ -176,6 +292,7 @@
 010A {
 	fullName = "Fuel Pressure";
 	shortName = "Fuel Press";
+	type = "value";
 	command = "010A";
 	supportedMinVal = "0";
 	supportedMaxVal = "765";
@@ -205,6 +322,7 @@
 010B {
 	fullName = "Intake Manifold Absolute Pressure";
 	shortName = "IMAP";
+	type = "value";
 	command = "010B";
 	supportedMinVal = "0";
 	supportedMaxVal = "255";
@@ -234,6 +352,7 @@
 010C {
 	fullName = "Engine RPM";
 	shortName = "RPM";
+	type = "value";
 	command = "010C";
 	supportedMinVal = "0";
 	supportedMaxVal = "16383.75";
@@ -263,6 +382,7 @@
 010D {
 	fullName = "Vehicle Speed";
 	shortName = "Speed";
+	type = "value";
 	command = "010D";
 	supportedMinVal = "0";
 	supportedMaxVal = "255";
@@ -292,6 +412,7 @@
 010E {
 	fullName = "Timing Advance";
 	shortName = "Timing Adv";
+	type = "value";
 	command = "010E";
 	supportedMinVal = "-64";
 	supportedMaxVal = "63.5";
@@ -321,6 +442,7 @@
 010F {
 	fullName = "Intake Air Temperature";
 	shortName = "IAT";
+	type = "value";
 	command = "010F";
 	supportedMinVal = "-40";
 	supportedMaxVal = "215";
@@ -350,6 +472,7 @@
 0110 {
 	fullName = "MAF Air Flow Rate";
 	shortName = "MAF Rate";
+	type = "value";
 	command = "0110";
 	supportedMinVal = "0";
 	supportedMaxVal = "655.35";
@@ -379,6 +502,7 @@
 0111 {
 	fullName = "Throttle Position";
 	shortName = "TPosn";
+	type = "value";
 	command = "0111";
 	supportedMinVal = "0";
 	supportedMaxVal = "100";

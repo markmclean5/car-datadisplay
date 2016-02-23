@@ -11,8 +11,6 @@
 #include <bcm2835.h>
 #include <algorithm>    // std::find
 #include <string>
-
-
 #include <locale.h>
 #include <config4cpp/Configuration.h>
 #include "parsingUtilities.h"
@@ -20,18 +18,13 @@
 using namespace std;
 using namespace config4cpp;
 
-
 PID::PID(string PIDid) {
 	cout << "PID created: " << PIDid << endl; 
-
 	id = PIDid;
 	debug = false;
-
 	currentRange = 1;
 	lastRange = 1;
-
 	configure(PIDid);
-
 	currentTime = 0;
 	lastTime = 0;
 	updateRate = 0;
@@ -48,66 +41,116 @@ void PID::configure(string ident) {
 		string PIDName = ident;
 		fullName = parseString(cfg, PIDName, "fullName");
 		shortName = parseString(cfg, PIDName, "shortName");
+		type = parseString(cfg, PIDName, "type");
 		command = parseString(cfg, PIDName, "command");
-
-		numRanges = parseInt(cfg, PIDName, "numRanges");
-
-		supportedMinVal = parseFloat(cfg, PIDName, "supportedMinVal");
-		supportedMaxVal = parseFloat(cfg, PIDName, "supportedMaxVal");
 		numDataBytes = parseInt(cfg, PIDName, "numDataBytes");
-
-		byteGain[0] = parseFloat(cfg, PIDName, "AGain");
-		byteOffset[0] = parseFloat(cfg, PIDName, "AOffset");
-		byteGain[1] = parseFloat(cfg, PIDName, "BGain");
-		byteOffset[1] = parseFloat(cfg, PIDName, "BOffset");
-		byteGain[2] = parseFloat(cfg, PIDName, "CGain");
-		byteOffset[2] = parseFloat(cfg, PIDName, "COffset");
-		byteGain[3] = parseFloat(cfg, PIDName, "DGain");
-		byteOffset[3] = parseFloat(cfg, PIDName, "DOffset");
-
-		TotalGain = parseFloat(cfg, PIDName, "TotalGain");
-		TotalOffset = parseFloat(cfg, PIDName, "TotalOffset");
-
-		cout << "Num Ranges set to: " << numRanges << endl;
-		
-		rangeScaling = new float[numRanges];
-		rangeStart = new float[numRanges];
-		rangeStop = new float[numRanges];
-		EngUnits = new string[numRanges];
-		weightedMALag = new int[numRanges];
-		simpleMALag = new int[numRanges];
-		weightedMACoeffs = new float*[numRanges];
-		weightedMAData = new float*[numRanges];
-		simpleMAData = new float*[numRanges];
-
-		
-		string rangeScope = "range";
+		if(type.compare("value") == 0) {									// Value type PID configuration
+			numRanges = parseInt(cfg, PIDName, "numRanges");
+			supportedMinVal = parseFloat(cfg, PIDName, "supportedMinVal");
+			supportedMaxVal = parseFloat(cfg, PIDName, "supportedMaxVal");
+			byteGain[0] = parseFloat(cfg, PIDName, "AGain");
+			byteOffset[0] = parseFloat(cfg, PIDName, "AOffset");
+			byteGain[1] = parseFloat(cfg, PIDName, "BGain");
+			byteOffset[1] = parseFloat(cfg, PIDName, "BOffset");
+			byteGain[2] = parseFloat(cfg, PIDName, "CGain");
+			byteOffset[2] = parseFloat(cfg, PIDName, "COffset");
+			byteGain[3] = parseFloat(cfg, PIDName, "DGain");
+			byteOffset[3] = parseFloat(cfg, PIDName, "DOffset");
+			TotalGain = parseFloat(cfg, PIDName, "TotalGain");
+			TotalOffset = parseFloat(cfg, PIDName, "TotalOffset");
+			rangeScaling = new float[numRanges];
+			rangeStart = new float[numRanges];
+			rangeStop = new float[numRanges];
+			EngUnits = new string[numRanges];
+			weightedMALag = new int[numRanges];
+			simpleMALag = new int[numRanges];
+			weightedMACoeffs = new float*[numRanges];
+			weightedMAData = new float*[numRanges];
+			simpleMAData = new float*[numRanges];
+			string rangeScope = "range";
+			currentRange = 1;
+			for(;currentRange<=numRanges;currentRange++) {
+				string currentRangeScope = rangeScope + to_string(currentRange);
+				rangeScaling[currentRange-1] = parseFloat(cfg, PIDName, currentRangeScope, ".scaling");
+				rangeStart[currentRange-1] = parseFloat(cfg, PIDName, currentRangeScope, ".rangeStart");
+				rangeStop[currentRange-1] = parseFloat(cfg, PIDName, currentRangeScope, ".rangeStop");
+				EngUnits[currentRange-1] = parseString(cfg, PIDName, currentRangeScope, ".engUnits");
+				simpleMALag[currentRange-1] = parseInt(cfg, PIDName, currentRangeScope, ".simpleMALag");
+				simpleMAData[currentRange-1] = new float[simpleMALag[currentRange-1]];
+				float* currentMAData = simpleMAData[currentRange-1];
+				for(int i = 0; i<simpleMALag[currentRange-1]; i++)
+					currentMAData[i] = 0;
+				weightedMALag[currentRange-1] = parseInt(cfg, PIDName, currentRangeScope, ".weightedMALag");
+				weightedMAData[currentRange-1] = new float[weightedMALag[currentRange-1]];
+				currentMAData = weightedMAData[currentRange-1];
+				for(int i = 0; i<weightedMALag[currentRange-1]; i++)
+					currentMAData[i] = 0;
+				weightedMACoeffs[currentRange-1] = new float[weightedMALag[currentRange-1]];
+				parseFloatArray(cfg, PIDName, currentRangeScope, weightedMALag[currentRange-1], weightedMACoeffs[currentRange-1], ".weightedMACoeffs");
+			}
 		currentRange = 1;
-		for(;currentRange<=numRanges;currentRange++) {
-			string currentRangeScope = rangeScope + to_string(currentRange);
-			rangeScaling[currentRange-1] = parseFloat(cfg, PIDName, currentRangeScope, ".scaling");
-			rangeStart[currentRange-1] = parseFloat(cfg, PIDName, currentRangeScope, ".rangeStart");
-			rangeStop[currentRange-1] = parseFloat(cfg, PIDName, currentRangeScope, ".rangeStop");
-			EngUnits[currentRange-1] = parseString(cfg, PIDName, currentRangeScope, ".engUnits");
-			simpleMALag[currentRange-1] = parseInt(cfg, PIDName, currentRangeScope, ".simpleMALag");
-			simpleMAData[currentRange-1] = new float[simpleMALag[currentRange-1]];
-
-			float* currentMAData = simpleMAData[currentRange-1];
-			for(int i = 0; i<simpleMALag[currentRange-1]; i++)
-				currentMAData[i] = 0;
-
-			weightedMALag[currentRange-1] = parseInt(cfg, PIDName, currentRangeScope, ".weightedMALag");
-			weightedMAData[currentRange-1] = new float[weightedMALag[currentRange-1]];
-
-			currentMAData = weightedMAData[currentRange-1];
-			for(int i = 0; i<weightedMALag[currentRange-1]; i++)
-				currentMAData[i] = 0;
-
-			weightedMACoeffs[currentRange-1] = new float[weightedMALag[currentRange-1]];
-			parseFloatArray(cfg, PIDName, currentRangeScope, weightedMALag[currentRange-1], weightedMACoeffs[currentRange-1], ".weightedMACoeffs");
+		}
+		else if(type.compare("bit-encoded") == 0) {						// Bit-encoded PID configuration
+			char byt = 'A';
+			int messageBit = 0;
+			if(numDataBytes > 0) {
+				for(int bit = 7; bit >=0; bit--) {
+					cout << "Message Bit " << messageBit << " - " << byt+to_string(bit) << endl;
+					cout << "Parsing " << byt+to_string(bit) << endl;
+					bitNames[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_name");
+					cout << "  Name = " << bitNames[messageBit] << endl;
+					bit0States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_0state");
+					cout << "  0 state = " << bit0States[messageBit] << endl;
+					bit1States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_1state");
+					cout << "  1 state = " << bit0States[messageBit] << endl;
+					messageBit++;
+				}
+			}
+			if(numDataBytes > 1){
+				byt = 'B';
+				for(int bit = 7; bit >= 0; bit--) {
+					cout << "Message Bit " << messageBit << " - " << byt+to_string(bit) << endl;
+					cout << "Parsing " << byt+to_string(bit) << endl;
+					bitNames[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_name");
+					cout << "  Name = " << bitNames[messageBit] << endl;
+					bit0States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_0state");
+					cout << "  0 state = " << bit0States[messageBit] << endl;
+					bit1States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_1state");
+					cout << "  1 state = " << bit0States[messageBit] << endl;
+					messageBit++;
+				}
+			}
+			if(numDataBytes > 2){
+				byt = 'C';
+				for(int bit = 7; bit >= 0; bit--) {
+					cout << "Message Bit " << messageBit << " - " << byt+to_string(bit) << endl;
+					cout << "Parsing " << byt+to_string(bit) << endl;
+					bitNames[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_name");
+					cout << "  Name = " << bitNames[messageBit] << endl;
+					bit0States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_0state");
+					cout << "  0 state = " << bit0States[messageBit] << endl;
+					bit1States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_1state");
+					cout << "  1 state = " << bit0States[messageBit] << endl;
+					messageBit++;
+				}
+			}
+			if(numDataBytes > 3){
+				byt = 'D';
+				for(int bit = 7; bit >= 0; bit--) {
+					cout << "Message Bit " << messageBit << " - " << byt+to_string(bit) << endl;
+					cout << "Parsing " << byt+to_string(bit) << endl;
+					bitNames[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_name");
+					cout << "  Name = " << bitNames[messageBit] << endl;
+					bit0States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_0state");
+					cout << "  0 state = " << bit0States[messageBit] << endl;
+					bit1States[messageBit] = parseString(cfg, PIDName, byt+to_string(bit)+"_1state");
+					cout << "  1 state = " << bit0States[messageBit] << endl;
+					messageBit++;
+				}
+			}
 
 		}
-		currentRange = 1;
+		
 		
 	}catch(const ConfigurationException & ex) {
 		cout << ex.c_str() << endl;
@@ -196,68 +239,79 @@ void PID::update (string serialData, uint64_t updateTime) {
 			string dataByteString = serialData.substr(found+4, numDataBytes*2);
 			cout << "Data Byte String - " << dataByteString << endl;
 			cout << "num data bytes: " << numDataBytes << endl;
-			for(int i=0;i<numDataBytes;i++) {
-				cout << "byte gain " << byteGain[i] << endl;
-				cout << "byte offset " << byteOffset[i] << endl;
-				cout << " substring " <<  dataByteString.substr(2*i, 2).c_str() << endl;
-				cout << "stroutl " << strtoul(dataByteString.substr(2*i, 2).c_str(), NULL, 16) << endl;
-				value += (byteGain[i]*strtoul(dataByteString.substr(2*i, 2).c_str(), NULL, 16) + byteOffset[i]);
-				cout << "value before total " << value << endl;
-			}
-			cout << "TotalGain " << TotalGain << endl;
-			cout << "TotalOffset " << TotalOffset << endl;
-			value = (value*TotalGain) + TotalOffset;
-			cout << " Value calculated to be: " << value <<endl;
-			// Now find out which range the  value belongs to
-			int range = 0;
-			bool rangeFound = false;
-			while(!rangeFound) {
-				if(range==numRanges) break;
-				if(debug) {
-					cout << "Checking if data fits within range # " << range+1 << endl;
-					cout << "Range start: " << rangeStart[range] << endl;
-					cout << "Range stop: " << rangeStop[range] << endl;
-				}	
-				if(((value>=rangeStart[range]) && (value<rangeStop[range])) ||
-					((value>=rangeStop[range]) && (value<rangeStart[range]))) {
-					if(debug) cout << "Data found in range # " << range+1 << endl;
-					lastRange = currentRange;
-					currentRange = range+1;
-					rangeFound = true;
+			
+
+			if(type.compare("value") == 0) {
+				for(int i=0;i<numDataBytes;i++) {
+					cout << "byte gain " << byteGain[i] << endl;
+					cout << "byte offset " << byteOffset[i] << endl;
+					cout << " substring " <<  dataByteString.substr(2*i, 2).c_str() << endl;
+					cout << "stroutl " << strtoul(dataByteString.substr(2*i, 2).c_str(), NULL, 16) << endl;
+					value += (byteGain[i]*strtoul(dataByteString.substr(2*i, 2).c_str(), NULL, 16) + byteOffset[i]);
+					cout << "value before total " << value << endl;
 				}
-				range++;
-			}
-			if(rangeFound==true) {
-				value = value * rangeScaling[currentRange-1];	// Apply scaling of current range
-				if(debug) cout << "Value scaled to range: " << value <<endl;
-				if(debug) cout << "Renge units: " << EngUnits[currentRange-1] << endl;
-				float* currentSimpleMAData = simpleMAData[currentRange-1];
-				float* currentWeightedMAData = weightedMAData[currentRange-1];
-				// If the range has changed this time around, reset MA data to current value
-				int idx;
-				if(currentRange!=lastRange) {
-					idx = 0;
-					for(;idx<simpleMALag[currentRange-1];idx++) currentSimpleMAData[idx] = value;
-					idx = 0;
-					for(;idx<weightedMALag[currentRange-1];idx++) currentWeightedMAData[idx] = value;
+				cout << "TotalGain " << TotalGain << endl;
+				cout << "TotalOffset " << TotalOffset << endl;
+				value = (value*TotalGain) + TotalOffset;
+				cout << " Value calculated to be: " << value <<endl;
+				// Now find out which range the  value belongs to
+				int range = 0;
+				bool rangeFound = false;
+				while(!rangeFound) {
+					if(range==numRanges) break;
+					if(debug) {
+						cout << "Checking if data fits within range # " << range+1 << endl;
+						cout << "Range start: " << rangeStart[range] << endl;
+						cout << "Range stop: " << rangeStop[range] << endl;
+					}	
+					if(((value>=rangeStart[range]) && (value<rangeStop[range])) ||
+						((value>=rangeStop[range]) && (value<rangeStart[range]))) {
+						if(debug) cout << "Data found in range # " << range+1 << endl;
+						lastRange = currentRange;
+						currentRange = range+1;
+						rangeFound = true;
+					}
+					range++;
 				}
-				// Shift all simple MA data values down one, put current value in last position
-				idx = 1;							
-				for(;idx<simpleMALag[currentRange-1];idx++)
-					currentSimpleMAData[idx-1] = currentSimpleMAData[idx];	// Shift data, overwrite oldest
-				currentSimpleMAData[simpleMALag[currentRange-1]-1] = value;	// Add latest value to array
-				// Shift all weighted MA data values down one, put current value in last position
-				idx = 1;
-				for(;idx<weightedMALag[currentRange-1];idx++)	
-					currentWeightedMAData[idx-1] = currentWeightedMAData[idx];	// Shift data, overwrite oldest
-				currentWeightedMAData[weightedMALag[currentRange-1]-1] = value;	// Add latest value to array
+				if(rangeFound==true) {
+					value = value * rangeScaling[currentRange-1];	// Apply scaling of current range
+					if(debug) cout << "Value scaled to range: " << value <<endl;
+					if(debug) cout << "Renge units: " << EngUnits[currentRange-1] << endl;
+					float* currentSimpleMAData = simpleMAData[currentRange-1];
+					float* currentWeightedMAData = weightedMAData[currentRange-1];
+					// If the range has changed this time around, reset MA data to current value
+					int idx;
+					if(currentRange!=lastRange) {
+						idx = 0;
+						for(;idx<simpleMALag[currentRange-1];idx++) currentSimpleMAData[idx] = value;
+						idx = 0;
+						for(;idx<weightedMALag[currentRange-1];idx++) currentWeightedMAData[idx] = value;
+					}
+					// Shift all simple MA data values down one, put current value in last position
+					idx = 1;							
+					for(;idx<simpleMALag[currentRange-1];idx++)
+						currentSimpleMAData[idx-1] = currentSimpleMAData[idx];	// Shift data, overwrite oldest
+					currentSimpleMAData[simpleMALag[currentRange-1]-1] = value;	// Add latest value to array
+					// Shift all weighted MA data values down one, put current value in last position
+					idx = 1;
+					for(;idx<weightedMALag[currentRange-1];idx++)	
+						currentWeightedMAData[idx-1] = currentWeightedMAData[idx];	// Shift data, overwrite oldest
+					currentWeightedMAData[weightedMALag[currentRange-1]-1] = value;	// Add latest value to array
+				}
+				else {
+					cout << "Error: Data not inside any range. " << endl;
+					currentRange=1;
+				}
 			}
-			else {
-				cout << "Error: Data not inside any range. " << endl;
-				currentRange=1;
+
+			// Process a bit-encoded data string: 
+			else if (type.compare("bit-encoded") == 0) {
+				cout << "Processing bit-encoded PID" << endl;
+				cout << "  substring: " << dataByteString.substr(0, 2*numDataBytes) << endl;
+				bitValue =  strtoul(dataByteString.substr(0, 2*numDataBytes).c_str(), NULL, 16);
+				cout << "  value: " << bitValue << endl;
 			}
 		}
-
 
 	}
 
@@ -268,5 +322,50 @@ void PID::update (string serialData, uint64_t updateTime) {
 
 	cout << "At end of PID update: current range: " << currentRange << endl;
 }
+
+// Bit-encoded functions
+
+bool PID::getBitNameValue(string name) {
+	bool val = false;
+	for(int i = 0; i < 8*numDataBytes; i++) {
+		if(name.compare(bitNames[i]) == 0) {
+			val = getBitPositionValue(i);
+			break;
+		}
+	}
+	return val;
+}
+string PID::getBitNameState(string name) {
+	string state = "";
+	for(int i = 0; i < 8*numDataBytes; i++) {
+		if(name.compare(bitNames[i]) == 0) {
+			state = getBitPositionState(i);
+			break;
+		}
+	}
+	return state;
+}
+bool PID::getBitPositionValue(int pos) {
+	return ((bitValue >> (32-pos) ) & 1);
+}
+string PID::getBitPositionState(int pos) {
+	if(getBitPositionValue(pos))
+		return bit1States[pos];
+	else
+		return bit0States[pos];
+
+}
+string PID::getBitPositionName(int pos) {
+	return bitNames[pos];
+}
+ 
+int PID::getNumBits(void) {
+	return numDataBytes*8;
+}
+
+
+
+
+
 
 

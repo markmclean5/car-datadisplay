@@ -417,7 +417,7 @@ g5 {
 
 
 
-TextView1 {
+PIDList {
 	cornerRadius = "20";
 	borderWidth = "2";
 	borderColor = ["1.0", "1.0", "1.0", "1.0"];
@@ -426,6 +426,51 @@ TextView1 {
 	numLines = "15";
 	pressDebounce = "500";
 }
+
+PIDSupport {
+	name = "PIDSupportMenu";
+	type = "PIDSupportMenu";
+	titled = "true";
+	titlePercentHeight = "9";
+	titleText = "PID Support";
+	titleFontSize = "20";
+	titleColor = ["1.0", "0.0", "0.0", "1.0"];
+	scrollable = "false";
+	numButtons = "5";
+	buttonPadding = "7";
+	cornerRadius = "10";
+	borderWidth = "2";
+	borderColor = ["1.0", "1.0", "1.0", "1.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	pressDebounce = "500";
+	isHorizontal = "false";
+	selectMode = "timed";
+	timedSelectDuration = "200";
+	hideable = "false";
+	configureButtons = "true";
+	buttonCornerRadius = "10";
+	buttonBorderWidth = "2";
+	buttonBorderColor = ["0.43", "0.43", "0.43", "1.0"];
+	buttonBackgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	buttonTextColor = ["1.0", "1.0", "1.0", "1.0"];
+	buttonSelectedBackgroundColor = ["0.43", "0.43", "0.43", "0.4"];
+	buttonSelectedBorderColor = ["1.0", "1.0", "1.0", "1.0"];
+	buttonSelectedBorderWidth = "2";
+	buttonSelectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
+	buttonName1 = "0100";
+	buttonText1 = "0101 - 0120";
+	buttonName2 = "0120";
+	buttonText2 = "0121 - 0140";
+	buttonName3 = "0140";
+	buttonText3 = "0141 - 0160";
+	buttonName4 = "060";
+	buttonText4 = "0161 - 0180";
+	buttonName5 = "0180";
+	buttonText5 = "0181 - 01A0";
+};
+
+
+
 
 SerialViewer {
 	cornerRadius = "10";
