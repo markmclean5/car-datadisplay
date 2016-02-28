@@ -13,7 +13,6 @@
 #include <config4cpp/Configuration.h>
 #include "parsingUtilities.h"
 #include <memory>
-
 #include "Menu.h"
 using namespace std;
 using namespace config4cpp;
@@ -36,6 +35,7 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	isHorizontal = true;
 	hideable = false;
 	hidden = false;
+	activeButtons = 0;
 	menuSelectMode = "manual";
 	configureButtons = false;
 	timedSelectionStart = bcm2835_st_read();
@@ -50,8 +50,10 @@ Menu::Menu(int cx, int cy, int w, int h, string identifier) {
 	bufferSaved = false;
 	titled = false;
 	scrollable = false;
+	dynamic = false;
 	title = "";
 	topMenuItemIndex = 0;
+	menuItemsRemaining = 0;
 	configure(menuIdentifier);		// Configure the menu
 }
 
@@ -63,36 +65,6 @@ Menu::~Menu(void) {
 	if(error != VG_NO_ERROR) cout << "************************************* Error!!! : " << error << endl;
 	cout << "Menu destructor finish on :" << menuIdentifier << endl;
 }
-
-/*
-Menu::Menu(const Menu &m) {
-	cout << "Menu copy constructor called to copy " << m.menuIdentifier << endl;
-
-	bufferImage = vgCreateImage(VG_sABGR_8888, 800, 480, VG_IMAGE_QUALITY_BETTER);
-	vgCopyImage(bufferImage, 0, 0, m.bufferImage, 0, 0, 800, 480, VG_FALSE);
-	vgFinish();
-
-	cout << "done copying image" << endl;
-
-	totalItems = m.totalItems;
-	buttonNames = new string[totalItems];
-	buttonCfgText = new string[totalItems];
-	buttonSelectStates = new bool[totalItems];
-
-
-	cout << "total items:" << totalItems << endl;
-
-	for(int i=1; i<=totalItems; i++) {
-		buttonSelectStates[i-1] = m.buttonSelectStates[i-1];
-		buttonNames[i-1] = m.buttonNames[i-1];
-		buttonCfgText[i-1] = m.buttonCfgText[i-1];
-	}
-
-
-	cout << "Menu copy constructor finish" << endl;
-
-}
-*/
 
 /* Menu update function: updates buttons, states, and draws menu */
 void Menu::update(touch_t menuTouch) {
@@ -126,7 +98,6 @@ void Menu::update(touch_t menuTouch) {
 	
 	}
 	
-
 	// Previous button pressed
 	if(scrollable && prevButton && previousBtn->isPressed()) {
 		cout << "prev btn pressed" << endl;
@@ -175,7 +146,6 @@ void Menu::update(touch_t menuTouch) {
 		bufferSaved = false;
 	}
 
-
 	if(scrollable && prevButton && (currentTime >= prevBtnSelectionEnd) && previousBtn->isSelected()) {
 			previousBtn->deselect();
 			bufferSaved = false;
@@ -183,6 +153,21 @@ void Menu::update(touch_t menuTouch) {
 	if(scrollable && nextButton && (currentTime >= nextBtnSelectionEnd) && nextBtn->isSelected()) {
 			nextBtn->deselect();
 			bufferSaved = false;
+	}
+
+
+	// Dynamic menu changes
+	if(dynamic) {
+		//if(totalItems != 0) cout << "totalItems " << totalItems << " activeButtons " << activeButtons << endl;
+		if (totalItems > activeButtons && totalItems <= numButtons) {
+			cout << "dynamic menu changes" << endl;
+			for(int b = activeButtons; b < totalItems; b++) {
+				menuButtons[b].setName(buttonNames[b]);
+				menuButtons[b].setText(buttonCfgText[b]);
+				activeButtons++;	
+			}
+			menuItemsRemaining = totalItems;
+		}
 	}
 
 
@@ -261,11 +246,17 @@ void Menu::configure(string ident) {
 			titlePercentHeight = parseInt(cfg, menuName, "titlePercentHeight");
 			titleFontSize = parseInt(cfg, menuName, "titleFontSize");	
 		}
+
+		// Total items - if 0 the menu is dynamic
+		totalItems = parseInt(cfg, menuName, "totalItems");
+		if(totalItems == 0) {
+			dynamic = true;
+			totalItems = 100;	// Arbitrary max value for dynamic menu
+		}
 		// Scrollable configuration
 		scrollable = parseBool(cfg, menuName, "scrollable");
 		if(scrollable) {
 			cout << "scrollable menu!" << endl;
-			totalItems = parseInt(cfg, menuName, "totalItems");
 			scrollItems = parseInt(cfg, menuName, "scrollItems");
 			scrollButtonPercentHeight = parseInt(cfg, menuName, "scrollButtonPercentHeight");
 			prevButton = parseBool(cfg, menuName, "prevButton");
@@ -273,7 +264,8 @@ void Menu::configure(string ident) {
 			nextButton = parseBool(cfg, menuName, "nextButton");
 			nextButtonText = parseString(cfg, menuName, "nextButtonText");
 			topMenuItemIndex = 0;
-			menuItemsRemaining = totalItems;
+			if(!dynamic)
+				menuItemsRemaining = totalItems;
 		}
 		pressDebounce = parseInt(cfg, menuName, "pressDebounce");
 		setPressDebounce(pressDebounce);
@@ -284,9 +276,13 @@ void Menu::configure(string ident) {
 		buttonNames = new string[totalItems];
 		buttonCfgText = new string[totalItems];
 		buttonSelectStates = new bool[totalItems];
-		for(int b = 0; b<totalItems; b++)
+		for(int b = 0; b<totalItems; b++) {
 			buttonSelectStates[b]= false;
-		activeButtons = numButtons;
+			buttonCfgText[b] = "";
+			buttonNames[b] = "";
+		}
+		if(!dynamic)
+			activeButtons = numButtons;
 		menuButtons.reserve(numButtons);
 		buttonPadding = parseInt(cfg, menuName, "buttonPadding");
 		// Menu select mode
@@ -306,11 +302,15 @@ void Menu::configure(string ident) {
 			buttonSelectedBorderWidth = parseInt(cfg, menuName, "buttonSelectedBorderWidth");
 			buttonCornerRadius = parseInt(cfg, menuName, "buttonCornerRadius");
 			// Store names and text for all menu items
-			for(int i=1; i<=totalItems; i++) {
-				buttonNames[i-1] = parseString(cfg, menuName, "buttonName"+std::to_string(i));
-				buttonCfgText[i-1] = parseString(cfg, menuName, "buttonText"+std::to_string(i));
+			if(!dynamic) {
+				for(int i=1; i<=totalItems; i++) {
+					buttonNames[i-1] = parseString(cfg, menuName, "buttonName"+std::to_string(i));
+					buttonCfgText[i-1] = parseString(cfg, menuName, "buttonText"+std::to_string(i));
+				}
 			}
 		}
+
+		if(dynamic) totalItems = 0; // Start dynamic menu with no items
 
 		// Hide (move to "hidden" location, and fade)
 		hideable = parseBool(cfg, menuName, "hideable");
@@ -543,4 +543,13 @@ string Menu::getSelectedButtonName(void) {
 		}
 	}
 	return name;
+}
+
+
+void Menu::addItem(string name, string text) {
+	cout << "add menu item" << endl;
+	buttonNames[totalItems] = name;
+	buttonCfgText[totalItems] = text;
+	totalItems++;
+	bufferSaved = false;
 }

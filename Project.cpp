@@ -231,8 +231,11 @@ int main() {
 		if(Mode1Menu.isButtonSelected("m5")) {
 			Menu PIDSupportMenu(width/6, height/2, width/3 - 20, 360, "PIDSupport");
 			TextView PIDList(width/2, height/2, width/3-20, 360, "PIDList");
+
+			Menu SupportedPIDMenu(width - width/6, height/2, width/3 - 20, 360, "SupportedPIDMenu");
 			
 			vector<PID> SupportPIDs;
+			vector<PID> SupportedPIDs;
 
 			
 			
@@ -241,6 +244,7 @@ int main() {
 				loopTouch = threadTouch;
 				vgSetPixels(0, 0, BackgroundImage, 0, 0, 800, 480);
 				Mode1Menu.update(loopTouch);
+				SupportedPIDMenu.update(loopTouch);
 
 				PIDSupportMenu.update(loopTouch);
 				string menuButton = PIDSupportMenu.getPressedButtonName();
@@ -252,11 +256,11 @@ int main() {
 					cout << "requesting supported pids - " << PIDSupportMenu.getSelectedButtonName() << endl;
 					SupportPIDs.emplace_back(PIDSupportMenu.getSelectedButtonName());
 
-					SupportPIDs.back().update("41 00 00 00 00 FF", loopTime);
+					SupportPIDs.back().update("41 00 00 00 FF FF", loopTime);
 
 					for(int i = 0; i < SupportPIDs.back().getNumBits(); i++) {
 						cout << i << " - Name "<< SupportPIDs.back().getBitPositionName(i) << " - State " << SupportPIDs.back().getBitPositionState(i) << endl;
-
+						if(SupportPIDs.back().getBitPositionValue(i)) SupportedPIDMenu.addItem(SupportPIDs.back().getBitPositionName(i), SupportPIDs.back().getBitPositionName(i));
 					}
 				}
 					

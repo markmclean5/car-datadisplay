@@ -1,3 +1,41 @@
+SupportedPIDMenu {
+	name = "SupportedPIDMenu";
+	type = "...";
+	titled = "true";
+	titlePercentHeight = "9";
+	titleText = "Supported PIDs";
+	titleFontSize = "20";
+	titleColor = ["1.0", "0.0", "0.0", "1.0"];
+	scrollable = "true";
+	scrollItems = "7";
+	scrollButtonPercentHeight = "15";
+	prevButton = "true";
+	prevButtonText = "PREV";
+	nextButton = "true";
+	nextButtonText = "NEXT";
+	totalItems = "0";
+	numButtons = "7";
+	buttonPadding = "7";
+	cornerRadius = "10";
+	borderWidth = "1";
+	borderColor = ["0.43", "0.43", "0.43", "0.0"];
+	backgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	pressDebounce = "500";
+	isHorizontal = "false";
+	selectMode = "radio";
+	hideable = "false";
+	configureButtons = "true";
+	buttonCornerRadius = "10";
+	buttonBorderWidth = "2";
+	buttonBorderColor = ["0.43", "0.43", "0.43", "1.0"];
+	buttonBackgroundColor = ["0.0", "0.0", "0.0", "0.6"];
+	buttonTextColor = ["1.0", "1.0", "1.0", "1.0"];
+	buttonSelectedBackgroundColor = ["0.43", "0.43", "0.43", "0.4"];
+	buttonSelectedBorderColor = ["1.0", "1.0", "1.0", "1.0"];
+	buttonSelectedBorderWidth = "2";
+	buttonSelectedTextColor = ["1.0", "0.0", "0.0", "1.0"];
+};
+
 HOTBUTTON_GroupMenu {
 	name = "HOTBUTTON_GroupMenu";
 	type = "...";
@@ -437,6 +475,7 @@ PIDSupport {
 	titleColor = ["1.0", "0.0", "0.0", "1.0"];
 	scrollable = "false";
 	numButtons = "5";
+	totalItems = "5";
 	buttonPadding = "7";
 	cornerRadius = "10";
 	borderWidth = "2";

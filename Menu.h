@@ -28,6 +28,10 @@ private:
 	bool isHorizontal;
 	int pressDebounce;
 
+
+	// Empty Menu
+	bool dynamic;
+
 	// Menu Title
 	bool titled;
 	string title;
@@ -109,7 +113,8 @@ public:
 	void unhide(void);						// Un-hide (and or un-fade) the menu
 	bool isHidden(void);					// Get menu hide state
 	~Menu(void);							// Menu destructor (destroys vgImage)
-	//Menu(const Menu &);
+
+	void addItem(string, string);
 
 };
 
